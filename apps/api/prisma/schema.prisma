@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  displayName String
+  avatarUrl   String?
+  password    String?  // null for OAuth-only users
+  githubId    String?  @unique
+  googleId    String?  @unique
+  xp          Int      @default(0)
+  level       Int      @default(1)
+  streak      Int      @default(0)
+  lastActiveAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submissions Submission[]
+
+  @@map("users")
+}
+
+model ComponentType {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  label       String
+  description String
+  iconUrl     String?
+  category    String
+  createdAt   DateTime @default(now())
+
+  @@map("component_types")
+}
+
+model Problem {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String
+  difficulty  Difficulty
+  category    String
+  isPublished Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  graph       ProblemGraph?
+  submissions Submission[]
+
+  @@map("problems")
+}
+
+model ProblemGraph {
+  id        String   @id @default(cuid())
+  problemId String   @unique
+  nodes     Json
+  edges     Json
+  answer    Json     // { nodeId: componentTypeSlug } — never sent to client
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("problem_graphs")
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  userId      String
+  problemId   String
+  score       Int
+  passed      Boolean
+  xpEarned    Int
+  timeTakenMs Int
+  slotAnswers Json     // { nodeId: componentTypeSlug }
+  slotResults Json     // SlotResult[]
+  createdAt   DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([userId, problemId])
+  @@map("submissions")
+}

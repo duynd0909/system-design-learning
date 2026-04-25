@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* Dark mode via class strategy */
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Tailwind v4 theme tokens ────────────────────────────────────────────── */
+@theme {
+  --font-family-display: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-family-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --animate-slot-pulse: slot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes slot-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
+  }
+}
+
+/* ─── Design tokens (light mode) ─────────────────────────────────────────── */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f7ff;
+  --bg-game-canvas: #f1f0ff;
+  --text-primary: #1e1b4b;
+  --text-secondary: #6d28d9;
+  --accent-primary: #4f46e5;
+  --accent-game: #f59e0b;
+  --slot-blank: #f97316;
+  --slot-filled: #ffffff;
+  --slot-correct: #10b981;
+  --slot-incorrect: #ef4444;
+}
+
+/* ─── Design tokens (dark mode) ──────────────────────────────────────────── */
+.dark {
+  --bg-primary: #0f0d1a;
+  --bg-secondary: #1a1730;
+  --bg-game-canvas: #131025;
+  --text-primary: #ede9fe;
+  --text-secondary: #a78bfa;
+  --accent-primary: #818cf8;
+  --accent-game: #fcd34d;
+  --slot-blank: #fb923c;
+  --slot-filled: #2d2650;
+  --slot-correct: #34d399;
+  --slot-incorrect: #f87171;
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.react-flow {
+  color: var(--text-primary);
+}
+
+.react-flow__controls {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.react-flow__controls-button {
+  border-color: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.react-flow__minimap {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  border-radius: 8px;
+  background: var(--bg-primary);
+}
