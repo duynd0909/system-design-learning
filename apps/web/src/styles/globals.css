@@ -9,17 +9,42 @@
   --font-family-body: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
-  --animate-slot-pulse: slot-pulse 2s ease-in-out infinite;
+  --animate-slot-pulse: slot-pulse 1.5s ease-in-out infinite;
+  --animate-submit-pulse: submit-pulse 1.5s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
 }
 
 @keyframes slot-pulse {
   0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
   }
   50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
+    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.4);
+  }
+}
+
+@keyframes submit-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.3);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes aurora-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
   }
 }
 
@@ -36,6 +61,9 @@
   --slot-filled: #ffffff;
   --slot-correct: #10b981;
   --slot-incorrect: #ef4444;
+  --aurora-color1: rgba(168, 85, 247, 0.25);
+  --aurora-color2: rgba(79, 70, 229, 0.25);
+  --aurora-overlay-opacity: 0.6;
 }
 
 /* ─── Design tokens (dark mode) ──────────────────────────────────────────── */
@@ -51,6 +79,9 @@
   --slot-filled: #2d2650;
   --slot-correct: #34d399;
   --slot-incorrect: #f87171;
+  --aurora-color1: rgba(192, 132, 252, 0.3);
+  --aurora-color2: rgba(129, 140, 248, 0.3);
+  --aurora-overlay-opacity: 0.85;
 }
 
 /* ─── Base ────────────────────────────────────────────────────────────────── */

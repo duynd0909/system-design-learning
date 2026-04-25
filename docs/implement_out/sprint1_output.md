@@ -187,7 +187,7 @@ npm run dev
 | No `console.log` in code | ✅ (NestJS Logger used on backend) |
 | No hardcoded secrets | ✅ (all from env vars) |
 | Animations wrapped in `useReducedMotion()` | ✅ (no Motion animations in Sprint 1 — added in Sprint 3) |
-| Types from `@joy/shared-types` | ✅ |
+| Types from `@stackdify/shared-types` | ✅ |
 | `blankSlotIds` never sent to client | ✅ (`maskGraph()` strips answer; `MaskedGraph` type has no answer field) |
 
 ---

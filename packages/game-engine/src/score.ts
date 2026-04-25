@@ -1,4 +1,4 @@
-import type { ScoringResult, SlotResult } from '@joy/shared-types';
+import type { ScoringResult, SlotResult } from '@stackdify/shared-types';
 
 export function scoreSubmission(
   submission: Record<string, string>,

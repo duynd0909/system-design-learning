@@ -22,7 +22,7 @@
 - Added root `packageManager` so Turborepo can resolve workspaces.
 - Installed `lucide-react` for frontend icons.
 - Added missing `apps/web/.env.example`.
-- Updated package exports for `@joy/shared-types` and `@joy/game-engine` to use tracked `src` JS/declaration outputs.
+- Updated package exports for `@stackdify/shared-types` and `@stackdify/game-engine` to use tracked `src` JS/declaration outputs.
 - Added `SubmissionHistoryItem` to `packages/shared-types`.
 - Fixed game-engine Jest coverage collection so tests execute TS sources, not stale generated JS.
 
@@ -63,10 +63,10 @@
 | Command | Result |
 | --- | --- |
 | `npm run typecheck` | ✅ Pass |
-| `npm run typecheck --workspace=@joy/web` | ✅ Pass |
-| `npm run typecheck --workspace=@joy/api` | ✅ Pass |
-| `npm run test --workspace=@joy/game-engine -- --coverage` | ✅ Pass — 30 tests, 100% statements/branches/functions/lines |
-| `npm run build --workspace=@joy/web` | ✅ Pass when run outside sandbox; sandboxed Turbopack build cannot bind its internal worker port |
+| `npm run typecheck --workspace=@stackdify/web` | ✅ Pass |
+| `npm run typecheck --workspace=@stackdify/api` | ✅ Pass |
+| `npm run test --workspace=@stackdify/game-engine -- --coverage` | ✅ Pass — 30 tests, 100% statements/branches/functions/lines |
+| `npm run build --workspace=@stackdify/web` | ✅ Pass when run outside sandbox; sandboxed Turbopack build cannot bind its internal worker port |
 
 Notes:
 - The first web build attempt failed on `next/font/google` because the sandbox cannot fetch Google Fonts. The implementation now uses local/system font stacks.

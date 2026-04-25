@@ -10,6 +10,6 @@ export default defineConfig({
     seed: 'ts-node --project tsconfig.seed.json prisma/seed.ts',
   },
   datasource: {
-    url: process.env.DATABASE_URL ?? 'postgresql://joy:joy@localhost:5432/joy_dev',
+    url: process.env.DATABASE_URL ?? 'postgresql://stackdify:stackdify@localhost:5432/stackdify_dev',
   },
 });

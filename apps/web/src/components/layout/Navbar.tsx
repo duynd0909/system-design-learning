@@ -10,10 +10,15 @@ export function Navbar() {
   const { user, isAuthenticated, isReady, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-[var(--bg-primary)]/80 backdrop-blur-md">
+      {/* Aurora gradient underline */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent" />
+
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="font-display text-xl font-bold text-[var(--text-primary)]">
-          <span className="text-[var(--accent-primary)]">Joy</span> of System Design
+        <Link href="/" className="font-display text-xl font-bold">
+          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-500 bg-clip-text text-transparent dark:from-indigo-300 dark:via-purple-300 dark:to-fuchsia-300">
+            Stackdify
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">

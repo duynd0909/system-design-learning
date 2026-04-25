@@ -4,10 +4,11 @@ import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { AuthProvider } from '@/components/providers/AuthProvider';
+import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
-  title: 'The Joy of System Design',
-  description: 'Gamified system design practice for software engineers.',
+  title: 'Stackdify',
+  description: 'Gamified system design practice for software engineers — drag, drop, and learn.',
   icons: { icon: '/favicon.ico' },
 };
 
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-body antialiased">
         <ThemeProvider>
           <AuthProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

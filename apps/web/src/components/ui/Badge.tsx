@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Difficulty } from '@joy/shared-types';
+import { Difficulty } from '@stackdify/shared-types';
 
 type BadgeVariant = 'default' | 'easy' | 'medium' | 'hard' | 'xp' | 'level';
 

@@ -1,5 +1,5 @@
 import { maskGraph } from '../mask';
-import type { ProblemGraph } from '@joy/shared-types';
+import type { ProblemGraph } from '@stackdify/shared-types';
 
 const makeGraph = (componentCount: number, actorCount = 1): ProblemGraph => ({
   nodes: [

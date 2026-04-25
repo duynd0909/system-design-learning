@@ -13,7 +13,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   User,
-} from '@joy/shared-types';
+} from '@stackdify/shared-types';
 import { apiFetch } from '@/lib/api';
 
 const TOKEN_KEY = 'joy.auth.token';

@@ -1,4 +1,4 @@
-# CLAUDE.md — The Joy of System Design
+# CLAUDE.md — Stackdify
 
 > This file is the single source of truth for all AI agents working on this codebase.
 > Read it fully before touching any file. Re-read the relevant section before each task.
@@ -10,7 +10,7 @@
 **What this is:** A gamified system design practice platform for software engineers.
 The core loop: select a real-world system (Instagram, YouTube, TikTok…) → see an architecture graph with ~50% of component nodes blanked out → drag-and-drop component chips to fill the slots → submit → get a scored, humorous, educational result.
 
-**Inspiration:** LeetCode's problem-solving loop + the original "Joy of System Design" open-source concept.
+**App name:** Stackdify — domain: stackdify.space
 
 **Docs to read first (in `/docs/`):**
 - `01_system_design.docx` — architecture, DB schema, API contracts, scoring algorithm
@@ -23,7 +23,7 @@ The core loop: select a real-world system (Instagram, YouTube, TikTok…) → se
 ## 2. Monorepo Structure
 
 ```
-joy-of-system-design/
+stackdify/
 ├── apps/
 │   ├── web/              # Next.js 14 frontend (App Router)
 │   └── api/              # NestJS backend
@@ -62,7 +62,7 @@ npm run test         # Jest across all packages
 
 ### 3.2 Always Do These
 
-- ✅ **Always import shared types from `@joy/shared-types`** — never redefine interfaces locally.
+- ✅ **Always import shared types from `@stackdify/shared-types`** — never redefine interfaces locally.
 - ✅ **Always implement both light and dark mode** for every UI component. Use CSS custom properties (`var(--bg-primary)` etc.) defined in `globals.css`.
 - ✅ **Always wrap Motion animations** in `useReducedMotion()` check. Skip decorative animations for accessibility.
 - ✅ **Always handle loading and error states.** No component fetches data without a skeleton and an error boundary.
@@ -271,7 +271,7 @@ getMe(@CurrentUser() user: User) {  // @CurrentUser() custom decorator
 
 **GET /api/v1/problems/:slug — Masked graph response:**
 ```typescript
-// From @joy/shared-types
+// From @stackdify/shared-types
 interface MaskedGraphResponse {
   problem: { id: string; slug: string; title: string; difficulty: Difficulty };
   nodes: MaskedNode[];  // blankSlotIds are NEVER included
@@ -431,14 +431,14 @@ Sprint 1 scope (do NOT implement Sprint 2+ features yet):
 
 ### Development — `apps/api/.env.local`
 ```bash
-DATABASE_URL="postgresql://joy:joy@localhost:5432/joy_dev"
+DATABASE_URL="postgresql://stackdify:stackdify@localhost:5432/stackdify_dev"
 REDIS_URL="redis://localhost:6379"
 JWT_SECRET="dev-secret-min-32-chars-change-in-prod"
 GITHUB_CLIENT_ID="your-github-oauth-app-client-id"
 GITHUB_CLIENT_SECRET="your-github-oauth-app-client-secret"
 GOOGLE_CLIENT_ID="your-google-oauth-client-id"
 GOOGLE_CLIENT_SECRET="your-google-oauth-client-secret"
-AWS_S3_BUCKET="joy-assets-dev"
+AWS_S3_BUCKET="stackdify-assets-dev"
 AWS_REGION="ap-southeast-1"
 CORS_ORIGIN="http://localhost:3000"
 NODE_ENV="development"
@@ -465,7 +465,7 @@ GOOGLE_CLIENT_SECRET="your-google-oauth-client-secret"
 ```bash
 # 1. Clone and install
 git clone <repo>
-cd joy-of-system-design
+cd stackdify
 npm install          # Installs all workspaces via Turborepo
 
 # 2. Start infrastructure
@@ -605,15 +605,15 @@ npm run cdk deploy --all
 **Check deployment status:**
 ```bash
 aws ecs describe-services \
-  --cluster joy-cluster \
-  --services joy-api joy-web \
+  --cluster stackdify-cluster \
+  --services stackdify-api stackdify-web \
   --query 'services[*].{name:serviceName,running:runningCount,desired:desiredCount,status:status}'
 ```
 
 **Tail production logs:**
 ```bash
-aws logs tail /ecs/joy-api --follow
-aws logs tail /ecs/joy-web --follow
+aws logs tail /ecs/stackdify-api --follow
+aws logs tail /ecs/stackdify-web --follow
 ```
 
 **Estimated monthly cost:** ~$50–72 USD (see `04_deployment_plan.docx` for full breakdown).
@@ -650,4 +650,4 @@ Before marking any task complete, verify ALL of the following:
 - [ ] No **`console.log`** left in code
 - [ ] No **hardcoded secrets or URLs**
 - [ ] Animations wrapped in **`useReducedMotion()`** check
-- [ ] Types imported from **`@joy/shared-types`** (not redefined locally)
+- [ ] Types imported from **`@stackdify/shared-types`** (not redefined locally)

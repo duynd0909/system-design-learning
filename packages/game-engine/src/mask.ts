@@ -1,4 +1,4 @@
-import type { ProblemGraph, MaskedGraph, MaskedNode } from '@joy/shared-types';
+import type { ProblemGraph, MaskedGraph, MaskedNode } from '@stackdify/shared-types';
 import { seededShuffle } from './shuffle';
 
 export function maskGraph(graph: ProblemGraph, seed?: string): MaskedGraph {

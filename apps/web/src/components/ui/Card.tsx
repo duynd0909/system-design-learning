@@ -11,7 +11,7 @@ export function Card({ children, className, hover = false }: CardProps) {
     <div
       className={cn(
         'rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-6 shadow-sm',
-        hover && 'cursor-pointer transition-all duration-200 hover:border-[var(--accent-primary)]/40 hover:shadow-md',
+        hover && 'cursor-pointer transition-all duration-200 hover:border-[var(--accent-primary)]/40 hover:shadow-[0_8px_32px_var(--aurora-color2)]',
         className,
       )}
     >

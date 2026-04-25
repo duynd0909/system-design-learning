@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { maskGraph } from '@joy/game-engine';
-import type { ProblemGraph } from '@joy/shared-types';
+import { maskGraph } from '@stackdify/game-engine';
+import type { ProblemGraph } from '@stackdify/shared-types';
 
 function toProblemGraph(nodes: unknown, edges: unknown): ProblemGraph {
   if (!Array.isArray(nodes) || !Array.isArray(edges)) {

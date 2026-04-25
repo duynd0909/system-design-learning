@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardTitle, CardDescription } from '@/components/ui/Card';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 
 const features = [
   {
@@ -28,11 +29,16 @@ const features = [
 export default function LandingPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[var(--bg-primary)] px-4 py-24 sm:py-32">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(79,70,229,0.12),transparent)]" />
+      {/* Hero — aurora background, adapts to light/dark via CSS vars */}
+      <AuroraBackground
+        className="min-h-[92vh] px-4 py-24 sm:py-32"
+        starCount={70}
+        pulseDuration={10}
+        ariaLabel="Stackdify hero section with animated aurora background"
+      >
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 px-4 py-1.5 text-sm text-[var(--accent-primary)]">
+          {/* Badge */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent-primary)]/25 bg-[var(--accent-primary)]/8 px-4 py-1.5 text-sm text-[var(--accent-primary)]">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent-primary)] opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
@@ -40,9 +46,11 @@ export default function LandingPage() {
             Sprint 1 — Foundation Release
           </div>
 
-          <h1 className="font-display mb-6 text-5xl font-bold tracking-tight text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
-            The Joy of{' '}
-            <span className="text-[var(--accent-primary)]">System Design</span>
+          {/* Headline — gradient adapts: deep in light, bright in dark */}
+          <h1 className="font-display mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            <span className="bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-500 bg-clip-text text-transparent dark:from-indigo-300 dark:via-purple-300 dark:to-fuchsia-300">
+              Stackdify
+            </span>
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[var(--text-secondary)] sm:text-xl">
@@ -59,11 +67,11 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="mt-4 text-sm text-[var(--text-secondary)]">
+          <p className="mt-4 text-sm text-[var(--text-secondary)]/70">
             Free to play. No credit card required.
           </p>
         </div>
-      </section>
+      </AuroraBackground>
 
       {/* How it works */}
       <section className="bg-[var(--bg-secondary)] px-4 py-20">
@@ -115,20 +123,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-[var(--accent-primary)] px-4 py-16">
+      {/* CTA — aurora-tinted strip */}
+      <section className="relative overflow-hidden px-4 py-20">
+        <div
+          className="absolute inset-0 -z-10 bg-[var(--bg-secondary)]"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse 80% 100% at 10% 50%, var(--aurora-color1) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 80% at 90% 50%, var(--aurora-color2) 0%, transparent 60%)
+            `,
+          }}
+        />
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display mb-4 text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="font-display mb-4 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
             Ready to level up?
           </h2>
-          <p className="mb-8 text-indigo-200">
+          <p className="mb-8 text-[var(--text-secondary)]">
             Join engineers practicing system design every day.
           </p>
           <Link href="/register">
-            <Button
-              size="lg"
-              className="bg-white text-[var(--accent-primary)] hover:bg-indigo-50"
-            >
+            <Button size="lg">
               Start for free →
             </Button>
           </Link>

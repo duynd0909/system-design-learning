@@ -7,7 +7,7 @@ import path from 'path';
 loadEnv({ path: path.join(__dirname, '../.env.local') });
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://joy:joy@localhost:5432/joy_dev',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://stackdify:stackdify@localhost:5432/stackdify_dev',
 });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
@@ -27,18 +27,20 @@ const componentTypes = [
 ];
 
 // Instagram architecture graph
+// Column x: 0=actor, 280=ingress, 580=LB, 880=app servers, 1180=data layer, 1480=replica
+// Row y spacing: 160px between nodes (node height ~80px + 80px gap)
 const instagramNodes = [
-  { id: 'user-1', type: 'actor', position: { x: 0, y: 200 }, data: { label: 'User' } },
-  { id: 'cdn-1', type: 'component', position: { x: 200, y: 50 }, data: { componentSlug: 'cdn', label: 'CDN' } },
-  { id: 'dns-1', type: 'component', position: { x: 200, y: 200 }, data: { componentSlug: 'dns', label: 'DNS' } },
-  { id: 'cdn-2', type: 'component', position: { x: 200, y: 350 }, data: { componentSlug: 'cdn', label: 'CDN (Media)' } },
-  { id: 'lb-1', type: 'component', position: { x: 450, y: 200 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-  { id: 'app-1', type: 'component', position: { x: 700, y: 100 }, data: { componentSlug: 'app-server', label: 'App Server 1' } },
-  { id: 'app-2', type: 'component', position: { x: 700, y: 300 }, data: { componentSlug: 'app-server', label: 'App Server 2' } },
-  { id: 'cache-1', type: 'component', position: { x: 950, y: 100 }, data: { componentSlug: 'cache', label: 'Cache (Redis)' } },
-  { id: 'db-1', type: 'component', position: { x: 950, y: 300 }, data: { componentSlug: 'relational-db', label: 'Primary DB' } },
-  { id: 'db-2', type: 'component', position: { x: 1200, y: 300 }, data: { componentSlug: 'relational-db', label: 'Read Replica' } },
-  { id: 'obj-1', type: 'component', position: { x: 950, y: 500 }, data: { componentSlug: 'object-storage', label: 'Object Storage' } },
+  { id: 'user-1',  type: 'actor',     position: { x: 0,    y: 320 }, data: { label: 'User' } },
+  { id: 'cdn-1',  type: 'component', position: { x: 280,  y: 80  }, data: { componentSlug: 'cdn',          label: 'CDN' } },
+  { id: 'dns-1',  type: 'component', position: { x: 280,  y: 260 }, data: { componentSlug: 'dns',          label: 'DNS' } },
+  { id: 'cdn-2',  type: 'component', position: { x: 280,  y: 440 }, data: { componentSlug: 'cdn',          label: 'CDN (Media)' } },
+  { id: 'lb-1',   type: 'component', position: { x: 580,  y: 260 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+  { id: 'app-1',  type: 'component', position: { x: 880,  y: 140 }, data: { componentSlug: 'app-server',   label: 'App Server 1' } },
+  { id: 'app-2',  type: 'component', position: { x: 880,  y: 380 }, data: { componentSlug: 'app-server',   label: 'App Server 2' } },
+  { id: 'cache-1',type: 'component', position: { x: 1180, y: 80  }, data: { componentSlug: 'cache',        label: 'Cache (Redis)' } },
+  { id: 'db-1',   type: 'component', position: { x: 1180, y: 300 }, data: { componentSlug: 'relational-db', label: 'Primary DB' } },
+  { id: 'db-2',   type: 'component', position: { x: 1480, y: 300 }, data: { componentSlug: 'relational-db', label: 'Read Replica' } },
+  { id: 'obj-1',  type: 'component', position: { x: 1180, y: 520 }, data: { componentSlug: 'object-storage', label: 'Object Storage' } },
 ];
 
 const instagramEdges = [
@@ -71,19 +73,21 @@ const instagramAnswer: Record<string, string> = {
 };
 
 // YouTube architecture graph
+// Column x: 0=actors, 300=ingress, 600=LB, 900=routing, 1200=async/cache, 1500=storage
+// Row y spacing: 160px between nodes
 const youtubeNodes = [
-  { id: 'user-1', type: 'actor', position: { x: 0, y: 250 }, data: { label: 'Viewer' } },
-  { id: 'creator-1', type: 'actor', position: { x: 0, y: 450 }, data: { label: 'Creator' } },
-  { id: 'cdn-1', type: 'component', position: { x: 200, y: 150 }, data: { componentSlug: 'cdn', label: 'CDN' } },
-  { id: 'dns-1', type: 'component', position: { x: 200, y: 300 }, data: { componentSlug: 'dns', label: 'DNS' } },
-  { id: 'lb-1', type: 'component', position: { x: 450, y: 250 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-  { id: 'api-gw', type: 'component', position: { x: 700, y: 150 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
-  { id: 'app-1', type: 'component', position: { x: 700, y: 350 }, data: { componentSlug: 'app-server', label: 'App Server' } },
-  { id: 'media-1', type: 'component', position: { x: 950, y: 450 }, data: { componentSlug: 'media-server', label: 'Transcoder' } },
-  { id: 'mq-1', type: 'component', position: { x: 950, y: 300 }, data: { componentSlug: 'message-queue', label: 'Message Queue' } },
-  { id: 'cache-1', type: 'component', position: { x: 950, y: 150 }, data: { componentSlug: 'cache', label: 'Cache' } },
-  { id: 'db-1', type: 'component', position: { x: 1200, y: 300 }, data: { componentSlug: 'relational-db', label: 'Metadata DB' } },
-  { id: 'obj-1', type: 'component', position: { x: 1200, y: 450 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
+  { id: 'user-1',   type: 'actor',     position: { x: 0,    y: 200 }, data: { label: 'Viewer' } },
+  { id: 'creator-1',type: 'actor',     position: { x: 0,    y: 500 }, data: { label: 'Creator' } },
+  { id: 'cdn-1',   type: 'component', position: { x: 300,  y: 120 }, data: { componentSlug: 'cdn',           label: 'CDN' } },
+  { id: 'dns-1',   type: 'component', position: { x: 300,  y: 340 }, data: { componentSlug: 'dns',           label: 'DNS' } },
+  { id: 'lb-1',    type: 'component', position: { x: 600,  y: 260 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+  { id: 'api-gw',  type: 'component', position: { x: 900,  y: 120 }, data: { componentSlug: 'api-gateway',   label: 'API Gateway' } },
+  { id: 'app-1',   type: 'component', position: { x: 900,  y: 380 }, data: { componentSlug: 'app-server',    label: 'App Server' } },
+  { id: 'cache-1', type: 'component', position: { x: 1200, y: 120 }, data: { componentSlug: 'cache',         label: 'Cache' } },
+  { id: 'mq-1',    type: 'component', position: { x: 1200, y: 340 }, data: { componentSlug: 'message-queue', label: 'Message Queue' } },
+  { id: 'media-1', type: 'component', position: { x: 1200, y: 540 }, data: { componentSlug: 'media-server',  label: 'Transcoder' } },
+  { id: 'db-1',    type: 'component', position: { x: 1500, y: 340 }, data: { componentSlug: 'relational-db', label: 'Metadata DB' } },
+  { id: 'obj-1',   type: 'component', position: { x: 1500, y: 540 }, data: { componentSlug: 'object-storage',label: 'Video Storage' } },
 ];
 
 const youtubeEdges = [

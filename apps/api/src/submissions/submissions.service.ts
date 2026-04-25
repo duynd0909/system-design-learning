@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { scoreSubmission } from '@joy/game-engine';
-import type { PaginatedResponse, SubmissionHistoryItem } from '@joy/shared-types';
+import { scoreSubmission } from '@stackdify/game-engine';
+import type { PaginatedResponse, SubmissionHistoryItem } from '@stackdify/shared-types';
 import type { CreateSubmissionDto } from './dto/create-submission.dto';
 
 const XP_PER_POINT = 10;
