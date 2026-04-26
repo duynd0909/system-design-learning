@@ -40,7 +40,7 @@ export function RequirementsSidebar({
   return (
     <aside
       aria-label="Requirements"
-      className="flex w-[300px] shrink-0 flex-col border-r border-[var(--text-primary)]/10 bg-[var(--bg-secondary)]"
+      className="flex h-full w-full flex-col bg-[var(--bg-secondary)]"
     >
       <div className="border-b border-[var(--text-primary)]/10 p-4">
         <div className="mb-1 flex items-center gap-2">
@@ -49,7 +49,7 @@ export function RequirementsSidebar({
         <h1 className="font-display text-base font-bold leading-snug text-[var(--text-primary)]">
           {problem.title}
         </h1>
-        <p className="mt-1.5 line-clamp-3 text-xs text-[var(--text-secondary)]">
+        <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
           {problem.description}
         </p>
       </div>
@@ -165,7 +165,7 @@ export function RequirementsSidebar({
                               >
                                 {req.title}
                               </div>
-                              <div className="mt-0.5 line-clamp-2 text-xs text-[var(--text-secondary)]">
+                              <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
                                 {req.description}
                               </div>
                             </div>

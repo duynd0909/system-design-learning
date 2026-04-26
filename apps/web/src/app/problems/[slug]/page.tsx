@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -24,16 +24,18 @@ import {
   type EdgeTypes,
   type NodeTypes,
 } from '@xyflow/react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock, RotateCcw, Send, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronLeft, Clock, Network, RotateCcw, Send, XCircle } from 'lucide-react';
 import type {
   ActorNodeData,
   ComponentNodeData,
   ComponentType,
+  Difficulty,
   MaskedNode,
+  Requirement,
   SubmissionResponse,
 } from '@stackdify/shared-types';
-import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
+import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useProblemDetail, useRequirementGraph, useProblems, useSubmit } from '@/lib/api';
@@ -85,6 +87,167 @@ function formatTime(seconds: number) {
   return `${m}:${s}`;
 }
 
+// ─── Game Header (LeetCode-style compact bar) ────────────────────────────────
+
+interface GameHeaderProps {
+  problem: { title: string; difficulty: Difficulty } | null;
+  requirements: Requirement[];
+  currentOrder: number;
+  completedOrders: Set<number>;
+  elapsedSeconds: number;
+  filledCount: number;
+  slotCount: number;
+  isReadyToSubmit: boolean;
+  isSubmitting: boolean;
+  isFetching: boolean;
+  submitError: string;
+  isAuthenticated: boolean;
+  isReady: boolean;
+  onSubmit: () => void;
+}
+
+function GameHeader({
+  problem,
+  requirements,
+  currentOrder,
+  completedOrders,
+  elapsedSeconds,
+  filledCount,
+  slotCount,
+  isReadyToSubmit,
+  isSubmitting,
+  isFetching,
+  submitError,
+  isAuthenticated,
+  isReady,
+  onSubmit,
+}: GameHeaderProps) {
+  const prefersReduced = useReducedMotion();
+
+  return (
+    <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3">
+      {/* Left: logo → back → problem title */}
+      <div className="flex min-w-0 items-center gap-2">
+        <Link href="/" aria-label="Go to Stackdify home" className="flex shrink-0 items-center gap-1.5">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
+            <Network className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+          <span className="hidden bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text font-display text-sm font-bold text-transparent sm:block dark:from-indigo-300 dark:to-purple-300">
+            Stackdify
+          </span>
+        </Link>
+
+        <span className="select-none text-[var(--text-primary)]/20" aria-hidden="true">/</span>
+
+        <Link
+          href="/problems"
+          className="flex shrink-0 items-center gap-0.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          Problems
+        </Link>
+
+        {problem && (
+          <>
+            <span className="hidden select-none text-[var(--text-primary)]/20 sm:block" aria-hidden="true">/</span>
+            <span className="hidden max-w-[180px] truncate text-sm font-semibold text-[var(--text-primary)] sm:block">
+              {problem.title}
+            </span>
+            <DifficultyBadge difficulty={problem.difficulty} />
+          </>
+        )}
+      </div>
+
+      {/* Center: requirement progress dots */}
+      {requirements.length > 0 && (
+        <div
+          className="flex shrink-0 items-center gap-1.5"
+          role="group"
+          aria-label={`Requirement progress: ${currentOrder} of ${requirements.length}`}
+        >
+          {requirements.map((req) => {
+            const isCompleted = completedOrders.has(req.order);
+            const isActive = req.order === currentOrder;
+            return (
+              <span
+                key={req.order}
+                aria-label={
+                  isCompleted
+                    ? `Requirement ${req.order} complete`
+                    : isActive
+                      ? `Requirement ${req.order} active`
+                      : `Requirement ${req.order} locked`
+                }
+                className={cn(
+                  'h-2 w-2 rounded-full transition-colors duration-300',
+                  isCompleted
+                    ? 'bg-[var(--slot-correct)]'
+                    : isActive
+                      ? 'bg-[var(--accent-primary)]'
+                      : 'bg-[var(--text-primary)]/20',
+                )}
+              />
+            );
+          })}
+          <span className="ml-0.5 text-xs font-medium tabular-nums text-[var(--text-secondary)]">
+            {currentOrder}/{requirements.length}
+          </span>
+        </div>
+      )}
+
+      {/* Right: timer + slots + submit */}
+      <div className="flex shrink-0 items-center gap-2">
+        {!isAuthenticated && isReady && (
+          <Link
+            href="/login"
+            className="hidden text-xs text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-primary)] lg:block"
+          >
+            Sign in to save XP
+          </Link>
+        )}
+
+        <div
+          className="flex items-center gap-1 rounded-md bg-[var(--text-primary)]/5 px-2 py-1 font-mono text-xs text-[var(--text-secondary)]"
+          aria-label={`Elapsed time: ${formatTime(elapsedSeconds)}`}
+        >
+          <Clock className="h-3 w-3" aria-hidden="true" />
+          <span aria-live="off">{formatTime(elapsedSeconds)}</span>
+        </div>
+
+        <span className="hidden text-xs tabular-nums text-[var(--text-secondary)] sm:block">
+          {filledCount}/{slotCount}
+        </span>
+
+        {submitError && (
+          <p className="hidden max-w-[160px] truncate text-xs text-red-500 md:block" role="alert">
+            {submitError}
+          </p>
+        )}
+
+        <div className={cn(isReadyToSubmit && !prefersReduced && 'animate-submit-pulse')}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={onSubmit}
+            loading={isSubmitting}
+            disabled={!isReadyToSubmit || isSubmitting || isFetching}
+            title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
+            className={cn(
+              'h-8 rounded-lg px-3 text-xs',
+              isReadyToSubmit && 'bg-gradient-to-r from-[var(--accent-primary)] to-[#6366f1] shadow-sm shadow-indigo-500/20',
+            )}
+          >
+            {!isSubmitting && <Send className="h-3 w-3" aria-hidden="true" />}
+            {isReadyToSubmit ? 'Submit' : 'Fill slots'}
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── Palette Drag Overlay ────────────────────────────────────────────────────
+
 function PaletteOverlay({ component }: { component: ComponentType | undefined }) {
   if (!component) return null;
   const Icon = iconForComponent(component.slug);
@@ -98,7 +261,8 @@ function PaletteOverlay({ component }: { component: ComponentType | undefined })
   );
 }
 
-// Compact inline result shown between requirements (not the last one)
+// ─── Compact Inline Result (mid-requirements) ────────────────────────────────
+
 interface CompactResultProps {
   result: SubmissionResponse;
   onNext: () => void;
@@ -149,12 +313,13 @@ function CompactResult({ result, onNext, onRetry, requirementTitle }: CompactRes
   );
 }
 
+// ─── Page ────────────────────────────────────────────────────────────────────
+
 export default function ProblemGamePage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
   const queryClient = useQueryClient();
-  const prefersReduced = useReducedMotion();
   const { token, isAuthenticated, isReady } = useAuth();
 
   const { data: problemDetail, isLoading: isProblemLoading, isError: isProblemError } = useProblemDetail(slug);
@@ -336,6 +501,42 @@ export default function ProblemGamePage() {
     }
   }, [completedOrders]);
 
+  // ── Sidebar resize ────────────────────────────────────────────────────────
+  const sidebarContainerRef = useRef<HTMLDivElement>(null);
+  const isResizingRef = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(300);
+
+  const handleResizerMouseDown = useCallback((e: React.MouseEvent) => {
+    isResizingRef.current = true;
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = sidebarContainerRef.current?.offsetWidth ?? 300;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current || !sidebarContainerRef.current) return;
+      const delta = e.clientX - dragStartX.current;
+      const next = Math.min(Math.max(dragStartWidth.current + delta, 200), 560);
+      sidebarContainerRef.current.style.width = `${next}px`;
+    };
+    const onMouseUp = () => {
+      if (!isResizingRef.current) return;
+      isResizingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
+
   const activeComponent = componentBySlug.get(activeSlug);
   const currentRequirement = reqGraph?.requirement;
   const isLastRequirement = result?.isLastRequirement ?? false;
@@ -346,8 +547,24 @@ export default function ProblemGamePage() {
   const isError = isProblemError || (!isGraphLoading && !!problemDetail && !reqGraph);
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--bg-primary)] overflow-hidden">
-      <Navbar />
+    <div className="flex h-screen flex-col overflow-hidden bg-[var(--bg-primary)]">
+      {/* Compact game header — full width, replaces global Navbar */}
+      <GameHeader
+        problem={problemDetail?.problem ?? null}
+        requirements={problemDetail?.requirements ?? []}
+        currentOrder={currentOrder}
+        completedOrders={completedOrders}
+        elapsedSeconds={elapsedSeconds}
+        filledCount={filledCount}
+        slotCount={slotIds.length}
+        isReadyToSubmit={isReadyToSubmit}
+        isSubmitting={submit.isPending}
+        isFetching={isFetching}
+        submitError={submitError}
+        isAuthenticated={isAuthenticated}
+        isReady={isReady}
+        onSubmit={handleSubmit}
+      />
 
       {isLoading ? (
         <div className="flex flex-1 overflow-hidden">
@@ -368,116 +585,78 @@ export default function ProblemGamePage() {
       ) : (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex flex-1 overflow-hidden">
-            {/* Left sidebar */}
-            <RequirementsSidebar
-              problem={problemDetail.problem}
-              requirements={problemDetail.requirements}
-              components={problemDetail.componentTypes}
-              placedSlugs={placedSlugs}
-              currentOrder={currentOrder}
-              completedOrders={completedOrders}
-              isLoading={isGraphLoading}
-              onSelectRequirement={handleSelectRequirement}
-            />
-
-            {/* Right: canvas column */}
-            <div className="flex flex-1 flex-col overflow-hidden">
-              {/* Top bar */}
-              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--text-primary)]/10 bg-[var(--bg-primary)] px-4 py-2.5">
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/problems"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                    Problems
-                  </Link>
-                  {currentRequirement && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-[var(--text-primary)]/20" aria-hidden="true" />
-                      <span className="text-sm font-medium text-[var(--text-primary)]">
-                        {currentRequirement.title}
-                      </span>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        ({currentOrder}/{reqGraph?.requirement.totalCount ?? '?'})
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {!isAuthenticated && isReady ? (
-                    <p className="text-xs text-[var(--text-secondary)]">Sign in to save XP.</p>
-                  ) : null}
-
-                  {/* Timer */}
-                  <div className="flex items-center gap-1.5 rounded-lg bg-[var(--bg-secondary)] px-2.5 py-1.5 font-mono text-sm text-[var(--text-secondary)]">
-                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span aria-label={`Elapsed time: ${formatTime(elapsedSeconds)}`}>{formatTime(elapsedSeconds)}</span>
-                  </div>
-
-                  <span className="text-xs text-[var(--text-secondary)]">
-                    {filledCount}/{slotIds.length} filled
-                  </span>
-
-                  {submitError ? <p className="text-sm text-red-500">{submitError}</p> : null}
-
-                  <div className={cn('rounded-lg', isReadyToSubmit && !prefersReduced && 'animate-submit-pulse')}>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleSubmit}
-                      loading={submit.isPending}
-                      disabled={!isReadyToSubmit || submit.isPending || isFetching}
-                      title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
-                      className={cn(isReadyToSubmit && 'bg-gradient-to-r from-[var(--accent-primary)] to-[#6366f1]')}
-                    >
-                      {submit.isPending ? null : <Send className="h-3.5 w-3.5" aria-hidden="true" />}
-                      {isReadyToSubmit ? 'Submit' : 'Fill all slots'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Canvas area */}
-              <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
-                <ReactFlowProvider>
-                  <div className="absolute inset-0">
-                    <ReactFlow
-                      nodes={flowNodes}
-                      edges={flowEdges}
-                      nodeTypes={nodeTypes}
-                      edgeTypes={edgeTypes}
-                      nodesDraggable={false}
-                      fitView
-                      fitViewOptions={{ padding: 0.2 }}
-                      minZoom={0.5}
-                      maxZoom={1.5}
-                      proOptions={{ hideAttribution: true }}
-                    >
-                      <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
-                      <Controls />
-                      {showMinimap && (
-                        <MiniMap pannable zoomable nodeColor="var(--accent-primary)" maskColor="rgba(0,0,0,0.08)" />
-                      )}
-                    </ReactFlow>
-                  </div>
-                </ReactFlowProvider>
-
-                {/* Compact result overlay (mid-requirement pass) */}
-                <AnimatePresence>
-                  {showCompactResult && currentRequirement ? (
-                    <CompactResult
-                      key={`compact-${currentOrder}`}
-                      result={result}
-                      onNext={handleNextRequirement}
-                      onRetry={handleRetry}
-                      requirementTitle={currentRequirement.title}
-                    />
-                  ) : null}
-                </AnimatePresence>
-              </section>
+            {/* Left sidebar — resizable */}
+            <div
+              ref={sidebarContainerRef}
+              style={{ width: 300 }}
+              className="shrink-0 overflow-hidden"
+            >
+              <RequirementsSidebar
+                problem={problemDetail.problem}
+                requirements={problemDetail.requirements}
+                components={problemDetail.componentTypes}
+                placedSlugs={placedSlugs}
+                currentOrder={currentOrder}
+                completedOrders={completedOrders}
+                isLoading={isGraphLoading}
+                onSelectRequirement={handleSelectRequirement}
+              />
             </div>
+
+            {/* Drag splitter */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize sidebar"
+              onMouseDown={handleResizerMouseDown}
+              className="group relative flex w-2 shrink-0 cursor-col-resize select-none items-center justify-center"
+            >
+              <div className="pointer-events-none h-full w-px bg-[var(--text-primary)]/10 transition-colors group-hover:bg-[var(--accent-primary)]/40 group-active:bg-[var(--accent-primary)]/60" />
+              <div className="pointer-events-none absolute flex flex-col gap-[3px]">
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className="h-1 w-1 rounded-full bg-[var(--text-primary)]/25 transition-colors group-hover:bg-[var(--accent-primary)]/60" />
+                ))}
+              </div>
+            </div>
+
+            {/* Right: canvas */}
+            <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
+              <ReactFlowProvider>
+                <div className="absolute inset-0">
+                  <ReactFlow
+                    nodes={flowNodes}
+                    edges={flowEdges}
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    nodesDraggable={false}
+                    fitView
+                    fitViewOptions={{ padding: 0.2 }}
+                    minZoom={0.5}
+                    maxZoom={1.5}
+                    proOptions={{ hideAttribution: true }}
+                  >
+                    <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
+                    <Controls />
+                    {showMinimap && (
+                      <MiniMap pannable zoomable nodeColor="var(--accent-primary)" maskColor="rgba(0,0,0,0.08)" />
+                    )}
+                  </ReactFlow>
+                </div>
+              </ReactFlowProvider>
+
+              {/* Compact result overlay (mid-requirement pass) */}
+              <AnimatePresence>
+                {showCompactResult && currentRequirement ? (
+                  <CompactResult
+                    key={`compact-${currentOrder}`}
+                    result={result}
+                    onNext={handleNextRequirement}
+                    onRetry={handleRetry}
+                    requirementTitle={currentRequirement.title}
+                  />
+                ) : null}
+              </AnimatePresence>
+            </section>
           </div>
 
           <DragOverlay>

@@ -16,7 +16,7 @@ The core loop: select a real-world system (Instagram, YouTube, TikTok…) → se
 - `01_system_design.docx` — architecture, DB schema, API contracts, scoring algorithm
 - `02_uiux_design.docx` — full design system, animation specs, page-by-page layout
 - `03_sprint_plan.docx` — sprint breakdown, acceptance criteria per sprint
-- `04_deployment_plan.docx` — AWS CDK infra, CI/CD, env vars, deployment playbook
+- `04_deployment_plan.docx` — Railway (Phase 1, current) → AWS ECS (Phase 2, at scale), CI/CD, env vars, Dockerfiles
 
 ---
 
@@ -467,7 +467,9 @@ GOOGLE_CLIENT_ID="your-google-oauth-client-id"
 GOOGLE_CLIENT_SECRET="your-google-oauth-client-secret"
 ```
 
-**Production:** All secrets are in AWS Secrets Manager. ECS task definitions inject them as environment variables. See `04_deployment_plan.docx` for the full production reference.
+**Production (Phase 1 — Railway):** Set variables in Railway Dashboard → Service → Variables. Railway injects `DATABASE_URL` and `REDIS_URL` automatically from the PostgreSQL/Redis plugins.
+
+**Production (Phase 2 — AWS):** All secrets are in AWS Secrets Manager. ECS task definitions inject them as environment variables. See `04_deployment_plan.docx` for the full reference.
 
 ---
 
@@ -611,7 +613,31 @@ All three must pass before merging.
 
 ---
 
-## 13. AWS Deployment (Production)
+## 13. Deployment
+
+### Phase 1 — Railway (Current)
+
+**Estimated cost:** ~$20–30 USD/month (vs $50–72 on AWS)
+
+**Auto-deploy:** Railway deploys automatically on every push to `main`. No manual steps after initial setup.
+
+**Check logs:**
+```bash
+npm install -g @railway/cli
+railway login
+railway logs --service api
+railway logs --service web
+```
+
+**Run migrations (before deploy):**
+```bash
+railway run --service api npx prisma migrate deploy
+```
+
+**Migration triggers to AWS** (see `04_deployment_plan.docx` §1.1):
+- 5,000+ MAU, or Railway bill approaching $50/month, or need VPC isolation / multi-region
+
+### Phase 2 — AWS ECS (When Scaling)
 
 **Region:** `ap-southeast-1` (Singapore — closest to Hanoi)
 
@@ -622,14 +648,6 @@ npm run cdk deploy --all
 ```
 
 **Subsequent deploys:** Automatic via GitHub Actions on merge to `main`.
-
-**Check deployment status:**
-```bash
-aws ecs describe-services \
-  --cluster stackdify-cluster \
-  --services stackdify-api stackdify-web \
-  --query 'services[*].{name:serviceName,running:runningCount,desired:desiredCount,status:status}'
-```
 
 **Tail production logs:**
 ```bash
