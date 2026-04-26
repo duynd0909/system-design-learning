@@ -1,28 +1,52 @@
 import Link from 'next/link';
+import { Gamepad2, Network, TrendingUp, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardTitle, CardDescription } from '@/components/ui/Card';
+import { BentoGrid, type BentoItem } from '@/components/ui/bento-grid';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 
-const features = [
+const features: BentoItem[] = [
   {
-    icon: '🏗️',
+    icon: <Network className="h-4 w-4 text-sky-500" />,
     title: 'Real Architecture Challenges',
-    description: 'Practice with production-grade system designs — Instagram, YouTube, TikTok, and more.',
+    meta: 'Production patterns',
+    description:
+      'Practice with production-grade system designs — Instagram, YouTube, TikTok, and more.',
+    status: 'Core',
+    tags: ['Systems', 'Scale'],
+    cta: 'Explore drills ->',
+    colSpan: 2,
+    hasPersistentHover: true,
   },
   {
-    icon: '🎮',
+    icon: <Gamepad2 className="h-4 w-4 text-violet-500" />,
     title: 'Learn by Playing',
-    description: 'Drag components onto the architecture graph and see exactly what you got right.',
+    meta: 'Interactive',
+    description:
+      'Drag components onto the architecture graph and see exactly what you got right.',
+    status: 'Game loop',
+    tags: ['Drag-drop', 'Practice'],
+    cta: 'Play now ->',
   },
   {
-    icon: '📈',
+    icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
     title: 'Track Your Growth',
-    description: 'XP, levels, and streaks keep you motivated through consistent practice.',
+    meta: 'XP and streaks',
+    description:
+      'XP, levels, and streaks keep you motivated through consistent practice.',
+    status: 'Progress',
+    tags: ['XP', 'Levels'],
+    cta: 'Track growth ->',
+    colSpan: 2,
   },
   {
-    icon: '🏆',
+    icon: <Trophy className="h-4 w-4 text-amber-500" />,
     title: 'Compete & Compare',
-    description: 'See how you rank against engineers worldwide on the leaderboard.',
+    meta: 'Leaderboard',
+    description:
+      'See how you rank against engineers worldwide on the leaderboard.',
+    status: 'Live',
+    tags: ['Ranking', 'Peers'],
+    cta: 'Compare ->',
   },
 ];
 
@@ -38,13 +62,13 @@ export default function LandingPage() {
       >
         <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent-primary)]/25 bg-[var(--accent-primary)]/8 px-4 py-1.5 text-sm text-[var(--accent-primary)]">
+          {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent-primary)]/25 bg-[var(--accent-primary)]/8 px-4 py-1.5 text-sm text-[var(--accent-primary)]">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent-primary)] opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
             </span>
             Sprint 1 — Foundation Release
-          </div>
+          </div> */}
 
           {/* Headline — gradient adapts: deep in light, bright in dark */}
           <h1 className="font-display mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
@@ -54,8 +78,9 @@ export default function LandingPage() {
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[var(--text-secondary)] sm:text-xl">
-            Stop reading. Start building. Practice real-world system architectures through
-            an interactive drag-and-drop game that gives you instant, scored feedback.
+            Stop reading. Start building. Practice real-world system
+            architectures through an interactive drag-and-drop game that gives
+            you instant, scored feedback.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
@@ -63,7 +88,9 @@ export default function LandingPage() {
               <Button size="lg">Start Practicing →</Button>
             </Link>
             <Link href="/register">
-              <Button variant="secondary" size="lg">Create Account</Button>
+              <Button variant="secondary" size="lg">
+                Create Account
+              </Button>
             </Link>
           </div>
 
@@ -80,22 +107,40 @@ export default function LandingPage() {
             <h2 className="font-display mb-3 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
               How it works
             </h2>
-            <p className="text-[var(--text-secondary)]">Three steps to sharpen your system design intuition.</p>
+            <p className="text-[var(--text-secondary)]">
+              Three steps to sharpen your system design intuition.
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {[
-              { step: '01', title: 'Pick a system', desc: 'Choose from real-world architectures like Instagram, YouTube, or TikTok.' },
-              { step: '02', title: 'Fill the blanks', desc: 'Drag component chips (CDN, Load Balancer, Cache…) onto the masked architecture graph.' },
-              { step: '03', title: 'Get scored', desc: 'Submit and see which components you nailed and which need more study — with explanations.' },
+              {
+                step: '01',
+                title: 'Pick a system',
+                desc: 'Choose from real-world architectures like Instagram, YouTube, or TikTok.',
+              },
+              {
+                step: '02',
+                title: 'Fill the blanks',
+                desc: 'Drag component chips (CDN, Load Balancer, Cache…) onto the masked architecture graph.',
+              },
+              {
+                step: '03',
+                title: 'Get scored',
+                desc: 'Submit and see which components you nailed and which need more study — with explanations.',
+              },
             ].map((item) => (
               <div key={item.step} className="flex gap-4">
                 <div className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-primary)]/10 text-lg font-bold text-[var(--accent-primary)]">
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">{item.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)]">{item.desc}</p>
+                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {item.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -111,15 +156,7 @@ export default function LandingPage() {
               Built for engineers
             </h2>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <Card key={f.title} hover>
-                <div className="mb-3 text-3xl">{f.icon}</div>
-                <CardTitle>{f.title}</CardTitle>
-                <CardDescription>{f.description}</CardDescription>
-              </Card>
-            ))}
-          </div>
+          <BentoGrid items={features} />
         </div>
       </section>
 
@@ -142,9 +179,7 @@ export default function LandingPage() {
             Join engineers practicing system design every day.
           </p>
           <Link href="/register">
-            <Button size="lg">
-              Start for free →
-            </Button>
+            <Button size="lg">Start for free →</Button>
           </Link>
         </div>
       </section>

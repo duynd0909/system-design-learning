@@ -269,14 +269,22 @@ getMe(@CurrentUser() user: User) {  // @CurrentUser() custom decorator
 
 ### Critical API Contracts
 
-**GET /api/v1/problems/:slug — Masked graph response:**
+**GET /api/v1/problems/:slug — Problem detail (metadata only, no graph):**
 ```typescript
 // From @stackdify/shared-types
-interface MaskedGraphResponse {
-  problem: { id: string; slug: string; title: string; difficulty: Difficulty };
-  nodes: MaskedNode[];  // blankSlotIds are NEVER included
-  edges: Edge[];
-  componentTypes: ComponentType[];  // All available components for the palette
+interface ProblemDetailResponse {
+  problem: Pick<Problem, 'id' | 'slug' | 'title' | 'difficulty' | 'description' | 'category'>;
+  requirements: Requirement[];   // metadata only — no nodes/edges/answers
+  componentTypes: ComponentType[];
+}
+```
+
+**GET /api/v1/problems/:slug/requirements/:order — Accumulated graph for one requirement:**
+```typescript
+interface RequirementGraphResponse {
+  requirement: Requirement & { totalCount: number };
+  nodes: MaskedNode[];   // accumulated: reqs 1..order-1 revealed + req `order` blanked
+  edges: GraphEdge[];    // accumulated: all edges from reqs 1..order
 }
 
 // BlankSlotNode in the response:
@@ -297,6 +305,7 @@ interface BlankNodeData {
 ```typescript
 interface SubmissionRequest {
   problemId: string;
+  requirementOrder: number;   // which requirement is being submitted (1-based)
   slotAnswers: Record<string, string>;  // { nodeId: componentTypeSlug }
   timeTakenMs: number;
 }
@@ -306,6 +315,8 @@ interface SubmissionResponse {
   score: number;            // 0–100
   passed: boolean;
   xpEarned: number;
+  requirementOrder: number;
+  isLastRequirement: boolean;
   slotResults: SlotResult[];
   // Canonical answers only included if explanation is requested:
   explanation?: SlotExplanation[];
@@ -382,12 +393,14 @@ async create(@Body() dto: CreateSubmissionDto, @CurrentUser() user: User) { ... 
 
 Key interfaces to define here:
 - `Problem`, `ProblemGraph`, `MaskedGraph`
+- `Requirement`, `ProblemDetailResponse`, `RequirementGraphResponse`
 - `Node`, `Edge`, `ComponentType`
 - `ComponentNodeData`, `BlankNodeData`, `ActorNodeData`
 - `Submission`, `SubmissionRequest`, `SubmissionResponse`
 - `SlotResult`, `SlotExplanation`
 - `User`, `UserStats`, `LeaderboardEntry`
 - `Difficulty` enum (`EASY | MEDIUM | HARD`)
+- `ProblemSummary` — includes `requirementCount` field
 
 ### `packages/game-engine`
 
@@ -395,6 +408,7 @@ Pure TypeScript, zero dependencies. Contains:
 - `mask.ts` — `maskGraph()`
 - `score.ts` — `scoreSubmission()`
 - `shuffle.ts` — `seededShuffle()` (deterministic for reproducible tests)
+- `accumulate.ts` — `buildAccumulatedGraph()` (progressive requirement reveal)
 
 Test coverage target: **> 90%** (Jest). Run: `npm test --filter=game-engine`.
 
@@ -406,24 +420,21 @@ Test coverage target: **> 90%** (Jest). Run: `npm test --filter=game-engine`.
 
 | Sprint | Name | Status | Branch |
 |--------|------|--------|--------|
-| 1 | Foundation & Auth | ⬜ Not started | `sprint/1-foundation` |
-| 2 | Core Game Loop | ⬜ Not started | `sprint/2-game-loop` |
-| 3 | Polish & Feedback | ⬜ Not started | `sprint/3-polish` |
+| 1 | Foundation & Auth | ✅ Complete | `sprint/1-foundation` |
+| 2 | Core Game Loop | ✅ Complete | `sprint/2-game-loop` |
+| 3 | Progressive Requirements | 🟡 In Progress | `main` |
 | 4 | Social & Discovery | ⬜ Not started | `sprint/4-social` |
 | 5 | Scale & Quality | ⬜ Not started | `sprint/5-scale` |
 
-**Current Sprint: 1**
+**Current Sprint: 3 — Progressive Requirements**
 
-Sprint 1 scope (do NOT implement Sprint 2+ features yet):
-- Monorepo scaffolding + Turborepo config
-- NestJS auth (JWT + GitHub + Google OAuth)
-- Prisma schema + first migration + seed script (Instagram + YouTube problems)
-- Next.js project with Tailwind, next-themes, NextAuth
-- Full design system: all base UI components
-- Landing page (no Motion animations yet — Sprint 3)
-- `/login` and `/register` pages
-- `packages/shared-types` with all interfaces
-- Docker Compose for local dev
+Sprint 3 scope (implemented 2026-04-26):
+- `Requirement` model replaces `ProblemGraph` (2–4 reqs per problem, sequential unlock)
+- New API endpoints: `GET /problems/:slug` → `ProblemDetailResponse`; `GET /problems/:slug/requirements/:order` → `RequirementGraphResponse`
+- `buildAccumulatedGraph()` in game-engine composes prior (revealed) + current (blanked) requirements
+- `RequirementsSidebar` component — locked/active/completed states, progress bar
+- Game page: sidebar + canvas split layout, compact per-requirement result, full modal on final pass
+- Seed updated: Instagram (3 reqs), YouTube (4 reqs)
 
 ---
 
@@ -516,19 +527,29 @@ npx prisma generate
 The seed script (`apps/api/prisma/seed.ts`) must insert:
 1. **ComponentTypes** — at minimum: CDN, Load Balancer, Application Server, Cache, Relational DB, DNS
 2. **Problems** — Instagram + YouTube (with `isPublished: true`)
-3. **ProblemGraphs** — full canonical node/edge JSON for each problem
+3. **Requirements** — per problem, ordered 1-based, each with `nodes`, `edges`, and `answer` for that step only
 
-**Instagram graph node structure (reference):**
-```typescript
-// Based on the PDF: CDN (×2), DNS, Load Balancer, Application Server (×2), Cache, Relational DB (×2)
-const instagramNodes: Node[] = [
-  { id: 'user-1', type: 'actor', position: { x: 0, y: 100 }, data: { label: 'User' } },
-  { id: 'cdn-1', type: 'component', position: { x: 200, y: 0 }, data: { componentSlug: 'cdn', label: 'CDN' } },
-  { id: 'dns-1', type: 'component', position: { x: 200, y: 200 }, data: { componentSlug: 'dns', label: 'DNS' } },
-  { id: 'lb-1', type: 'component', position: { x: 450, y: 150 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-  // ... etc
-];
-```
+**Requirement count by difficulty:**
+- `EASY`: 2 requirements
+- `MEDIUM`: 3 requirements (Instagram)
+- `HARD`: 4 requirements (YouTube)
+
+**Instagram (MEDIUM — 3 requirements):**
+| Req | Title | New Nodes | Blanks |
+|-----|-------|-----------|--------|
+| 1 | Handle user traffic | User(actor), DNS, Load Balancer, App Server 1 | dns-1, lb-1 |
+| 2 | Serve and cache data | App Server 2, Cache (Redis), Primary DB | app-2, cache-1, db-1 |
+| 3 | Store and deliver media | CDN(static), CDN(media), Object Storage, Read Replica | cdn-1, cdn-2, obj-1, db-2 |
+
+**YouTube (HARD — 4 requirements):**
+| Req | Title | New Nodes | Blanks |
+|-----|-------|-----------|--------|
+| 1 | Route viewer traffic | Viewer(actor), DNS, CDN, Load Balancer | dns-1, cdn-1 |
+| 2 | Serve API requests | API Gateway, App Server | api-gw, app-1 |
+| 3 | Handle uploads and transcoding | Creator(actor), Message Queue, Transcoder | mq-1, media-1 |
+| 4 | Store and cache data | Cache, Metadata DB, Video Storage | cache-1, db-1, obj-1 |
+
+Each requirement's `edges` may include cross-requirement connections (source/target from earlier reqs).
 
 ---
 

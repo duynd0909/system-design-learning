@@ -64,7 +64,7 @@ export interface GraphEdge {
   type?: string;
 }
 
-// ─── Problem Graph ────────────────────────────────────────────────────────────
+// ─── Problem Graph (kept for game-engine compatibility) ───────────────────────
 
 export interface ProblemGraph {
   nodes: GraphNode[];
@@ -74,6 +74,16 @@ export interface ProblemGraph {
 export interface MaskedGraph {
   nodes: MaskedNode[];
   edges: GraphEdge[];
+}
+
+// ─── Requirement ─────────────────────────────────────────────────────────────
+// Each problem has 2–4 requirements that unlock sequentially.
+
+export interface Requirement {
+  id: string;
+  order: number;       // 1-based
+  title: string;
+  description: string;
 }
 
 // ─── Problem ──────────────────────────────────────────────────────────────────
@@ -98,10 +108,27 @@ export interface ProblemSummary {
   difficulty: Difficulty;
   category: string;
   nodeCount: number;
+  requirementCount: number;
 }
 
-// ─── API Response: Masked Graph ───────────────────────────────────────────────
+// ─── API Response: Problem Detail (replaces MaskedGraphResponse for GET /problems/:slug) ──
 
+export interface ProblemDetailResponse {
+  problem: Pick<Problem, 'id' | 'slug' | 'title' | 'difficulty' | 'description' | 'category'>;
+  requirements: Requirement[];   // metadata only — no nodes/edges/answers
+  componentTypes: ComponentType[];
+}
+
+// ─── API Response: Requirement Graph (GET /problems/:slug/requirements/:order) ──
+
+export interface RequirementGraphResponse {
+  requirement: Requirement & { totalCount: number };
+  nodes: MaskedNode[];   // accumulated: reqs 1..order-1 revealed + req `order` blanked
+  edges: GraphEdge[];    // accumulated: all edges from reqs 1..order
+}
+
+// ─── Kept for backwards-compat (game canvas page currently uses this shape) ──
+/** @deprecated Use ProblemDetailResponse + RequirementGraphResponse instead */
 export interface MaskedGraphResponse {
   problem: Pick<Problem, 'id' | 'slug' | 'title' | 'difficulty'>;
   nodes: MaskedNode[];
@@ -113,6 +140,7 @@ export interface MaskedGraphResponse {
 
 export interface SubmissionRequest {
   problemId: string;
+  requirementOrder: number;   // which requirement is being submitted
   slotAnswers: Record<string, string>;
   timeTakenMs: number;
 }
@@ -137,6 +165,8 @@ export interface SubmissionResponse {
   passed: boolean;
   xpEarned: number;
   timeTakenMs: number;
+  requirementOrder: number;
+  isLastRequirement: boolean;
   slotResults: SlotResult[];
   explanation?: SlotExplanation[];
   createdAt: string;
@@ -146,6 +176,7 @@ export interface Submission {
   id: string;
   userId: string;
   problemId: string;
+  requirementOrder?: number;
   score: number;
   passed: boolean;
   xpEarned: number;
@@ -157,6 +188,7 @@ export interface Submission {
 export interface SubmissionHistoryItem {
   id: string;
   problemId: string;
+  requirementOrder?: number;
   score: number;
   passed: boolean;
   xpEarned: number;
@@ -182,10 +214,36 @@ export interface UserStats {
   userId: string;
   totalSubmissions: number;
   passedSubmissions: number;
+  solved: number;              // unique problems passed at least once
   averageScore: number;
+  accuracy: number;            // passedSubmissions / totalSubmissions * 100
   totalXp: number;
   level: number;
   streak: number;
+  categoryBreakdown: Record<string, { solved: number; total: number }>;
+}
+
+// ─── User Activity ────────────────────────────────────────────────────────────
+
+export interface UserActivity {
+  date: string;   // YYYY-MM-DD
+  count: number;  // submissions on that day
+}
+
+// ─── Solution ────────────────────────────────────────────────────────────────
+
+export interface SolutionNode {
+  id: string;
+  type: 'component' | 'actor';
+  position: { x: number; y: number };
+  data: ComponentNodeData | ActorNodeData;
+  wasBlank: boolean;   // true if this node was a blank slot in the game
+}
+
+export interface SolutionResponse {
+  nodes: SolutionNode[];
+  edges: GraphEdge[];
+  explanations: SlotExplanation[];
 }
 
 export interface AuthTokenResponse {

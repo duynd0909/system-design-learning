@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useDroppable } from '@dnd-kit/core';
@@ -47,16 +48,19 @@ function NodeHandles() {
 }
 
 export function ComponentNode({ data, selected }: NodeProps<Node<ComponentCanvasData, 'component'>>) {
+  const [hovered, setHovered] = useState(false);
   const Icon = iconForComponent(data.componentSlug);
 
   return (
     <div
       aria-label={`${data.label} component node`}
       className={cn(
-        'min-w-36 rounded-lg border bg-[var(--slot-filled)] px-4 py-3 shadow-sm',
+        'relative min-w-36 rounded-lg border bg-[var(--slot-filled)] px-4 py-3 shadow-sm',
         'border-[var(--text-primary)]/15 text-[var(--text-primary)]',
         selected && 'border-[var(--accent-primary)] shadow-md',
       )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <NodeHandles />
       <div className="flex items-center gap-2">
@@ -70,6 +74,17 @@ export function ComponentNode({ data, selected }: NodeProps<Node<ComponentCanvas
           </div>
         </div>
       </div>
+
+      {/* Description tooltip */}
+      {hovered && data.description && (
+        <div
+          role="tooltip"
+          className="absolute bottom-full left-1/2 z-50 mb-2 w-52 -translate-x-1/2 rounded-lg bg-[var(--text-primary)] px-3 py-2 text-xs text-[var(--bg-primary)] shadow-xl"
+        >
+          {data.description}
+          <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-[var(--text-primary)]" />
+        </div>
+      )}
     </div>
   );
 }

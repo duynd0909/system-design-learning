@@ -13,20 +13,20 @@ enum Difficulty {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  username    String   @unique
-  displayName String
-  avatarUrl   String?
-  password    String?  // null for OAuth-only users
-  githubId    String?  @unique
-  googleId    String?  @unique
-  xp          Int      @default(0)
-  level       Int      @default(1)
-  streak      Int      @default(0)
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  displayName  String
+  avatarUrl    String?
+  password     String?  // null for OAuth-only users
+  githubId     String?  @unique
+  googleId     String?  @unique
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  streak       Int      @default(0)
   lastActiveAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   submissions Submission[]
 
@@ -56,37 +56,46 @@ model Problem {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  graph       ProblemGraph?
-  submissions Submission[]
+  requirements Requirement[]
+  submissions  Submission[]
 
   @@map("problems")
 }
 
-model ProblemGraph {
-  id        String   @id @default(cuid())
-  problemId String   @unique
-  nodes     Json
-  edges     Json
-  answer    Json     // { nodeId: componentTypeSlug } — never sent to client
+// Each problem has 2–4 requirements that unlock sequentially.
+// Only NEW nodes/edges for this requirement are stored here;
+// the service accumulates across requirements 1..N to build the full canvas.
+model Requirement {
+  id          String   @id @default(cuid())
+  problemId   String
+  order       Int      // 1-based; requirements unlock in ascending order
+  title       String
+  description String
+  nodes       Json     // GraphNode[] — nodes introduced by this requirement
+  edges       Json     // GraphEdge[] — edges for this requirement (may reference prior-req nodes)
+  answer      Json     // { nodeId: componentTypeSlug } — blank nodes for THIS requirement only
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
-  @@map("problem_graphs")
+  @@unique([problemId, order])
+  @@index([problemId])
+  @@map("requirements")
 }
 
 model Submission {
-  id          String   @id @default(cuid())
-  userId      String
-  problemId   String
-  score       Int
-  passed      Boolean
-  xpEarned    Int
-  timeTakenMs Int
-  slotAnswers Json     // { nodeId: componentTypeSlug }
-  slotResults Json     // SlotResult[]
-  createdAt   DateTime @default(now())
+  id               String   @id @default(cuid())
+  userId           String
+  problemId        String
+  requirementOrder Int?     // which requirement was submitted; null = legacy
+  score            Int
+  passed           Boolean
+  xpEarned         Int
+  timeTakenMs      Int
+  slotAnswers      Json     // { nodeId: componentTypeSlug }
+  slotResults      Json     // SlotResult[]
+  createdAt        DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)

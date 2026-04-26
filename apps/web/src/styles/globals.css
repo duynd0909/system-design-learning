@@ -48,6 +48,16 @@
   }
 }
 
+.aurora-pulse {
+  animation: aurora-pulse var(--aurora-pulse-duration, 10s) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-pulse {
+    animation: none;
+  }
+}
+
 /* ─── Design tokens (light mode) ─────────────────────────────────────────── */
 :root {
   --bg-primary: #ffffff;

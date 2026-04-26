@@ -3,13 +3,16 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
   ProblemSummary,
-  MaskedGraphResponse,
+  ProblemDetailResponse,
+  RequirementGraphResponse,
+  SolutionResponse,
   SubmissionRequest,
   SubmissionResponse,
   SubmissionHistoryItem,
   LeaderboardEntry,
   User,
   UserStats,
+  UserActivity,
   PaginatedResponse,
 } from '@stackdify/shared-types';
 
@@ -41,11 +44,19 @@ export function useProblems() {
   });
 }
 
-export function useProblem(slug: string) {
-  return useQuery<MaskedGraphResponse>({
+export function useProblemDetail(slug: string) {
+  return useQuery<ProblemDetailResponse>({
     queryKey: ['problems', slug],
     queryFn: () => apiFetch(`/problems/${slug}`),
     enabled: !!slug,
+  });
+}
+
+export function useRequirementGraph(slug: string, order: number) {
+  return useQuery<RequirementGraphResponse>({
+    queryKey: ['problems', slug, 'requirements', order],
+    queryFn: () => apiFetch(`/problems/${slug}/requirements/${order}`),
+    enabled: !!slug && order > 0,
   });
 }
 
@@ -91,5 +102,23 @@ export function useMyStats(token: string) {
     queryKey: ['users', 'me', 'stats'],
     queryFn: () => apiFetch('/users/me/stats', undefined, token),
     enabled: !!token,
+  });
+}
+
+export function useMyActivity(token: string) {
+  return useQuery<UserActivity[]>({
+    queryKey: ['users', 'me', 'activity'],
+    queryFn: () => apiFetch('/users/me/activity', undefined, token),
+    enabled: !!token,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useProblemSolution(slug: string, token: string) {
+  return useQuery<SolutionResponse>({
+    queryKey: ['problems', slug, 'solution'],
+    queryFn: () => apiFetch(`/problems/${slug}/solution`, undefined, token),
+    enabled: !!slug && !!token,
+    retry: false,
   });
 }

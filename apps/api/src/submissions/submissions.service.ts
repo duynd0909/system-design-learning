@@ -28,17 +28,28 @@ export class SubmissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateSubmissionDto) {
-    const graph = await this.prisma.problemGraph.findFirst({
-      where: { problemId: dto.problemId },
+    // Fetch the specific requirement's answer key
+    const requirement = await this.prisma.requirement.findFirst({
+      where: { problemId: dto.problemId, order: dto.requirementOrder },
+      include: { problem: { select: { requirements: { select: { order: true } } } } },
     });
-    if (!graph) throw new NotFoundException('Problem not found');
-    if (!isStringRecord(graph.answer)) {
-      throw new InternalServerErrorException('Invalid problem answer data');
+
+    if (!requirement) {
+      throw new NotFoundException(
+        `Requirement ${dto.requirementOrder} not found for problem`,
+      );
+    }
+    if (!isStringRecord(requirement.answer)) {
+      throw new InternalServerErrorException('Invalid requirement answer data');
     }
 
-    const answer = graph.answer;
+    const answer = requirement.answer;
+    const totalRequirements = requirement.problem.requirements.length;
+    const isLastRequirement = dto.requirementOrder === totalRequirements;
+
     const result = scoreSubmission(dto.slotAnswers, answer);
     const xpEarned = result.passed ? XP_PER_POINT * Object.keys(answer).length : 0;
+
     const slotResultsJson: Prisma.InputJsonArray = result.slotResults.map(
       (slotResult): Prisma.InputJsonObject => ({
         slotId: slotResult.slotId,
@@ -53,6 +64,7 @@ export class SubmissionsService {
         data: {
           userId,
           problemId: dto.problemId,
+          requirementOrder: dto.requirementOrder,
           score: result.score,
           passed: result.passed,
           xpEarned,
@@ -78,6 +90,8 @@ export class SubmissionsService {
       passed: result.passed,
       xpEarned,
       timeTakenMs: dto.timeTakenMs,
+      requirementOrder: dto.requirementOrder,
+      isLastRequirement,
       slotResults: result.slotResults,
       createdAt: submission.createdAt.toISOString(),
     };
@@ -99,6 +113,7 @@ export class SubmissionsService {
         select: {
           id: true,
           problemId: true,
+          requirementOrder: true,
           score: true,
           passed: true,
           xpEarned: true,
@@ -116,6 +131,7 @@ export class SubmissionsService {
       data: submissions.map((submission) => ({
         id: submission.id,
         problemId: submission.problemId,
+        requirementOrder: submission.requirementOrder ?? undefined,
         score: submission.score,
         passed: submission.passed,
         xpEarned: submission.xpEarned,

@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, UserRound } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, LogOut, UserRound } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export function Navbar() {
   const { user, isAuthenticated, isReady, logout } = useAuth();
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-40 bg-[var(--bg-primary)]/80 backdrop-blur-md">
@@ -24,26 +26,38 @@ export function Navbar() {
         <nav className="hidden items-center gap-6 md:flex">
           <Link
             href="/problems"
-            className="text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            className={`text-sm font-medium transition-colors hover:text-[var(--text-primary)] ${pathname === '/problems' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
           >
             Problems
           </Link>
           <Link
             href="/leaderboard"
-            className="text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            className={`text-sm font-medium transition-colors hover:text-[var(--text-primary)] ${pathname === '/leaderboard' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
           >
             Leaderboard
           </Link>
+          {isAuthenticated && (
+            <Link
+              href="/dashboard"
+              className={`text-sm font-medium transition-colors hover:text-[var(--text-primary)] ${pathname === '/dashboard' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
+            >
+              Dashboard
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {isReady && isAuthenticated && user ? (
             <>
-              <div className="hidden items-center gap-2 rounded-lg border border-[var(--text-primary)]/10 px-3 py-1.5 text-sm text-[var(--text-primary)] sm:flex">
-                <UserRound className="h-4 w-4 text-[var(--accent-primary)]" aria-hidden="true" />
+              <Link
+                href="/dashboard"
+                className="hidden items-center gap-2 rounded-lg border border-[var(--text-primary)]/10 px-3 py-1.5 text-sm text-[var(--text-primary)] transition-colors hover:border-[var(--accent-primary)]/40 sm:flex"
+                aria-label="Go to dashboard"
+              >
+                <LayoutDashboard className="h-4 w-4 text-[var(--accent-primary)]" aria-hidden="true" />
                 <span className="max-w-28 truncate">{user.displayName}</span>
-              </div>
+              </Link>
               <Button type="button" variant="ghost" size="sm" onClick={logout} aria-label="Sign out">
                 <LogOut className="h-4 w-4" aria-hidden="true" />
               </Button>

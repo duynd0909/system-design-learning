@@ -20,6 +20,12 @@ export class UsersController {
     return this.usersService.getStats(user.id);
   }
 
+  @Get('me/activity')
+  @UseGuards(JwtAuthGuard)
+  getMyActivity(@CurrentUser() user: User) {
+    return this.usersService.getActivity(user.id);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
