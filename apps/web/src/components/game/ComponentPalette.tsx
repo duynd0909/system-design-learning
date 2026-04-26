@@ -11,9 +11,10 @@ export const componentDragId = (slug: string) => `component:${slug}`;
 interface ChipProps {
   component: ComponentType;
   isPlaced: boolean;
+  layout?: 'grid' | 'rail';
 }
 
-function DraggableChip({ component, isPlaced }: ChipProps) {
+function DraggableChip({ component, isPlaced, layout = 'rail' }: ChipProps) {
   const prefersReduced = useReducedMotion();
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: componentDragId(component.slug),
@@ -26,9 +27,10 @@ function DraggableChip({ component, isPlaced }: ChipProps) {
       ref={setNodeRef}
       type="button"
       className={cn(
-        'flex shrink-0 flex-col items-center gap-1 rounded-xl border border-[var(--text-primary)]/10',
+        'flex flex-col items-center gap-1 rounded-xl border border-[var(--text-primary)]/10',
         'bg-[var(--bg-primary)] px-3 pb-2 pt-2.5 shadow-sm',
         'transition-all hover:border-[var(--accent-primary)]/40 hover:shadow-md',
+        layout === 'rail' ? 'shrink-0' : 'min-w-0',
         isDragging && !prefersReduced && 'scale-110 shadow-xl opacity-70',
         isPlaced && 'opacity-50',
       )}
@@ -50,9 +52,28 @@ function DraggableChip({ component, isPlaced }: ChipProps) {
 interface ComponentPaletteProps {
   components: ComponentType[];
   placedSlugs: Set<string>;
+  variant?: 'rail' | 'panel';
 }
 
-export function ComponentPalette({ components, placedSlugs }: ComponentPaletteProps) {
+export function ComponentPalette({ components, placedSlugs, variant = 'rail' }: ComponentPaletteProps) {
+  if (variant === 'panel') {
+    return (
+      <div
+        aria-label="Component palette — drag chips onto blank slots"
+        className="grid grid-cols-2 gap-2"
+      >
+        {components.map((component) => (
+          <DraggableChip
+            key={component.id}
+            component={component}
+            isPlaced={placedSlugs.has(component.slug)}
+            layout="grid"
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div
       aria-label="Component palette — drag chips onto blank slots"
@@ -67,6 +88,7 @@ export function ComponentPalette({ components, placedSlugs }: ComponentPalettePr
             key={component.id}
             component={component}
             isPlaced={placedSlugs.has(component.slug)}
+            layout="rail"
           />
         ))}
       </div>

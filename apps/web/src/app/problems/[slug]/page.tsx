@@ -44,7 +44,6 @@ import {
   FilledSlotNode,
   type GameFlowNode,
 } from '@/components/game/GameNodes';
-import { ComponentPalette } from '@/components/game/ComponentPalette';
 import { LabelEdge } from '@/components/game/LabelEdge';
 import { ResultOverlay } from '@/components/game/ResultOverlay';
 import { RequirementsSidebar } from '@/components/game/RequirementsSidebar';
@@ -373,6 +372,8 @@ export default function ProblemGamePage() {
             <RequirementsSidebar
               problem={problemDetail.problem}
               requirements={problemDetail.requirements}
+              components={problemDetail.componentTypes}
+              placedSlugs={placedSlugs}
               currentOrder={currentOrder}
               completedOrders={completedOrders}
               isLoading={isGraphLoading}
@@ -476,9 +477,6 @@ export default function ProblemGamePage() {
                   ) : null}
                 </AnimatePresence>
               </section>
-
-              {/* Component palette */}
-              <ComponentPalette components={problemDetail.componentTypes} placedSlugs={placedSlugs} />
             </div>
           </div>
 
