@@ -90,27 +90,27 @@ export class UsersService {
     };
   }
 
-  async getActivity(userId: string): Promise<UserActivity[]> {
-    const since = new Date();
-    since.setDate(since.getDate() - 89); // last 90 days inclusive
+  async getActivity(userId: string, year: number): Promise<UserActivity[]> {
+    const since = new Date(year, 0, 1);
+    const until = new Date(year, 11, 31, 23, 59, 59, 999);
 
     const submissions = await this.prisma.submission.findMany({
-      where: { userId, createdAt: { gte: since } },
+      where: { userId, createdAt: { gte: since, lte: until } },
       select: { createdAt: true },
     });
 
-    // Group by YYYY-MM-DD
     const counts = new Map<string, number>();
     for (const sub of submissions) {
       const date = sub.createdAt.toISOString().slice(0, 10);
       counts.set(date, (counts.get(date) ?? 0) + 1);
     }
 
-    // Return all 90 days (zeros included) so the heatmap grid is complete
+    // Return every day of the year (zeros included)
     const result: UserActivity[] = [];
-    for (let i = 89; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
+    const isLeap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    const days = isLeap ? 366 : 365;
+    for (let i = 0; i < days; i++) {
+      const d = new Date(year, 0, 1 + i);
       const date = d.toISOString().slice(0, 10);
       result.push({ date, count: counts.get(date) ?? 0 });
     }

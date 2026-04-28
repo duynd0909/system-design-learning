@@ -120,7 +120,6 @@ export function BlankSlotNode({ data, selected }: NodeProps<Node<BlankSlotData, 
           </svg>
         </div>
         <div className="text-sm font-semibold">Drop here</div>
-        <div className="text-[10px] uppercase tracking-wide opacity-60">{data.slotId}</div>
       </div>
     </div>
   );
@@ -166,9 +165,6 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
           </span>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{data.component.label}</div>
-            <div className="truncate text-[10px] uppercase tracking-wide text-[var(--text-secondary)]">
-              {data.slotId}
-            </div>
           </div>
         </motion.div>
       </AnimatePresence>

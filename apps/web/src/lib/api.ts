@@ -105,10 +105,10 @@ export function useMyStats(token: string) {
   });
 }
 
-export function useMyActivity(token: string) {
+export function useMyActivity(token: string, year: number) {
   return useQuery<UserActivity[]>({
-    queryKey: ['users', 'me', 'activity'],
-    queryFn: () => apiFetch('/users/me/activity', undefined, token),
+    queryKey: ['users', 'me', 'activity', year],
+    queryFn: () => apiFetch(`/users/me/activity?year=${year}`, undefined, token),
     enabled: !!token,
     staleTime: 5 * 60_000,
   });

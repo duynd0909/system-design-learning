@@ -47,7 +47,7 @@ const componentTypes = [
 const instagramReq1 = {
   order: 1,
   title: 'Handle user traffic',
-  description: 'Route millions of daily requests through DNS and a load balancer to a fleet of application servers.',
+  description: 'Millions of users are hitting your app simultaneously. How do you get their requests to your servers reliably?',
   nodes: [
     { id: 'user-1', type: 'actor',     position: { x: 0,   y: 320 }, data: { label: 'User' } },
     { id: 'dns-1',  type: 'component', position: { x: 280, y: 200 }, data: { componentSlug: 'dns',           label: 'DNS' } },
@@ -65,7 +65,7 @@ const instagramReq1 = {
 const instagramReq2 = {
   order: 2,
   title: 'Serve and cache data',
-  description: 'Add a second app server, a Redis cache for hot data, and a relational database for persistent storage.',
+  description: 'Your single server is struggling under load and reads are slow. What do you add to scale and keep data consistent?',
   nodes: [
     { id: 'app-2',   type: 'component', position: { x: 840,  y: 340 }, data: { componentSlug: 'app-server',    label: 'App Server 2' } },
     { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
@@ -84,7 +84,7 @@ const instagramReq2 = {
 const instagramReq3 = {
   order: 3,
   title: 'Store and deliver media',
-  description: 'Add CDNs for static assets and media, object storage for uploads, and a read replica for query offloading.',
+  description: 'Users upload millions of photos daily and expect instant delivery worldwide. How do you store and serve media at scale?',
   nodes: [
     { id: 'cdn-1', type: 'component', position: { x: 280,  y: 60  }, data: { componentSlug: 'cdn',            label: 'CDN (Static)' } },
     { id: 'cdn-2', type: 'component', position: { x: 280,  y: 500 }, data: { componentSlug: 'cdn',            label: 'CDN (Media)' } },
@@ -126,7 +126,7 @@ const instagramReq3 = {
 const youtubeReq1 = {
   order: 1,
   title: 'Route viewer traffic',
-  description: 'Direct viewers from DNS through a CDN for edge caching, then to a central load balancer.',
+  description: 'Hundreds of millions of viewers stream video simultaneously. How do you route traffic efficiently from the edge to your backend?',
   nodes: [
     { id: 'viewer-1', type: 'actor',     position: { x: 0,   y: 200 }, data: { label: 'Viewer' } },
     { id: 'dns-1',    type: 'component', position: { x: 300, y: 100 }, data: { componentSlug: 'dns',           label: 'DNS' } },
@@ -145,7 +145,7 @@ const youtubeReq1 = {
 const youtubeReq2 = {
   order: 2,
   title: 'Serve API requests',
-  description: 'Add an API gateway for routing and rate-limiting, backed by an application server for business logic.',
+  description: 'Your backend must handle millions of API calls for search, recommendations, and playback. How do you structure the request path?',
   nodes: [
     { id: 'api-gw', type: 'component', position: { x: 900, y: 80  }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
     { id: 'app-1',  type: 'component', position: { x: 900, y: 320 }, data: { componentSlug: 'app-server',  label: 'App Server' } },
@@ -160,7 +160,7 @@ const youtubeReq2 = {
 const youtubeReq3 = {
   order: 3,
   title: 'Handle uploads and transcoding',
-  description: 'Creators upload videos to the app server, which enqueues a transcoding job for the media server.',
+  description: 'Creators upload large video files around the clock. What infrastructure handles the upload and converts them to multiple formats?',
   nodes: [
     { id: 'creator-1', type: 'actor',     position: { x: 0,    y: 500 }, data: { label: 'Creator' } },
     { id: 'mq-1',      type: 'component', position: { x: 1200, y: 320 }, data: { componentSlug: 'message-queue', label: 'Message Queue' } },
@@ -177,7 +177,7 @@ const youtubeReq3 = {
 const youtubeReq4 = {
   order: 4,
   title: 'Store and cache data',
-  description: 'Cache hot API responses in Redis, persist video metadata to a relational DB, and store video files in object storage.',
+  description: 'You need fast API responses, persistent video metadata, and durable video file storage. How do you architect the data layer?',
   nodes: [
     { id: 'cache-1', type: 'component', position: { x: 1200, y: 80  }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
     { id: 'db-1',    type: 'component', position: { x: 1500, y: 320 }, data: { componentSlug: 'relational-db',  label: 'Metadata DB' } },
@@ -205,7 +205,7 @@ const youtubeReq4 = {
 const whatsappReq1 = {
   order: 1,
   title: 'Route messaging traffic',
-  description: 'Resolve user requests via DNS, balance load across servers to handle hundreds of millions of concurrent connections.',
+  description: 'Hundreds of millions of users need persistent, low-latency connections for real-time messaging. How do you handle that traffic?',
   nodes: [
     { id: 'user-1', type: 'actor',     position: { x: 0,   y: 250 }, data: { label: 'User' } },
     { id: 'dns-1',  type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns',           label: 'DNS' } },
@@ -223,7 +223,7 @@ const whatsappReq1 = {
 const whatsappReq2 = {
   order: 2,
   title: 'Store messages and media',
-  description: 'Cache recent messages for fast delivery, persist chat history in a relational DB, and store photos and voice notes in object storage.',
+  description: 'Users exchange billions of messages and media files every day. What\'s your storage strategy for speed and durability?',
   nodes: [
     { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
     { id: 'db-1',    type: 'component', position: { x: 1120, y: 280 }, data: { componentSlug: 'relational-db',  label: 'Message DB' } },
@@ -256,7 +256,7 @@ const whatsappReq2 = {
 const tiktokReq1 = {
   order: 1,
   title: 'Route mobile traffic',
-  description: 'Resolve DNS, serve static content and video at the edge via CDN, and balance API requests across the backend.',
+  description: 'Your mobile app needs to serve static assets and stream video to users globally with minimal latency. How do you design the network layer?',
   nodes: [
     { id: 'user-1', type: 'actor',     position: { x: 0,   y: 300 }, data: { label: 'User' } },
     { id: 'dns-1',  type: 'component', position: { x: 280, y: 150 }, data: { componentSlug: 'dns',           label: 'DNS' } },
@@ -275,7 +275,7 @@ const tiktokReq1 = {
 const tiktokReq2 = {
   order: 2,
   title: 'Serve the feed',
-  description: 'Route requests through an API gateway for auth and rate-limiting, process business logic in app servers, and store the personalised feed in a NoSQL store.',
+  description: 'Every user sees a personalised video feed. What powers the API layer and stores the feed data?',
   nodes: [
     { id: 'api-gw',  type: 'component', position: { x: 840,  y: 150 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
     { id: 'app-1',   type: 'component', position: { x: 840,  y: 380 }, data: { componentSlug: 'app-server',  label: 'App Server' } },
@@ -292,7 +292,7 @@ const tiktokReq2 = {
 const tiktokReq3 = {
   order: 3,
   title: 'Deliver short videos',
-  description: 'Upload videos to object storage, transcode with a media server, push to CDN for edge delivery, and cache hot feed metadata.',
+  description: 'Creator videos need to reach viewers in seconds, transcoded for any device and streamed from the nearest edge. How?',
   nodes: [
     { id: 'obj-1',   type: 'component', position: { x: 1400, y: 380 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
     { id: 'media-1', type: 'component', position: { x: 1120, y: 560 }, data: { componentSlug: 'media-server',   label: 'Transcoder' } },
@@ -326,7 +326,7 @@ const tiktokReq3 = {
 const zoomReq1 = {
   order: 1,
   title: 'Connect users',
-  description: 'Resolve meeting URLs via DNS, load-balance signalling traffic, and negotiate WebRTC sessions through the app server.',
+  description: 'A user clicks a meeting link and expects to be connected instantly. How does the infrastructure resolve and route them to the right session?',
   nodes: [
     { id: 'user-1', type: 'actor',     position: { x: 0,   y: 250 }, data: { label: 'User' } },
     { id: 'dns-1',  type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns',           label: 'DNS' } },
@@ -344,7 +344,7 @@ const zoomReq1 = {
 const zoomReq2 = {
   order: 2,
   title: 'Handle real-time media',
-  description: 'Deliver static assets and screen-share streams via CDN, relay and mix audio/video through a media server, and propagate meeting events via a message queue.',
+  description: 'A meeting has 100 participants — all sending and receiving audio and video in real time. What handles the media?',
   nodes: [
     { id: 'cdn-1',   type: 'component', position: { x: 280,  y: 500 }, data: { componentSlug: 'cdn',           label: 'CDN' } },
     { id: 'media-1', type: 'component', position: { x: 1120, y: 250 }, data: { componentSlug: 'media-server',  label: 'Media Server' } },
@@ -361,7 +361,7 @@ const zoomReq2 = {
 const zoomReq3 = {
   order: 3,
   title: 'Persist sessions and recordings',
-  description: 'Cache active session state for fast lookup, store meeting metadata in a relational DB, and archive cloud recordings to object storage.',
+  description: 'Meeting state, participant metadata, and cloud recordings all need to persist. How do you design the storage layer?',
   nodes: [
     { id: 'cache-1', type: 'component', position: { x: 1400, y: 100 }, data: { componentSlug: 'cache',          label: 'Session Cache' } },
     { id: 'db-1',    type: 'component', position: { x: 1400, y: 300 }, data: { componentSlug: 'relational-db',  label: 'Meeting DB' } },

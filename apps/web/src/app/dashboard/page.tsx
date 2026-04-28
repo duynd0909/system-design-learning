@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import {
@@ -24,8 +25,8 @@ import { fadeUp, spring } from '@/lib/animations';
 
 // ─── Activity Heatmap ────────────────────────────────────────────────────────
 
-const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function heatColor(count: number) {
   if (count === 0) return 'bg-[var(--text-primary)]/8';
@@ -37,74 +38,119 @@ function heatColor(count: number) {
 
 interface ActivityHeatmapProps {
   data: Array<{ date: string; count: number }>;
+  year: number;
 }
 
-function ActivityHeatmap({ data }: ActivityHeatmapProps) {
-  // data is 90 days, oldest first
-  // We render 13 columns of 7 rows (91 cells; trim to 90)
-  const cells = [...data];
-  while (cells.length < 91) cells.unshift({ date: '', count: -1 }); // pad front
+function ActivityHeatmap({ data, year }: ActivityHeatmapProps) {
+  const countMap = new Map(data.map((d) => [d.date, d.count]));
+  const today = new Date();
 
-  const weeks: Array<typeof cells> = [];
-  for (let i = 0; i < 13; i++) {
-    weeks.push(cells.slice(i * 7, i * 7 + 7));
+  // Grid: Sunday on/before Jan 1 → Saturday on/after Dec 31
+  const jan1 = new Date(year, 0, 1);
+  const gridStart = new Date(jan1);
+  gridStart.setDate(jan1.getDate() - jan1.getDay());
+
+  const dec31 = new Date(year, 11, 31);
+  const gridEnd = new Date(dec31);
+  gridEnd.setDate(dec31.getDate() + (6 - dec31.getDay()));
+
+  const totalDays = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  const numWeeks = totalDays / 7;
+
+  // Build week columns
+  const weeks: Array<Array<{ date: string; count: number }>> = [];
+  for (let w = 0; w < numWeeks; w++) {
+    const week: Array<{ date: string; count: number }> = [];
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(gridStart);
+      date.setDate(gridStart.getDate() + w * 7 + d);
+      const inYear = date.getFullYear() === year;
+      const isFuture = date > today;
+      if (!inYear || isFuture) {
+        week.push({ date: '', count: -1 });
+      } else {
+        const dateStr = date.toISOString().slice(0, 10);
+        week.push({ date: dateStr, count: countMap.get(dateStr) ?? 0 });
+      }
+    }
+    weeks.push(week);
   }
 
-  // Month labels: find the first cell of each month in the grid
+  // One label per month, at the first column that contains a day ≤ 7 of that month
   const monthPositions: Array<{ col: number; label: string }> = [];
+  const seenMonths = new Set<number>();
   weeks.forEach((week, wi) => {
-    week.forEach((cell) => {
+    for (const cell of week) {
       if (cell.date) {
         const d = new Date(cell.date + 'T00:00:00');
-        if (d.getDate() <= 7) {
-          if (!monthPositions.find((m) => m.col === wi)) {
-            monthPositions.push({ col: wi, label: MONTH_LABELS[d.getMonth()] });
-          }
+        const month = d.getMonth();
+        if (d.getDate() <= 7 && !seenMonths.has(month)) {
+          seenMonths.add(month);
+          monthPositions.push({ col: wi, label: MONTH_LABELS[month] });
         }
       }
-    });
+    }
   });
 
+  const DAY_COL_W = 28; // px — fixed width of the day-label column
+
   return (
-    <div className="overflow-x-auto">
-      {/* Month row */}
-      <div className="mb-1 flex gap-1 pl-8">
-        {weeks.map((_, wi) => {
-          const mp = monthPositions.find((m) => m.col === wi);
-          return (
-            <div key={wi} className="w-3 shrink-0 text-[9px] text-[var(--text-secondary)]">
-              {mp ? mp.label : ''}
-            </div>
-          );
-        })}
+    <div className="w-full select-none">
+      {/* Month labels — absolutely positioned over the grid area */}
+      <div className="relative mb-1 h-4" style={{ paddingLeft: DAY_COL_W }}>
+        {monthPositions.map(({ col, label }) => (
+          <span
+            key={label}
+            className="absolute whitespace-nowrap text-[10px] text-[var(--text-secondary)]"
+            style={{ left: `calc(${DAY_COL_W}px + ${(col / numWeeks) * 100}%)` }}
+          >
+            {label}
+          </span>
+        ))}
       </div>
 
-      <div className="flex gap-1">
+      <div className="flex w-full items-stretch gap-1.5">
         {/* Day labels */}
-        <div className="flex flex-col gap-1 pr-1">
-          {DAY_LABELS.map((d, i) => (
-            <div key={d} className={cn('h-3 text-[9px] leading-3 text-[var(--text-secondary)]', i % 2 === 0 ? 'opacity-0' : '')}>
-              {d}
-            </div>
+        <div
+          className="flex shrink-0 flex-col justify-around"
+          style={{ width: DAY_COL_W }}
+        >
+          {DAY_ABBR.map((label, i) => (
+            <span
+              key={label}
+              className={cn('text-[9px] leading-none text-[var(--text-secondary)]', i % 2 === 0 ? 'invisible' : '')}
+            >
+              {label}
+            </span>
           ))}
         </div>
 
-        {/* Grid */}
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-1">
-            {week.map((cell, di) => (
+        {/* Cell grid — fills remaining width, cells are square via aspect-ratio */}
+        <div
+          className="min-w-0 flex-1"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${numWeeks}, 1fr)`,
+            gridTemplateRows: 'repeat(7, 1fr)',
+            gridAutoFlow: 'column',
+            gap: '3px',
+            aspectRatio: `${numWeeks} / 7`,
+          }}
+        >
+          {weeks.flatMap((week, wi) =>
+            week.map((cell, di) => (
               <div
-                key={di}
-                title={cell.date ? `${cell.date}: ${cell.count} submission${cell.count !== 1 ? 's' : ''}` : ''}
+                key={`${wi}-${di}`}
+                title={cell.count >= 0 ? `${cell.date}: ${cell.count} submission${cell.count !== 1 ? 's' : ''}` : undefined}
                 className={cn(
-                  'h-3 w-3 rounded-sm transition-colors',
+                  'rounded-[2px] transition-colors',
                   cell.count < 0 ? 'opacity-0' : heatColor(cell.count),
                 )}
-                aria-label={cell.date ? `${cell.date}: ${cell.count} submissions` : undefined}
+                aria-label={cell.date && cell.count >= 0 ? `${cell.date}: ${cell.count} submissions` : undefined}
               />
-            ))}
-          </div>
-        ))}
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
@@ -158,8 +204,12 @@ export default function DashboardPage() {
   const { token, isAuthenticated, isReady } = useAuth();
   const { data: user, isLoading: userLoading } = useMe(token);
   const { data: stats, isLoading: statsLoading } = useMyStats(token);
-  const { data: activity, isLoading: activityLoading } = useMyActivity(token);
   const { data: submissionsPage, isLoading: subsLoading } = useMySubmissions(token, 1, 10);
+
+  const currentYear = new Date().getFullYear();
+  const [activityYear, setActivityYear] = useState(currentYear);
+  const availableYears = [currentYear - 1, currentYear];
+  const { data: activity, isLoading: activityLoading } = useMyActivity(token, activityYear);
 
   const isLoading = userLoading || statsLoading || activityLoading || subsLoading;
 
@@ -254,15 +304,34 @@ export default function DashboardPage() {
             {/* Activity heatmap */}
             <Card className="p-5">
               <CardHeader className="mb-4">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-[var(--text-secondary)]" aria-hidden="true" />
-                  <CardTitle className="text-base">Activity — last 90 days</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-[var(--text-secondary)]" aria-hidden="true" />
+                    <CardTitle className="text-base">Activity</CardTitle>
+                  </div>
+                  <div className="flex gap-1">
+                    {availableYears.map((y) => (
+                      <button
+                        key={y}
+                        type="button"
+                        onClick={() => setActivityYear(y)}
+                        className={cn(
+                          'rounded px-2 py-0.5 text-xs font-medium transition-colors',
+                          y === activityYear
+                            ? 'bg-[var(--accent-primary)] text-white'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                        )}
+                      >
+                        {y}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </CardHeader>
               {activityLoading ? (
-                <Skeleton className="h-20 w-full rounded-lg" />
+                <Skeleton className="h-28 w-full rounded-lg" />
               ) : activity ? (
-                <ActivityHeatmap data={activity} />
+                <ActivityHeatmap data={activity} year={activityYear} />
               ) : null}
             </Card>
 

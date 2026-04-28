@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Query } from '@nestjs/common';
 import type { User } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -22,8 +22,9 @@ export class UsersController {
 
   @Get('me/activity')
   @UseGuards(JwtAuthGuard)
-  getMyActivity(@CurrentUser() user: User) {
-    return this.usersService.getActivity(user.id);
+  getMyActivity(@CurrentUser() user: User, @Query('year') year?: string) {
+    const y = year ? parseInt(year, 10) : new Date().getFullYear();
+    return this.usersService.getActivity(user.id, y);
   }
 
   @Get(':id')
