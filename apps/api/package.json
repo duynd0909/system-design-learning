@@ -6,6 +6,8 @@
     "build": "nest build",
     "premigrate": "npx prisma generate",
     "migrate": "npx prisma migrate deploy",
+    "seed": "npx prisma db seed",
+    "deploy:db": "npm run migrate && npm run seed",
     "dev": "nest start --watch",
     "predev": "npx prisma migrate deploy",
     "prestart": "npm run build && npx prisma migrate deploy",
