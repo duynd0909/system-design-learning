@@ -3,18 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GitBranch, Search } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { API_BASE } from '@/lib/api';
-import {apiFetch} from "@/lib/api";
+import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+
 interface FormState {
   email: string;
   username: string;
   displayName: string;
   password: string;
+  repeatPassword: string;
 }
 
 interface FormErrors {
@@ -22,13 +22,20 @@ interface FormErrors {
   username?: string;
   displayName?: string;
   password?: string;
+  repeatPassword?: string;
   general?: string;
 }
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
-  const [form, setForm] = useState<FormState>({ email: '', username: '', displayName: '', password: '' });
+  const [form, setForm] = useState<FormState>({
+    email: '',
+    username: '',
+    displayName: '',
+    password: '',
+    repeatPassword: '',
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +54,9 @@ export default function RegisterPage() {
     if (!form.password) next.password = 'Password is required';
     else if (form.password.length < 8) next.password = 'Must be at least 8 characters';
 
+    if (!form.repeatPassword) next.repeatPassword = 'Repeat your password';
+    else if (form.repeatPassword !== form.password) next.repeatPassword = 'Passwords do not match';
+
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -58,7 +68,12 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-      await register(form);
+      await register({
+        email: form.email,
+        username: form.username,
+        displayName: form.displayName,
+        password: form.password,
+      });
       router.push('/problems');
     } catch (error) {
       setErrors({ general: error instanceof Error ? error.message : 'Registration failed' });
@@ -86,22 +101,7 @@ export default function RegisterPage() {
       </div>
 
       <Card>
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <a
-            href={`${API_BASE}/auth/github`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[var(--text-primary)]/20 bg-[var(--bg-primary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-primary)]/50"
-          >
-            <GitBranch className="h-4 w-4" aria-hidden="true" />
-            GitHub
-          </a>
-          <a
-            href={`${API_BASE}/auth/google`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[var(--text-primary)]/20 bg-[var(--bg-primary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-primary)]/50"
-          >
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Google
-          </a>
-        </div>
+        <SocialAuthButtons />
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
@@ -120,6 +120,7 @@ export default function RegisterPage() {
           <Input label="Username" type="text" autoComplete="username" placeholder="e.g. jsmith99" {...field('username')} />
           <Input label="Display name" type="text" autoComplete="name" placeholder="e.g. John Smith" {...field('displayName')} />
           <Input label="Password" type="password" autoComplete="new-password" {...field('password')} />
+          <Input label="Repeat password" type="password" autoComplete="new-password" {...field('repeatPassword')} />
           <Button type="submit" className="w-full" loading={loading}>
             Create account
           </Button>

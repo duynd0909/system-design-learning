@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GitBranch, Search } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { API_BASE } from '@/lib/api';
+import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 
 interface FormState {
   email: string;
@@ -64,22 +63,7 @@ export default function LoginPage() {
       </div>
 
       <Card>
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <a
-            href={`${API_BASE}/auth/github`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[var(--text-primary)]/20 bg-[var(--bg-primary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-primary)]/50"
-          >
-            <GitBranch className="h-4 w-4" aria-hidden="true" />
-            GitHub
-          </a>
-          <a
-            href={`${API_BASE}/auth/google`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[var(--text-primary)]/20 bg-[var(--bg-primary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-primary)]/50"
-          >
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Google
-          </a>
-        </div>
+        <SocialAuthButtons />
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
