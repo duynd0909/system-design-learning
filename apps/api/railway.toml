@@ -17,4 +17,4 @@ restartPolicyMaxRetries = 5
 # Run DB migration before starting the server on each deploy.
 # Railway executes this in a one-off container before routing traffic.
 # Comment out if you prefer to run migrations manually via:
-railway run --service api npx prisma migrate deploy
+# railway run --service api npx prisma migrate deploy
