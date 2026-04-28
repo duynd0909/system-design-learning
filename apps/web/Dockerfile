@@ -12,6 +12,9 @@ COPY apps/web/package*.json ./apps/web/
 
 RUN npm ci
 
+# Copy root tsconfig needed by shared-types
+COPY tsconfig.base.json ./
+
 # Copy full source
 COPY packages/shared-types ./packages/shared-types
 COPY apps/web              ./apps/web
