@@ -46,6 +46,7 @@ COPY --from=builder /app/packages/game-engine/package.json  ./packages/game-engi
 # API compiled output and Prisma schema/migrations
 COPY --from=builder /app/apps/api/dist    ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma  ./apps/api/prisma
+COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 
 EXPOSE 3001
