@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Copy manifests first for layer caching
 COPY package*.json ./
+COPY tsconfig.base.json ./
 COPY packages/shared-types/package*.json ./packages/shared-types/
 COPY packages/game-engine/package*.json ./packages/game-engine/
 COPY apps/api/package*.json ./apps/api/
