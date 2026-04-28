@@ -37,6 +37,12 @@
   50% { transform: translateY(-6px); }
 }
 
+@keyframes system-edge-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
 @keyframes aurora-pulse {
   0%, 100% {
     opacity: 0.5;
@@ -55,6 +61,10 @@
 @media (prefers-reduced-motion: reduce) {
   .aurora-pulse {
     animation: none;
+  }
+
+  .react-flow__edge-path {
+    animation: none !important;
   }
 }
 

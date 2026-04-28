@@ -19,6 +19,7 @@ interface RequirementsSidebarProps {
   completedOrders: Set<number>;
   isLoading: boolean;
   onSelectRequirement?: (order: number) => void;
+  onComponentClick?: (componentSlug: string) => void;
 }
 
 export function RequirementsSidebar({
@@ -30,9 +31,10 @@ export function RequirementsSidebar({
   completedOrders,
   isLoading,
   onSelectRequirement,
+  onComponentClick,
 }: RequirementsSidebarProps) {
   const prefersReduced = useReducedMotion();
-  const [activeTab, setActiveTab] = useState<'questions' | 'components'>('questions');
+  const [activeTab, setActiveTab] = useState<'requirements' | 'components'>('requirements');
   const completedCount = completedOrders.size;
   const totalCount = requirements.length;
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
@@ -46,10 +48,10 @@ export function RequirementsSidebar({
         <div className="mb-1 flex items-center gap-2">
           <DifficultyBadge difficulty={problem.difficulty} />
         </div>
-        <h1 className="font-display text-base font-bold leading-snug text-[var(--text-primary)]">
+        <h1 className="font-display text-lg font-bold leading-snug text-[var(--text-primary)]">
           {problem.title}
         </h1>
-        <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
+        <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
           {problem.description}
         </p>
       </div>
@@ -64,16 +66,16 @@ export function RequirementsSidebar({
             <button
               type="button"
               role="tab"
-              aria-selected={activeTab === 'questions'}
+              aria-selected={activeTab === 'requirements'}
               className={cn(
                 'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
-                activeTab === 'questions'
+                activeTab === 'requirements'
                   ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
               )}
-              onClick={() => setActiveTab('questions')}
+              onClick={() => setActiveTab('requirements')}
             >
-              Questions
+              Requirements
             </button>
             <button
               type="button"
@@ -93,10 +95,10 @@ export function RequirementsSidebar({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-3">
-          {activeTab === 'questions' ? (
+          {activeTab === 'requirements' ? (
             <>
               <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
-                Questions
+                Requirements
               </h2>
 
               {isLoading ? (
@@ -159,13 +161,13 @@ export function RequirementsSidebar({
                             <div className="min-w-0 flex-1">
                               <div
                                 className={cn(
-                                  'text-sm font-semibold leading-tight',
+                                  'text-base font-semibold leading-tight',
                                   isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-primary)]/80',
                                 )}
                               >
                                 {req.title}
                               </div>
-                              <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                              <div className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
                                 {req.description}
                               </div>
                             </div>
@@ -190,9 +192,14 @@ export function RequirementsSidebar({
                 </h2>
               </div>
               <p className="mb-3 px-1 text-xs leading-relaxed text-[var(--text-secondary)]">
-                Drag a component onto a blank slot in the canvas.
+                Choose an empty slot, then add the matching infrastructure component.
               </p>
-              <ComponentPalette components={components} placedSlugs={placedSlugs} variant="panel" />
+              <ComponentPalette
+                components={components}
+                placedSlugs={placedSlugs}
+                variant="panel"
+                onComponentClick={onComponentClick}
+              />
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -17,14 +18,32 @@ import {
   Background,
   BackgroundVariant,
   Controls,
+  MarkerType,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
   type Edge,
   type EdgeTypes,
   type NodeTypes,
+  type ReactFlowInstance,
 } from '@xyflow/react';
-import { ArrowRight, CheckCircle2, ChevronLeft, Clock, Network, RotateCcw, Send, XCircle } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  ChevronLeft,
+  Clock,
+  LayoutGrid,
+  LocateFixed,
+  Map as MapIcon,
+  Maximize2,
+  Network,
+  Pause,
+  Play,
+  RotateCcw,
+  Send,
+  Sparkles,
+  XCircle,
+} from 'lucide-react';
 import type {
   ActorNodeData,
   ComponentNodeData,
@@ -37,6 +56,7 @@ import type {
 import { Button } from '@/components/ui/Button';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useProblemDetail, useRequirementGraph, useProblems, useSubmit } from '@/lib/api';
 import {
@@ -46,10 +66,18 @@ import {
   FilledSlotNode,
   type GameFlowNode,
 } from '@/components/game/GameNodes';
-import { LabelEdge } from '@/components/game/LabelEdge';
+import { LabelEdge, type SystemEdgeData } from '@/components/game/LabelEdge';
 import { ResultOverlay } from '@/components/game/ResultOverlay';
 import { RequirementsSidebar } from '@/components/game/RequirementsSidebar';
 import { iconForComponent } from '@/components/game/component-icons';
+import {
+  categoryForComponent,
+  edgeStatusStroke,
+  getCategoryStyle,
+  inferEdgeKind,
+  type SystemEdgeStatus,
+} from '@/components/game/graph-config';
+import { autoLayoutGraph, emptyConnectedPath, getConnectedPath, getDirectEdgeNodes } from '@/components/game/graph-utils';
 import { cn } from '@/lib/utils';
 import { scaleIn, spring } from '@/lib/animations';
 import { useQueryClient } from '@tanstack/react-query';
@@ -218,6 +246,8 @@ function GameHeader({
           {filledCount}/{slotCount}
         </span>
 
+        <ThemeToggle className="h-8 w-8 rounded-lg bg-[var(--text-primary)]/5 hover:bg-[var(--text-primary)]/10" />
+
         {submitError && (
           <p className="hidden max-w-[160px] truncate text-xs text-red-500 md:block" role="alert">
             {submitError}
@@ -251,9 +281,13 @@ function GameHeader({
 function PaletteOverlay({ component }: { component: ComponentType | undefined }) {
   if (!component) return null;
   const Icon = iconForComponent(component.slug);
+  const categoryStyle = getCategoryStyle(categoryForComponent(component));
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--bg-primary)] px-3 py-2 shadow-xl">
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+    <div
+      className="flex items-center gap-3 rounded-lg border bg-[var(--bg-primary)] px-3 py-2 shadow-xl"
+      style={{ borderColor: categoryStyle.border, boxShadow: `0 14px 34px ${categoryStyle.glow}` }}
+    >
+      <span className={cn('grid h-10 w-10 place-items-center rounded-md border', categoryStyle.bgClass, categoryStyle.borderClass, categoryStyle.textClass)}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="text-sm font-semibold text-[var(--text-primary)]">{component.label}</span>
@@ -313,6 +347,84 @@ function CompactResult({ result, onNext, onRetry, requirementTitle }: CompactRes
   );
 }
 
+interface CanvasToolButtonProps {
+  label: string;
+  active?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}
+
+function CanvasToolButton({ label, active = false, disabled = false, onClick, children }: CanvasToolButtonProps) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'grid h-8 w-8 cursor-pointer place-items-center rounded-md border border-transparent text-[var(--text-secondary)]',
+        'transition-colors duration-150 hover:border-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30',
+        'disabled:cursor-not-allowed disabled:opacity-40',
+        active && 'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/12 text-[var(--accent-primary)]',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+interface CanvasToolbarProps {
+  hasNodes: boolean;
+  minimapVisible: boolean;
+  snapToGrid: boolean;
+  simulationEnabled: boolean;
+  onAutoLayout: () => void;
+  onFitView: () => void;
+  onToggleMinimap: () => void;
+  onToggleSnap: () => void;
+  onToggleSimulation: () => void;
+}
+
+function CanvasToolbar({
+  hasNodes,
+  minimapVisible,
+  snapToGrid,
+  simulationEnabled,
+  onAutoLayout,
+  onFitView,
+  onToggleMinimap,
+  onToggleSnap,
+  onToggleSimulation,
+}: CanvasToolbarProps) {
+  return (
+    <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/95 p-1 shadow-lg backdrop-blur">
+      <CanvasToolButton label="Auto layout" disabled={!hasNodes} onClick={onAutoLayout}>
+        <Sparkles className="h-4 w-4" aria-hidden="true" />
+      </CanvasToolButton>
+      <CanvasToolButton label="Fit to view" disabled={!hasNodes} onClick={onFitView}>
+        <Maximize2 className="h-4 w-4" aria-hidden="true" />
+      </CanvasToolButton>
+      <CanvasToolButton label="Toggle minimap" active={minimapVisible} onClick={onToggleMinimap}>
+        <MapIcon className="h-4 w-4" aria-hidden="true" />
+      </CanvasToolButton>
+      <CanvasToolButton label="Toggle snap to grid" active={snapToGrid} onClick={onToggleSnap}>
+        <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+      </CanvasToolButton>
+      <CanvasToolButton label={simulationEnabled ? 'Pause simulation' : 'Start simulation'} active={simulationEnabled} disabled={!hasNodes} onClick={onToggleSimulation}>
+        {simulationEnabled ? (
+          <Pause className="h-4 w-4" aria-hidden="true" />
+        ) : (
+          <Play className="h-4 w-4" aria-hidden="true" />
+        )}
+      </CanvasToolButton>
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function ProblemGamePage() {
@@ -321,6 +433,8 @@ export default function ProblemGamePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { token, isAuthenticated, isReady } = useAuth();
+  const prefersReduced = useReducedMotion();
+  const flowInstanceRef = useRef<ReactFlowInstance<GameFlowNode, Edge<SystemEdgeData>> | null>(null);
 
   const { data: problemDetail, isLoading: isProblemLoading, isError: isProblemError } = useProblemDetail(slug);
   const { data: problems } = useProblems();
@@ -333,6 +447,13 @@ export default function ProblemGamePage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [result, setResult] = useState<SubmissionResponse | null>(null);
   const [submitError, setSubmitError] = useState('');
+  const [selectedSlotId, setSelectedSlotId] = useState('');
+  const [layoutOverrides, setLayoutOverrides] = useState<Record<string, { x: number; y: number }>>({});
+  const [hoveredEdgeId, setHoveredEdgeId] = useState('');
+  const [simulationEnabled, setSimulationEnabled] = useState(false);
+  const [activeSimulationEdgeId, setActiveSimulationEdgeId] = useState('');
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [isMinimapVisible, setIsMinimapVisible] = useState(true);
 
   const { data: reqGraph, isLoading: isGraphLoading, isFetching } = useRequirementGraph(slug, currentOrder);
   const submit = useSubmit(token);
@@ -343,6 +464,10 @@ export default function ProblemGamePage() {
     setAnswers({});
     setResult(null);
     setSubmitError('');
+    setSelectedSlotId('');
+    setLayoutOverrides({});
+    setHoveredEdgeId('');
+    setActiveSimulationEdgeId('');
     setStartedAt(Date.now());
     setElapsedSeconds(0);
   }, [currentOrder]);
@@ -369,6 +494,32 @@ export default function ProblemGamePage() {
   const filledCount = slotIds.filter((id) => answers[id]).length;
   const isReadyToSubmit = slotIds.length > 0 && filledCount === slotIds.length;
   const placedSlugs = useMemo(() => new Set(Object.values(answers)), [answers]);
+  const remainingSlots = Math.max(slotIds.length - filledCount, 0);
+
+  const nodeSlugById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const node of reqGraph?.nodes ?? []) {
+      if (node.type === 'blank') {
+        const answerSlug = answers[node.id];
+        if (answerSlug) map.set(node.id, answerSlug);
+        continue;
+      }
+      if (isComponentData(node.data)) {
+        map.set(node.id, node.data.componentSlug);
+      }
+    }
+    return map;
+  }, [answers, reqGraph?.nodes]);
+
+  const hoveredPath = useMemo(
+    () => (hoveredEdgeId ? getConnectedPath(hoveredEdgeId, reqGraph?.edges ?? []) : emptyConnectedPath()),
+    [hoveredEdgeId, reqGraph?.edges],
+  );
+  const activeSimulationNodes = useMemo(
+    () => (activeSimulationEdgeId ? getDirectEdgeNodes(activeSimulationEdgeId, reqGraph?.edges ?? []) : new Set<string>()),
+    [activeSimulationEdgeId, reqGraph?.edges],
+  );
+  const hasHoveredPath = hoveredPath.edgeIds.size > 0;
 
   const nextProblemSlug = useMemo(() => {
     if (!problems || !problemDetail) return null;
@@ -382,54 +533,174 @@ export default function ProblemGamePage() {
       delete next[slotId];
       return next;
     });
+    setSelectedSlotId(slotId);
     setSubmitError('');
   }, []);
 
   const flowNodes = useMemo<GameFlowNode[]>(() => {
     if (!reqGraph) return [];
     return reqGraph.nodes.map((node): GameFlowNode => {
+      const position = layoutOverrides[node.id] ?? node.position;
+      const isHighlighted = hoveredPath.nodeIds.has(node.id);
+      const isDimmed = hasHoveredPath && !isHighlighted;
+      const isSimulationActive = activeSimulationNodes.has(node.id);
+
       if (node.type === 'blank') {
         const selected = componentBySlug.get(answers[node.id]);
         if (selected) {
           return {
             id: node.id,
             type: 'filledSlot',
-            position: node.position,
-            data: { slotId: node.id, component: selected, onClear: clearSlot },
+            position,
+            data: {
+              slotId: node.id,
+              component: selected,
+              onClear: clearSlot,
+              onSelectSlot: setSelectedSlotId,
+              isSelected: selectedSlotId === node.id,
+              isHighlighted,
+              isDimmed,
+              isSimulationActive,
+            },
           };
         }
-        return { id: node.id, type: 'blankSlot', position: node.position, data: { slotId: node.id } };
+        return {
+          id: node.id,
+          type: 'blankSlot',
+          position,
+          data: {
+            slotId: node.id,
+            onSelectSlot: setSelectedSlotId,
+            isSelected: selectedSlotId === node.id,
+            isHighlighted,
+            isDimmed,
+          },
+        };
       }
       if (node.type === 'actor' && isActorData(node.data)) {
-        return { id: node.id, type: 'actor', position: node.position, data: { label: node.data.label } };
+        return {
+          id: node.id,
+          type: 'actor',
+          position,
+          data: {
+            label: node.data.label,
+            isHighlighted,
+            isDimmed,
+            isSimulationActive,
+          },
+        };
       }
       if (isComponentData(node.data)) {
+        const component = componentBySlug.get(node.data.componentSlug);
         return {
           id: node.id,
           type: 'component',
-          position: node.position,
-          data: { componentSlug: node.data.componentSlug, label: node.data.label, description: node.data.description },
+          position,
+          data: {
+            componentSlug: node.data.componentSlug,
+            category: component?.category,
+            label: node.data.label,
+            description: node.data.description ?? component?.description,
+            isHighlighted,
+            isDimmed,
+            isSimulationActive,
+          },
         };
       }
-      return { id: node.id, type: 'actor', position: node.position, data: { label: 'Actor' } };
+      return {
+        id: node.id,
+        type: 'actor',
+        position,
+        data: { label: 'Actor', isHighlighted, isDimmed, isSimulationActive },
+      };
     });
-  }, [answers, clearSlot, componentBySlug, reqGraph]);
+  }, [
+    activeSimulationNodes,
+    answers,
+    clearSlot,
+    componentBySlug,
+    hasHoveredPath,
+    hoveredPath.nodeIds,
+    layoutOverrides,
+    reqGraph,
+    selectedSlotId,
+  ]);
 
-  const flowEdges = useMemo<Edge[]>(
+  const handleEdgeHover = useCallback((edgeId: string) => {
+    setHoveredEdgeId(edgeId);
+  }, []);
+
+  const handleEdgeHoverEnd = useCallback(() => {
+    setHoveredEdgeId('');
+  }, []);
+
+  const flowEdges = useMemo<Edge<SystemEdgeData>[]>(
     () =>
-      reqGraph?.edges.map((edge) => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        label: edge.label,
-        type: 'label',
-        animated: edge.animated,
-        style: { stroke: 'var(--text-secondary)', strokeWidth: 2 },
-      })) ?? [],
-    [reqGraph?.edges],
+      reqGraph?.edges.map((edge) => {
+        const kind = inferEdgeKind(edge, {
+          sourceSlug: nodeSlugById.get(edge.source),
+          targetSlug: nodeSlugById.get(edge.target),
+        });
+        const isActive = simulationEnabled && activeSimulationEdgeId === edge.id;
+        const isHighlighted = hoveredPath.edgeIds.has(edge.id);
+        const isDimmed = hasHoveredPath && !isHighlighted;
+        const status: SystemEdgeStatus = isActive ? 'active' : 'normal';
+        const color = edgeStatusStroke(kind, status);
+
+        return {
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          label: edge.label,
+          type: 'label',
+          animated: edge.animated || isActive,
+          markerEnd: { type: MarkerType.ArrowClosed, color },
+          data: {
+            kind,
+            status,
+            isActive,
+            isHighlighted,
+            isDimmed,
+            onHover: handleEdgeHover,
+            onHoverEnd: handleEdgeHoverEnd,
+          },
+        };
+      }) ?? [],
+    [
+      activeSimulationEdgeId,
+      handleEdgeHover,
+      handleEdgeHoverEnd,
+      hasHoveredPath,
+      hoveredPath.edgeIds,
+      nodeSlugById,
+      reqGraph?.edges,
+      simulationEnabled,
+    ],
   );
 
-  const showMinimap = flowNodes.length > 8;
+  const showMinimap = isMinimapVisible && flowNodes.length > 0;
+  const simulationEdgeIds = useMemo(() => reqGraph?.edges.map((edge) => edge.id) ?? [], [reqGraph?.edges]);
+
+  useEffect(() => {
+    if (!simulationEnabled || simulationEdgeIds.length === 0) {
+      setActiveSimulationEdgeId('');
+      return;
+    }
+
+    if (prefersReduced) {
+      setActiveSimulationEdgeId(simulationEdgeIds[0]);
+      return;
+    }
+
+    let index = 0;
+    setActiveSimulationEdgeId(simulationEdgeIds[index]);
+    const interval = window.setInterval(() => {
+      index = (index + 1) % simulationEdgeIds.length;
+      setActiveSimulationEdgeId(simulationEdgeIds[index]);
+    }, 950);
+
+    return () => window.clearInterval(interval);
+  }, [prefersReduced, simulationEdgeIds, simulationEnabled]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveSlug(componentDragSlug(String(event.active.id)));
@@ -440,10 +711,42 @@ export default function ProblemGamePage() {
     const slotId = event.over ? slotIdFromDrop(String(event.over.id)) : '';
     if (componentSlug && slotId) {
       setAnswers((current) => ({ ...current, [slotId]: componentSlug }));
+      setSelectedSlotId(slotId);
       setSubmitError('');
     }
     setActiveSlug('');
   }, []);
+
+  const handleComponentClick = useCallback((componentSlug: string) => {
+    const targetSlotId =
+      (selectedSlotId && slotIds.includes(selectedSlotId) ? selectedSlotId : '') ||
+      slotIds.find((slotId) => !answers[slotId]) ||
+      '';
+
+    if (!targetSlotId) return;
+
+    setAnswers((current) => ({ ...current, [targetSlotId]: componentSlug }));
+    setSelectedSlotId(targetSlotId);
+    setSubmitError('');
+  }, [answers, selectedSlotId, slotIds]);
+
+  const handleFitView = useCallback(() => {
+    flowInstanceRef.current?.fitView({ padding: 0.24, duration: prefersReduced ? 0 : 280 });
+  }, [prefersReduced]);
+
+  const handleAutoLayout = useCallback(() => {
+    if (flowNodes.length === 0 || !reqGraph) return;
+
+    setLayoutOverrides(autoLayoutGraph(flowNodes, reqGraph.edges, {
+      originX: 40,
+      originY: 260,
+      columnGap: 290,
+      rowGap: 170,
+    }));
+    window.requestAnimationFrame(() => {
+      flowInstanceRef.current?.fitView({ padding: 0.24, duration: prefersReduced ? 0 : 280 });
+    });
+  }, [flowNodes, prefersReduced, reqGraph]);
 
   const handleSubmit = useCallback(async () => {
     if (!isAuthenticated) { router.push('/login'); return; }
@@ -479,6 +782,7 @@ export default function ProblemGamePage() {
   const handleRetry = useCallback(() => {
     setResult(null);
     setAnswers({});
+    setSelectedSlotId('');
     setSubmitError('');
     setStartedAt(Date.now());
     setElapsedSeconds(0);
@@ -489,6 +793,8 @@ export default function ProblemGamePage() {
     setCurrentOrder(1);
     setCompletedOrders(new Set());
     setAnswers({});
+    setSelectedSlotId('');
+    setLayoutOverrides({});
     setSubmitError('');
     setStartedAt(Date.now());
     setElapsedSeconds(0);
@@ -600,6 +906,7 @@ export default function ProblemGamePage() {
                 completedOrders={completedOrders}
                 isLoading={isGraphLoading}
                 onSelectRequirement={handleSelectRequirement}
+                onComponentClick={handleComponentClick}
               />
             </div>
 
@@ -621,6 +928,35 @@ export default function ProblemGamePage() {
 
             {/* Right: canvas */}
             <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
+              <div className="pointer-events-none absolute left-4 top-4 z-20 max-w-sm rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/92 px-3 py-2.5 shadow-lg backdrop-blur">
+                <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+                  <LocateFixed className="h-3 w-3" aria-hidden="true" />
+                  Requirement {currentOrder}
+                </div>
+                <div className="text-sm font-semibold leading-tight text-[var(--text-primary)]">
+                  {currentRequirement?.title ?? problemDetail.problem.title}
+                </div>
+                <div className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
+                  {slotIds.length === 0
+                    ? 'Explore the revealed architecture path.'
+                    : selectedSlotId
+                      ? `Slot selected. ${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`
+                      : `${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`}
+                </div>
+              </div>
+
+              <CanvasToolbar
+                hasNodes={flowNodes.length > 0}
+                minimapVisible={isMinimapVisible}
+                snapToGrid={snapToGrid}
+                simulationEnabled={simulationEnabled}
+                onAutoLayout={handleAutoLayout}
+                onFitView={handleFitView}
+                onToggleMinimap={() => setIsMinimapVisible((current) => !current)}
+                onToggleSnap={() => setSnapToGrid((current) => !current)}
+                onToggleSimulation={() => setSimulationEnabled((current) => !current)}
+              />
+
               <ReactFlowProvider>
                 <div className="absolute inset-0">
                   <ReactFlow
@@ -629,6 +965,11 @@ export default function ProblemGamePage() {
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     nodesDraggable={false}
+                    snapToGrid={snapToGrid}
+                    snapGrid={[24, 24]}
+                    onInit={(instance) => {
+                      flowInstanceRef.current = instance;
+                    }}
                     fitView
                     fitViewOptions={{ padding: 0.2 }}
                     minZoom={0.5}
@@ -638,11 +979,42 @@ export default function ProblemGamePage() {
                     <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
                     <Controls />
                     {showMinimap && (
-                      <MiniMap pannable zoomable nodeColor="var(--accent-primary)" maskColor="rgba(0,0,0,0.08)" />
+                      <MiniMap
+                        pannable
+                        zoomable
+                        nodeColor={(node) => {
+                          if (node.type === 'blankSlot') return 'var(--slot-blank)';
+                          if (node.type === 'filledSlot') return 'var(--slot-correct)';
+                          return 'var(--accent-primary)';
+                        }}
+                        maskColor="rgba(0,0,0,0.08)"
+                      />
                     )}
                   </ReactFlow>
                 </div>
               </ReactFlowProvider>
+
+              {flowNodes.length === 0 && (
+                <div className="absolute inset-0 z-10 grid place-items-center p-8 text-center">
+                  <div className="rounded-lg border border-dashed border-[var(--text-primary)]/15 bg-[var(--bg-primary)]/80 px-5 py-4 text-sm text-[var(--text-secondary)] shadow-sm">
+                    Canvas is ready.
+                  </div>
+                </div>
+              )}
+
+              <AnimatePresence>
+                {activeSlug ? (
+                  <motion.div
+                    key="drop-state"
+                    initial={prefersReduced ? undefined : { opacity: 0, y: 8 }}
+                    animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
+                    exit={prefersReduced ? undefined : { opacity: 0, y: 8 }}
+                    className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-[var(--slot-blank)]/30 bg-[var(--bg-primary)]/95 px-4 py-2 text-xs font-semibold text-[var(--slot-blank)] shadow-lg backdrop-blur"
+                  >
+                    Drop on an open slot
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
 
               {/* Compact result overlay (mid-requirement pass) */}
               <AnimatePresence>
