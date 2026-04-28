@@ -1,6 +1,10 @@
 # Railway service config — NestJS API
-# In Railway dashboard: set this service's Root Directory to "apps/api"
-# The Dockerfile path below is relative to the repository root.
+# This service must build from the repository root because the API Dockerfile
+# copies npm workspace packages from ./packages and ./apps/api.
+# Railway dashboard:
+# - Root Directory: leave empty or "/"
+# - Config file path: /apps/api/railway.toml
+# - Dockerfile path is relative to the repository root.
 
 [build]
 builder = "DOCKERFILE"
@@ -9,6 +13,7 @@ dockerfilePath = "apps/api/Dockerfile"
 [deploy]
 # Overrides Dockerfile CMD (optional — CMD in Dockerfile is the source of truth)
 startCommand = "node dist/main.js"
+preDeployCommand = ["npx prisma migrate deploy"]
 healthcheckPath = "/api/v1/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
