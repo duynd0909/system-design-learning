@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
-import { useMemo, useCallback } from 'react';
+import { Suspense, useMemo, useCallback } from 'react';
 import { Difficulty } from '@stackdify/shared-types';
 import { useProblems, useMySubmissions } from '@/lib/api';
 import { Card, CardTitle, CardDescription } from '@/components/ui/Card';
@@ -20,7 +20,18 @@ const DIFFICULTIES = [
   { label: 'Hard', value: Difficulty.HARD },
 ];
 
-export default function ProblemsPage() {
+function ProblemsPageFallback() {
+  return (
+    <div className="min-h-screen bg-[var(--bg-primary)]">
+      <Navbar />
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <SkeletonCard />
+      </main>
+    </div>
+  );
+}
+
+function ProblemsPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -177,5 +188,13 @@ export default function ProblemsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ProblemsPage() {
+  return (
+    <Suspense fallback={<ProblemsPageFallback />}>
+      <ProblemsPageContent />
+    </Suspense>
   );
 }
