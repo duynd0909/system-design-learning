@@ -50,5 +50,5 @@ EXPOSE 3000
 
 WORKDIR /app/apps/web
 
-# next binary is in the hoisted /app/node_modules/.bin
+# next reads the runtime port from the PORT environment variable.
 CMD ["/app/node_modules/.bin/next", "start"]

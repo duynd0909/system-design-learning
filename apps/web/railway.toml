@@ -1,6 +1,10 @@
 # Railway service config — Next.js Frontend
-# In Railway dashboard: set this service's Root Directory to "apps/web"
-# The Dockerfile path below is relative to the repository root.
+# This service must build from the repository root because the web Dockerfile
+# copies npm workspace packages from ./packages and ./apps/web.
+# Railway dashboard:
+# - Root Directory: leave empty or "/"
+# - Config file path: /apps/web/railway.toml
+# - Dockerfile path is relative to the repository root.
 
 [build]
 builder = "DOCKERFILE"
