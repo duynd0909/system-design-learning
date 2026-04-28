@@ -1,0 +1,42 @@
+# Dependencies — reinstalled inside the image
+node_modules
+**/node_modules
+
+# Next.js build output (rebuilt inside image)
+**/.next
+**/dist
+**/build
+
+# Prisma generated client (regenerated inside image)
+**/generated
+
+# Local environment files — never bake secrets into images
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Dev / test artifacts
+**/*.test.ts
+**/*.spec.ts
+**/coverage
+**/.turbo
+
+# Source maps (not needed at runtime)
+**/*.map
+
+# Editor and OS metadata
+.git
+.gitignore
+**/.DS_Store
+**/*.log
+**/Thumbs.db
+.vscode
+.idea
+
+# Documentation (not needed at runtime)
+docs
+*.md
+*.docx
+
+# Infrastructure code
+infra

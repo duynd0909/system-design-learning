@@ -10,10 +10,14 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     config: ConfigService,
     private readonly authService: AuthService,
   ) {
+    const apiPublicUrl = config
+      .get<string>('API_PUBLIC_URL', 'http://localhost:3001')
+      .replace(/\/$/, '');
+
     super({
       clientID: config.getOrThrow<string>('GITHUB_CLIENT_ID'),
       clientSecret: config.getOrThrow<string>('GITHUB_CLIENT_SECRET'),
-      callbackURL: `${config.get('CORS_ORIGIN', 'http://localhost:3000')}/api/auth/callback/github`,
+      callbackURL: `${apiPublicUrl}/api/v1/auth/github/callback`,
       scope: ['user:email'],
     });
   }

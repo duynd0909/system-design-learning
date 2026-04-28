@@ -10,10 +10,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     config: ConfigService,
     private readonly authService: AuthService,
   ) {
+    const apiPublicUrl = config
+      .get<string>('API_PUBLIC_URL', 'http://localhost:3001')
+      .replace(/\/$/, '');
+
     super({
       clientID: config.getOrThrow<string>('GOOGLE_CLIENT_ID'),
       clientSecret: config.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-      callbackURL: `${config.get('CORS_ORIGIN', 'http://localhost:3000')}/api/auth/callback/google`,
+      callbackURL: `${apiPublicUrl}/api/v1/auth/google/callback`,
       scope: ['email', 'profile'],
     });
   }
