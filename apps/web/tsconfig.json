@@ -26,6 +26,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@icons/*": [
+        "./public/icons/*"
+      ],
       "@stackdify/shared-types": [
         "../../packages/shared-types/src"
       ]
