@@ -4,6 +4,8 @@
 # ── Stage 1: Build ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Copy manifests first for layer caching
 COPY package*.json ./
@@ -27,6 +29,8 @@ RUN npm run build --workspace=@stackdify/shared-types && \
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 WORKDIR /app
 
