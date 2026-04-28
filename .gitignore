@@ -22,9 +22,6 @@ build/
 # Test coverage
 coverage/
 
-# Prisma
-apps/api/prisma/migrations/
-
 # OS files
 .DS_Store
 *.pem
