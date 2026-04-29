@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import type { Difficulty } from '@stackdify/shared-types';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -237,10 +238,10 @@ export default function DashboardPage() {
   const categories = stats ? Object.entries(stats.categoryBreakdown) : [];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="flex min-h-screen flex-col bg-[var(--bg-primary)]">
       <Navbar />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         {/* Welcome header */}
         <div className="mb-8">
           {isLoading ? (
@@ -457,6 +458,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

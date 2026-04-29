@@ -59,6 +59,7 @@ export class AuthService {
       : { googleId: data.googleId };
 
     let user = await this.prisma.user.findFirst({ where });
+    let wasLinked = false;
 
     if (!user) {
       const emailUser = await this.prisma.user.findUnique({ where: { email: data.email } });
@@ -71,6 +72,7 @@ export class AuthService {
             avatarUrl: data.avatarUrl ?? emailUser.avatarUrl,
           },
         });
+        wasLinked = true;
       } else {
         const username = await this.makeUniqueUsername(data.username);
         user = await this.prisma.user.create({
@@ -86,7 +88,7 @@ export class AuthService {
       }
     }
 
-    return this.issueToken(user);
+    return { ...this.issueToken(user), wasLinked };
   }
 
   private issueToken(user: User) {

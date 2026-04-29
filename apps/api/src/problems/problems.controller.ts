@@ -1,6 +1,7 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import type { User } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ProblemsService } from './problems.service';
 
@@ -9,13 +10,26 @@ export class ProblemsController {
   constructor(private readonly problemsService: ProblemsService) {}
 
   @Get()
-  findAll() {
-    return this.problemsService.findAll();
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @CurrentUser() user: User | null,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('difficulty') difficulty?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.problemsService.findAll(user?.id, page, limit, difficulty, category);
+  }
+
+  @Get('categories')
+  findCategories() {
+    return this.problemsService.findCategories();
   }
 
   @Get(':slug')
-  findOne(@Param('slug') slug: string) {
-    return this.problemsService.findBySlug(slug);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(@Param('slug') slug: string, @CurrentUser() user: User | null) {
+    return this.problemsService.findBySlug(slug, user?.id);
   }
 
   @Get(':slug/requirements/:order')

@@ -111,15 +111,22 @@ export function RequirementsSidebar({
                   {requirements.map((req) => {
                     const isCompleted = completedOrders.has(req.order);
                     const isActive = req.order === currentOrder;
-                    const isLocked = !isCompleted && req.order > currentOrder;
-                    const isClickable = isCompleted && onSelectRequirement;
+                    // A requirement is locked only if it hasn't been unlocked yet.
+                    // "Unlocked" means completed, or the next one after the last completed.
+                    // Using currentOrder here would break navigation: if the user browses
+                    // back to req 1, req 3 (in-progress) would incorrectly appear locked.
+                    const highestAccessible = completedOrders.size > 0
+                      ? Math.max(...completedOrders) + 1
+                      : 1;
+                    const isLocked = !isCompleted && req.order > highestAccessible;
+                    const isClickable = (isCompleted || req.order === highestAccessible) && !isActive && onSelectRequirement;
 
                     return (
                       <li key={req.id}>
                         <motion.button
                           type="button"
                           disabled={isLocked || isActive}
-                          onClick={isClickable ? () => onSelectRequirement(req.order) : undefined}
+                          onClick={isClickable ? () => onSelectRequirement!(req.order) : undefined}
                           initial={prefersReduced ? undefined : fadeIn.initial}
                           animate={prefersReduced ? undefined : fadeIn.animate}
                           transition={{ delay: (req.order - 1) * 0.06 }}

@@ -4,10 +4,23 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useToast } from '@/components/ui/Toast';
 
-export function AuthCallbackClient({ token }: { token: string }) {
+const PROVIDER_LABELS: Record<string, string> = {
+  github: 'GitHub',
+  google: 'Google',
+};
+
+interface AuthCallbackClientProps {
+  token: string;
+  linked?: string;
+  provider?: string;
+}
+
+export function AuthCallbackClient({ token, linked, provider }: AuthCallbackClientProps) {
   const router = useRouter();
   const { completeOAuth } = useAuth();
+  const toastCtx = useToast();
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -17,11 +30,17 @@ export function AuthCallbackClient({ token }: { token: string }) {
     }
 
     void completeOAuth(token)
-      .then(() => router.replace('/problems'))
+      .then(() => {
+        if (linked === '1') {
+          const providerLabel = PROVIDER_LABELS[provider ?? ''] ?? 'social';
+          toastCtx?.toast(`Your ${providerLabel} account has been linked to your existing Stackdify account.`, 'success');
+        }
+        router.replace('/problems');
+      })
       .catch((nextError) => {
         setError(nextError instanceof Error ? nextError.message : 'Could not complete sign in.');
       });
-  }, [completeOAuth, router, token]);
+  }, [completeOAuth, linked, provider, router, toastCtx, token]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--bg-primary)] px-4">

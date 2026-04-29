@@ -109,6 +109,8 @@ export interface ProblemSummary {
   category: string;
   nodeCount: number;
   requirementCount: number;
+  isSolved?: boolean;                    // only present when authenticated
+  completedRequirementOrders?: number[]; // only present when authenticated
 }
 
 // ─── API Response: Problem Detail (replaces MaskedGraphResponse for GET /problems/:slug) ──
@@ -117,6 +119,7 @@ export interface ProblemDetailResponse {
   problem: Pick<Problem, 'id' | 'slug' | 'title' | 'difficulty' | 'description' | 'category'>;
   requirements: Requirement[];   // metadata only — no nodes/edges/answers
   componentTypes: ComponentType[];
+  completedRequirementOrders: number[];  // orders of passed requirements; empty when unauthenticated
 }
 
 // ─── API Response: Requirement Graph (GET /problems/:slug/requirements/:order) ──

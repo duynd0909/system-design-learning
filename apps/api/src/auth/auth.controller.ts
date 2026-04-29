@@ -27,9 +27,10 @@ export class AuthController {
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  githubCallback(@Req() req: { user: { accessToken: string } }, @Res() res: Response) {
-    const { accessToken } = req.user;
-    res.redirect(`${process.env.CORS_ORIGIN}/auth/callback?token=${accessToken}`);
+  githubCallback(@Req() req: { user: { accessToken: string; wasLinked: boolean } }, @Res() res: Response) {
+    const { accessToken, wasLinked } = req.user;
+    const extra = wasLinked ? '&linked=1&provider=github' : '';
+    res.redirect(`${process.env.CORS_ORIGIN}/auth/callback?token=${accessToken}${extra}`);
   }
 
   @Get('google')
@@ -40,8 +41,9 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleCallback(@Req() req: { user: { accessToken: string } }, @Res() res: Response) {
-    const { accessToken } = req.user;
-    res.redirect(`${process.env.CORS_ORIGIN}/auth/callback?token=${accessToken}`);
+  googleCallback(@Req() req: { user: { accessToken: string; wasLinked: boolean } }, @Res() res: Response) {
+    const { accessToken, wasLinked } = req.user;
+    const extra = wasLinked ? '&linked=1&provider=google' : '';
+    res.redirect(`${process.env.CORS_ORIGIN}/auth/callback?token=${accessToken}${extra}`);
   }
 }

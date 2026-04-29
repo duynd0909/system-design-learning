@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
-import { Suspense, useMemo, useCallback } from 'react';
+import { CheckCircle2, LayoutGrid, List } from 'lucide-react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Difficulty } from '@stackdify/shared-types';
-import { useProblems, useMySubmissions } from '@/lib/api';
+import type { ProblemSummary } from '@stackdify/shared-types';
+import { useInfiniteProblems, useProblemCategories } from '@/lib/api';
 import { Card, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge, DifficultyBadge } from '@/components/ui/Badge';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +21,133 @@ const DIFFICULTIES = [
   { label: 'Medium', value: Difficulty.MEDIUM },
   { label: 'Hard', value: Difficulty.HARD },
 ];
+
+// ─── Requirement progress bar ─────────────────────────────────────────────────
+
+function RequirementProgress({ completed, total }: { completed: number; total: number }) {
+  if (total === 0) return null;
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex flex-1 gap-0.5">
+        {Array.from({ length: total }, (_, i) => (
+          <div
+            key={i}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors duration-300',
+              i < completed ? 'bg-[var(--slot-correct)]' : 'bg-[var(--text-primary)]/15',
+            )}
+          />
+        ))}
+      </div>
+      <span className="shrink-0 text-[10px] tabular-nums text-[var(--text-secondary)]">
+        {completed}/{total}
+      </span>
+    </div>
+  );
+}
+
+// ─── Card view item ───────────────────────────────────────────────────────────
+
+function ProblemCard({ problem, isAuthenticated }: { problem: ProblemSummary; isAuthenticated: boolean }) {
+  const completedCount = problem.completedRequirementOrders?.length ?? 0;
+  return (
+    <Link href={`/problems/${problem.slug}`} className="group block">
+      <Card
+        hover
+        className="flex h-full flex-col transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_12px_40px_rgba(79,70,229,0.15)]"
+      >
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <DifficultyBadge difficulty={problem.difficulty} />
+          <div className="flex items-center gap-2">
+            {isAuthenticated && problem.isSolved ? (
+              <Badge variant="level" className="gap-1">
+                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                Solved
+              </Badge>
+            ) : null}
+            <span className="text-xs text-[var(--text-secondary)]">{problem.nodeCount} nodes</span>
+          </div>
+        </div>
+
+        <CardTitle className="mb-2">{problem.title}</CardTitle>
+        <CardDescription className="line-clamp-2 flex-1">{problem.description}</CardDescription>
+
+        {isAuthenticated && problem.requirementCount > 0 && (
+          <div className="mt-3">
+            <RequirementProgress completed={completedCount} total={problem.requirementCount} />
+          </div>
+        )}
+
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-xs text-[var(--text-secondary)]">{problem.category}</span>
+          <span className="text-xs font-medium text-[var(--accent-primary)] transition-all group-hover:translate-x-0.5">
+            Practice →
+          </span>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+// ─── List view item ───────────────────────────────────────────────────────────
+
+function ProblemListRow({ problem, isAuthenticated }: { problem: ProblemSummary; isAuthenticated: boolean }) {
+  const completedCount = problem.completedRequirementOrders?.length ?? 0;
+  return (
+    <Link href={`/problems/${problem.slug}`} className="group block">
+      <div className="flex items-center gap-3 rounded-xl border border-[var(--text-primary)]/8 bg-[var(--bg-secondary)] px-4 py-3.5 transition-all duration-200 hover:border-[var(--accent-primary)]/30 hover:shadow-[0_4px_24px_rgba(79,70,229,0.1)]">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate font-semibold text-[var(--text-primary)]">{problem.title}</span>
+            {isAuthenticated && problem.isSolved && (
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--slot-correct)]" aria-label="Solved" />
+            )}
+          </div>
+          <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">{problem.description}</p>
+        </div>
+
+        <div className="flex w-[76px] shrink-0 justify-start">
+          <DifficultyBadge difficulty={problem.difficulty} />
+        </div>
+
+        <span className="hidden shrink-0 text-xs text-[var(--text-secondary)] sm:block">{problem.category}</span>
+
+        {isAuthenticated && problem.requirementCount > 0 ? (
+          <div className="hidden w-32 shrink-0 lg:block">
+            <RequirementProgress completed={completedCount} total={problem.requirementCount} />
+          </div>
+        ) : (
+          <span className="hidden shrink-0 text-xs text-[var(--text-secondary)] lg:block">
+            {problem.nodeCount} nodes
+          </span>
+        )}
+
+        <span className="shrink-0 text-xs font-medium text-[var(--accent-primary)] transition-transform duration-200 group-hover:translate-x-0.5">
+          Practice →
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+// ─── List skeleton row ────────────────────────────────────────────────────────
+
+function SkeletonListRow() {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--text-primary)]/8 bg-[var(--bg-secondary)] px-4 py-3.5">
+      <div className="flex-1 space-y-1.5">
+        <div className="h-4 w-44 animate-pulse rounded bg-[var(--text-primary)]/10" />
+        <div className="h-3 w-64 animate-pulse rounded bg-[var(--text-primary)]/8" />
+      </div>
+      <div className="h-5 w-[76px] animate-pulse rounded-full bg-[var(--text-primary)]/10" />
+      <div className="hidden h-3 w-20 animate-pulse rounded bg-[var(--text-primary)]/8 sm:block" />
+      <div className="hidden h-3 w-28 animate-pulse rounded bg-[var(--text-primary)]/8 lg:block" />
+      <div className="h-3 w-14 animate-pulse rounded bg-[var(--text-primary)]/8" />
+    </div>
+  );
+}
+
+// ─── Page fallback ────────────────────────────────────────────────────────────
 
 function ProblemsPageFallback() {
   return (
@@ -31,37 +160,59 @@ function ProblemsPageFallback() {
   );
 }
 
+// ─── Page content ─────────────────────────────────────────────────────────────
+
 function ProblemsPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { token, isAuthenticated } = useAuth();
-  const { data: problems, isLoading, isError } = useProblems();
-  const { data: submissions } = useMySubmissions(token ?? '', 1, 100);
 
   const selectedDifficulty = searchParams.get('difficulty') ?? '';
   const selectedCategory = searchParams.get('category') ?? '';
+  const difficultyFilter = DIFFICULTIES.some(({ value }) => value === selectedDifficulty)
+    ? (selectedDifficulty as Difficulty)
+    : '';
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  // Pass token so the API embeds isSolved + completedRequirementOrders per problem.
+  const {
+    data: problemPages,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteProblems({
+    token: token || undefined,
+    difficulty: difficultyFilter,
+    category: selectedCategory,
+  });
+  const { data: categoryData } = useProblemCategories();
 
-  const completedSlugs = useMemo(() => {
-    return new Set(
-      submissions?.data
-        ?.filter((s) => s.passed)
-        .map((s) => s.problem.slug) ?? [],
-    );
-  }, [submissions?.data]);
+  // View mode persisted across sessions
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  useEffect(() => {
+    const saved = localStorage.getItem('problems-view-mode');
+    if (saved === 'card' || saved === 'list') setViewMode(saved);
+  }, []);
+  const handleViewMode = useCallback((mode: 'card' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('problems-view-mode', mode);
+  }, []);
+
+  const problems = useMemo(
+    () =>
+      problemPages?.pages
+        .flatMap((page) => page.data ?? [])
+        .filter((problem): problem is ProblemSummary => Boolean(problem?.id)) ?? [],
+    [problemPages],
+  );
+  const totalProblems = problemPages?.pages[0]?.total ?? 0;
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(problems?.map((p) => p.category) ?? [])).sort();
+    const cats = Array.from(new Set([...(categoryData ?? []), ...(selectedCategory ? [selectedCategory] : [])])).sort();
     return ['All', ...cats];
-  }, [problems]);
-
-  const filtered = useMemo(() => {
-    return (problems ?? []).filter((p) => {
-      const matchesDifficulty = !selectedDifficulty || p.difficulty === selectedDifficulty;
-      const matchesCategory = !selectedCategory || selectedCategory === 'All' || p.category === selectedCategory;
-      return matchesDifficulty && matchesCategory;
-    });
-  }, [problems, selectedDifficulty, selectedCategory]);
+  }, [categoryData, selectedCategory]);
 
   const setFilter = useCallback(
     (key: string, value: string) => {
@@ -76,10 +227,25 @@ function ProblemsPageContent() {
     [pathname, router, searchParams],
   );
 
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) void fetchNextPage();
+      },
+      { rootMargin: '320px 0px' },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="flex min-h-screen flex-col bg-[var(--bg-primary)]">
       <Navbar />
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-12 sm:px-6">
         {/* Page header with aurora radial glow */}
         <div
           className="relative mb-8 overflow-hidden rounded-2xl border border-[var(--text-primary)]/8 px-6 py-8"
@@ -108,11 +274,11 @@ function ProblemsPageContent() {
                 onClick={() => setFilter('difficulty', value)}
                 className={cn(
                   'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-                  (selectedDifficulty === value || (!selectedDifficulty && !value))
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white shadow-sm'
+                  difficultyFilter === value || (!difficultyFilter && !value)
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm dark:from-indigo-500 dark:to-purple-500'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
                 )}
-                aria-pressed={selectedDifficulty === value || (!selectedDifficulty && !value)}
+                aria-pressed={difficultyFilter === value || (!difficultyFilter && !value)}
               >
                 {label}
               </button>
@@ -128,17 +294,57 @@ function ProblemsPageContent() {
               className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           )}
 
-          {/* Result count */}
-          {!isLoading && (
-            <span className="ml-auto text-sm text-[var(--text-secondary)]">
-              {filtered.length} {filtered.length === 1 ? 'problem' : 'problems'}
-            </span>
-          )}
+          {/* Right side: result count + view toggle */}
+          <div className="ml-auto flex items-center gap-2">
+            {!isLoading && (
+              <span className="text-sm text-[var(--text-secondary)]">
+                {problems.length}
+                {totalProblems > problems.length ? ` of ${totalProblems}` : ''}{' '}
+                {totalProblems === 1 ? 'problem' : 'problems'}
+              </span>
+            )}
+            <div
+              className="flex items-center rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-0.5"
+              role="group"
+              aria-label="Toggle view mode"
+            >
+              <button
+                type="button"
+                onClick={() => handleViewMode('card')}
+                aria-pressed={viewMode === 'card'}
+                aria-label="Card view"
+                className={cn(
+                  'rounded-md p-1.5 transition-colors duration-150',
+                  viewMode === 'card'
+                    ? 'bg-[var(--accent-primary)] text-white shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                )}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewMode('list')}
+                aria-pressed={viewMode === 'list'}
+                aria-label="List view"
+                className={cn(
+                  'rounded-md p-1.5 transition-colors duration-150',
+                  viewMode === 'list'
+                    ? 'bg-[var(--accent-primary)] text-white shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                )}
+              >
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         </div>
 
         {isError && (
@@ -147,46 +353,39 @@ function ProblemsPageContent() {
           </div>
         )}
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoading
-            ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-            : filtered.map((problem) => (
-                <Link key={problem.id} href={`/problems/${problem.slug}`} className="group block">
-                  <Card
-                    hover
-                    className="h-full transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_12px_40px_rgba(79,70,229,0.15)]"
-                  >
-                    <div className="mb-3 flex items-start justify-between gap-2">
-                      <DifficultyBadge difficulty={problem.difficulty} />
-                      <div className="flex items-center gap-2">
-                        {isAuthenticated && completedSlugs.has(problem.slug) ? (
-                          <Badge variant="level" className="gap-1">
-                            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                            Solved
-                          </Badge>
-                        ) : null}
-                        <span className="text-xs text-[var(--text-secondary)]">{problem.nodeCount} nodes</span>
-                      </div>
-                    </div>
-                    <CardTitle className="mb-2">{problem.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-[var(--text-secondary)]">{problem.category}</span>
-                      <span className="text-xs font-medium text-[var(--accent-primary)] transition-all group-hover:translate-x-0.5">
-                        Practice →
-                      </span>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-        </div>
+        {/* Card grid */}
+        {viewMode === 'card' && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+              : problems.map((problem) => (
+                  <ProblemCard key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
+                ))}
+            {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={`next-${i}`} />)}
+          </div>
+        )}
 
-        {!isLoading && filtered.length === 0 && !isError && (
+        {/* List */}
+        {viewMode === 'list' && (
+          <div className="flex flex-col gap-2">
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, i) => <SkeletonListRow key={i} />)
+              : problems.map((problem) => (
+                  <ProblemListRow key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
+                ))}
+            {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonListRow key={`next-${i}`} />)}
+          </div>
+        )}
+
+        <div ref={sentinelRef} className="h-8" aria-hidden="true" />
+
+        {!isLoading && problems.length === 0 && !isError && (
           <div className="py-16 text-center text-[var(--text-secondary)]">
             No problems match the selected filters.
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

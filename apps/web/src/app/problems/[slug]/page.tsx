@@ -17,7 +17,6 @@ import {
 import {
   Background,
   BackgroundVariant,
-  Controls,
   MarkerType,
   MiniMap,
   ReactFlow,
@@ -132,6 +131,7 @@ interface GameHeaderProps {
   isAuthenticated: boolean;
   isReady: boolean;
   onSubmit: () => void;
+  onNavigate: (href: string) => void;
 }
 
 function GameHeader({
@@ -149,6 +149,7 @@ function GameHeader({
   isAuthenticated,
   isReady,
   onSubmit,
+  onNavigate,
 }: GameHeaderProps) {
   const prefersReduced = useReducedMotion();
 
@@ -156,24 +157,30 @@ function GameHeader({
     <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3">
       {/* Left: logo → back → problem title */}
       <div className="flex min-w-0 items-center gap-2">
-        <Link href="/" aria-label="Go to Stackdify home" className="flex shrink-0 items-center gap-1.5">
+        <button
+          type="button"
+          aria-label="Go to Stackdify home"
+          onClick={() => onNavigate('/')}
+          className="flex shrink-0 items-center gap-1.5"
+        >
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
             <Network className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
           <span className="hidden bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text font-display text-sm font-bold text-transparent sm:block dark:from-indigo-300 dark:to-purple-300">
             Stackdify
           </span>
-        </Link>
+        </button>
 
         <span className="select-none text-[var(--text-primary)]/20" aria-hidden="true">/</span>
 
-        <Link
-          href="/problems"
+        <button
+          type="button"
+          onClick={() => onNavigate('/problems')}
           className="flex shrink-0 items-center gap-0.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
           Problems
-        </Link>
+        </button>
 
         {problem && (
           <>
@@ -300,11 +307,12 @@ function PaletteOverlay({ component }: { component: ComponentType | undefined })
 interface CompactResultProps {
   result: SubmissionResponse;
   onNext: () => void;
-  onRetry: () => void;
+  onDismiss: () => void;
+  onReset: () => void;
   requirementTitle: string;
 }
 
-function CompactResult({ result, onNext, onRetry, requirementTitle }: CompactResultProps) {
+function CompactResult({ result, onNext, onDismiss, onReset, requirementTitle }: CompactResultProps) {
   const prefersReduced = useReducedMotion();
   return (
     <motion.div
@@ -323,7 +331,7 @@ function CompactResult({ result, onNext, onRetry, requirementTitle }: CompactRes
         )}
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[var(--text-primary)]">
-            {result.passed ? `${requirementTitle} — done!` : 'Not quite'}
+            {result.passed ? `${requirementTitle} — done!` : 'Not quite — fix the highlighted slots'}
           </div>
           <div className="text-xs text-[var(--text-secondary)]">
             Score: {result.score}%{result.passed ? ` · +${result.xpEarned} XP` : ''}
@@ -336,10 +344,15 @@ function CompactResult({ result, onNext, onRetry, requirementTitle }: CompactRes
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           ) : (
-            <Button type="button" size="sm" variant="secondary" onClick={onRetry}>
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              Retry
-            </Button>
+            <>
+              <Button type="button" size="sm" onClick={onDismiss}>
+                Edit
+              </Button>
+              <Button type="button" size="sm" variant="secondary" onClick={onReset}>
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                Reset
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -425,6 +438,47 @@ function CanvasToolbar({
   );
 }
 
+// ─── Leave Confirmation Modal ────────────────────────────────────────────────
+
+interface LeaveConfirmModalProps {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function LeaveConfirmModal({ open, onConfirm, onCancel }: LeaveConfirmModalProps) {
+  const prefersReduced = useReducedMotion();
+  if (!open) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Leave problem confirmation"
+      className="fixed inset-0 z-[60] grid place-items-center bg-black/45 px-4 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={prefersReduced ? undefined : scaleIn.initial}
+        animate={prefersReduced ? undefined : scaleIn.animate}
+        transition={spring}
+        className="w-full max-w-sm rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] p-6 shadow-xl"
+      >
+        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">Leave this problem?</h2>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          Your current placements will be lost. Progress from completed requirements is saved.
+        </p>
+        <div className="mt-5 flex gap-3">
+          <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+            Stay
+          </Button>
+          <Button type="button" className="flex-1" onClick={onConfirm}>
+            Leave
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function ProblemGamePage() {
@@ -435,8 +489,9 @@ export default function ProblemGamePage() {
   const { token, isAuthenticated, isReady } = useAuth();
   const prefersReduced = useReducedMotion();
   const flowInstanceRef = useRef<ReactFlowInstance<GameFlowNode, Edge<SystemEdgeData>> | null>(null);
+  const hasRestoredRef = useRef(false);
 
-  const { data: problemDetail, isLoading: isProblemLoading, isError: isProblemError } = useProblemDetail(slug);
+  const { data: problemDetail, isLoading: isProblemLoading, isError: isProblemError } = useProblemDetail(slug, token || undefined);
   const { data: problems } = useProblems();
 
   const [currentOrder, setCurrentOrder] = useState(1);
@@ -454,6 +509,7 @@ export default function ProblemGamePage() {
   const [activeSimulationEdgeId, setActiveSimulationEdgeId] = useState('');
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
+  const [slotFeedback, setSlotFeedback] = useState<Record<string, boolean>>({});
 
   const { data: reqGraph, isLoading: isGraphLoading, isFetching } = useRequirementGraph(slug, currentOrder);
   const submit = useSubmit(token);
@@ -463,6 +519,7 @@ export default function ProblemGamePage() {
   useEffect(() => {
     setAnswers({});
     setResult(null);
+    setSlotFeedback({});
     setSubmitError('');
     setSelectedSlotId('');
     setLayoutOverrides({});
@@ -472,6 +529,25 @@ export default function ProblemGamePage() {
     setElapsedSeconds(0);
   }, [currentOrder]);
 
+  // Restore completed requirements from the problem detail response.
+  // completedRequirementOrders is embedded by the server when the request is authenticated,
+  // so we wait for both the token and a fresh authenticated fetch before restoring.
+  useEffect(() => {
+    if (hasRestoredRef.current || !problemDetail || !token) return;
+    hasRestoredRef.current = true;
+
+    const orders = problemDetail.completedRequirementOrders ?? [];
+    if (orders.length === 0) return;
+
+    const passedOrders = new Set(orders);
+    setCompletedOrders(passedOrders);
+    const totalReqs = problemDetail.requirements.length;
+    const nextOrder =
+      Array.from({ length: totalReqs }, (_, i) => i + 1).find((o) => !passedOrders.has(o)) ??
+      totalReqs;
+    setCurrentOrder(nextOrder);
+  }, [problemDetail, token]);
+
   // Elapsed timer — stops while result is showing
   useEffect(() => {
     if (result) return;
@@ -480,6 +556,32 @@ export default function ProblemGamePage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [startedAt, result]);
+
+  // Re-fit the canvas whenever a new requirement graph is ready for the current order.
+  //
+  // The fitView prop on <ReactFlow> only fires on mount. When the graph changes while
+  // the component stays mounted (cached data, restored progress jumping from order 1→3)
+  // we must call it manually.
+  //
+  // We guard with `reqGraph.requirement.order === currentOrder` so a stale cached graph
+  // from the previous order never triggers a mis-fit.
+  //
+  // Double rAF: first frame lets React commit the new nodes to the DOM; second frame
+  // lets React Flow finish measuring their dimensions before we call fitView.
+  useEffect(() => {
+    if (!reqGraph || reqGraph.requirement.order !== currentOrder) return;
+    let outer = 0;
+    let inner = 0;
+    outer = window.requestAnimationFrame(() => {
+      inner = window.requestAnimationFrame(() => {
+        flowInstanceRef.current?.fitView({ padding: 0.2, duration: prefersReduced ? 0 : 400 });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(outer);
+      window.cancelAnimationFrame(inner);
+    };
+  }, [reqGraph, currentOrder, prefersReduced]);
 
   const componentBySlug = useMemo(
     () => new Map((problemDetail?.componentTypes ?? []).map((c) => [c.slug, c])),
@@ -533,6 +635,12 @@ export default function ProblemGamePage() {
       delete next[slotId];
       return next;
     });
+    setSlotFeedback((prev) => {
+      if (!(slotId in prev)) return prev;
+      const next = { ...prev };
+      delete next[slotId];
+      return next;
+    });
     setSelectedSlotId(slotId);
     setSubmitError('');
   }, []);
@@ -548,6 +656,8 @@ export default function ProblemGamePage() {
       if (node.type === 'blank') {
         const selected = componentBySlug.get(answers[node.id]);
         if (selected) {
+          const fb = slotFeedback[node.id];
+          const feedbackState = fb === false ? 'error' : fb === true ? 'valid' : undefined;
           return {
             id: node.id,
             type: 'filledSlot',
@@ -561,6 +671,7 @@ export default function ProblemGamePage() {
               isHighlighted,
               isDimmed,
               isSimulationActive,
+              visualState: feedbackState,
             },
           };
         }
@@ -624,6 +735,7 @@ export default function ProblemGamePage() {
     layoutOverrides,
     reqGraph,
     selectedSlotId,
+    slotFeedback,
   ]);
 
   const handleEdgeHover = useCallback((edgeId: string) => {
@@ -713,6 +825,12 @@ export default function ProblemGamePage() {
       setAnswers((current) => ({ ...current, [slotId]: componentSlug }));
       setSelectedSlotId(slotId);
       setSubmitError('');
+      setSlotFeedback((prev) => {
+        if (!(slotId in prev)) return prev;
+        const next = { ...prev };
+        delete next[slotId];
+        return next;
+      });
     }
     setActiveSlug('');
   }, []);
@@ -728,6 +846,12 @@ export default function ProblemGamePage() {
     setAnswers((current) => ({ ...current, [targetSlotId]: componentSlug }));
     setSelectedSlotId(targetSlotId);
     setSubmitError('');
+    setSlotFeedback((prev) => {
+      if (!(targetSlotId in prev)) return prev;
+      const next = { ...prev };
+      delete next[targetSlotId];
+      return next;
+    });
   }, [answers, selectedSlotId, slotIds]);
 
   const handleFitView = useCallback(() => {
@@ -753,6 +877,7 @@ export default function ProblemGamePage() {
     if (!problemDetail || !isReadyToSubmit) return;
 
     setSubmitError('');
+    setSlotFeedback({});
     try {
       const response = await submit.mutateAsync({
         problemId: problemDetail.problem.id,
@@ -761,11 +886,15 @@ export default function ProblemGamePage() {
         timeTakenMs: Math.max(Date.now() - startedAt, 1),
       });
       setResult(response);
+      const feedback: Record<string, boolean> = {};
+      for (const sr of response.slotResults) feedback[sr.slotId] = sr.correct;
+      setSlotFeedback(feedback);
       if (response.passed) {
         setCompletedOrders((prev) => new Set(prev).add(currentOrder));
       }
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['submissions', 'me'] }),
+        queryClient.invalidateQueries({ queryKey: ['problems', slug] }),   // refresh completedRequirementOrders + isSolved
+        queryClient.invalidateQueries({ queryKey: ['problems', token || null] }), // refresh problems list isSolved badge
         queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
       ]);
     } catch (error) {
@@ -779,9 +908,16 @@ export default function ProblemGamePage() {
     setResult(null);
   }, [currentOrder, reqGraph]);
 
-  const handleRetry = useCallback(() => {
+  // Dismiss result overlay but keep current slot placements and feedback visible
+  const handleDismissResult = useCallback(() => {
+    setResult(null);
+  }, []);
+
+  // Reset everything and start the requirement from scratch
+  const handleReset = useCallback(() => {
     setResult(null);
     setAnswers({});
+    setSlotFeedback({});
     setSelectedSlotId('');
     setSubmitError('');
     setStartedAt(Date.now());
@@ -789,10 +925,12 @@ export default function ProblemGamePage() {
   }, []);
 
   const handleFullRetry = useCallback(() => {
+    hasRestoredRef.current = false;
     setResult(null);
     setCurrentOrder(1);
     setCompletedOrders(new Set());
     setAnswers({});
+    setSlotFeedback({});
     setSelectedSlotId('');
     setLayoutOverrides({});
     setSubmitError('');
@@ -801,7 +939,8 @@ export default function ProblemGamePage() {
   }, []);
 
   const handleSelectRequirement = useCallback((order: number) => {
-    if (completedOrders.has(order)) {
+    const highestAccessible = completedOrders.size > 0 ? Math.max(...completedOrders) + 1 : 1;
+    if (completedOrders.has(order) || order === highestAccessible) {
       setCurrentOrder(order);
       setResult(null);
     }
@@ -846,8 +985,61 @@ export default function ProblemGamePage() {
   const activeComponent = componentBySlug.get(activeSlug);
   const currentRequirement = reqGraph?.requirement;
   const isLastRequirement = result?.isLastRequirement ?? false;
-  const showFullResult = result !== null && (isLastRequirement || !result.passed);
-  const showCompactResult = result !== null && result.passed && !isLastRequirement;
+  // Full overlay only for the very last requirement (pass or fail); inline compact for everything else
+  const showFullResult = result !== null && isLastRequirement;
+  const showCompactResult = result !== null && !isLastRequirement;
+
+  // ── Leave modal ──────────────────────────────────────────────────────────
+  const [leaveModal, setLeaveModal] = useState<{ open: boolean; href: string }>({ open: false, href: '' });
+  const leaveHrefRef = useRef('');
+
+  // Keep a ref in sync so event handlers always read the latest value without
+  // needing to be re-registered. Avoids stale closure bugs entirely.
+  const shouldWarnOnLeaveRef = useRef(false);
+  shouldWarnOnLeaveRef.current = Object.keys(answers).length > 0 && !showFullResult;
+
+  const handleNavigateAway = useCallback((href: string) => {
+    if (shouldWarnOnLeaveRef.current) {
+      leaveHrefRef.current = href;
+      setLeaveModal({ open: true, href });
+    } else {
+      router.push(href);
+    }
+  }, [router]);
+
+  const handleLeaveConfirm = useCallback(() => {
+    const href = leaveHrefRef.current;
+    setLeaveModal({ open: false, href: '' });
+    router.push(href);
+  }, [router]);
+
+  const handleLeaveCancel = useCallback(() => {
+    setLeaveModal({ open: false, href: '' });
+  }, []);
+
+  // Block browser refresh / tab close — registered once, reads from ref
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!shouldWarnOnLeaveRef.current) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Block browser back button — registered once, reads from ref
+  useEffect(() => {
+    const handlePopState = () => {
+      if (!shouldWarnOnLeaveRef.current) return;
+      // Push a dummy entry so the URL stays on this page while the modal is shown
+      window.history.pushState(null, '', window.location.href);
+      leaveHrefRef.current = '/problems';
+      setLeaveModal({ open: true, href: '/problems' });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const isLoading = isProblemLoading || isGraphLoading;
   const isError = isProblemError || (!isGraphLoading && !!problemDetail && !reqGraph);
@@ -870,6 +1062,7 @@ export default function ProblemGamePage() {
         isAuthenticated={isAuthenticated}
         isReady={isReady}
         onSubmit={handleSubmit}
+        onNavigate={handleNavigateAway}
       />
 
       {isLoading ? (
@@ -977,7 +1170,6 @@ export default function ProblemGamePage() {
                     proOptions={{ hideAttribution: true }}
                   >
                     <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
-                    <Controls />
                     {showMinimap && (
                       <MiniMap
                         pannable
@@ -1016,14 +1208,15 @@ export default function ProblemGamePage() {
                 ) : null}
               </AnimatePresence>
 
-              {/* Compact result overlay (mid-requirement pass) */}
+              {/* Compact result overlay (mid-requirement pass or fail) */}
               <AnimatePresence>
                 {showCompactResult && currentRequirement ? (
                   <CompactResult
                     key={`compact-${currentOrder}`}
                     result={result}
                     onNext={handleNextRequirement}
-                    onRetry={handleRetry}
+                    onDismiss={handleDismissResult}
+                    onReset={handleReset}
                     requirementTitle={currentRequirement.title}
                   />
                 ) : null}
@@ -1037,18 +1230,25 @@ export default function ProblemGamePage() {
         </DndContext>
       )}
 
-      {/* Full result overlay (last requirement or failure) */}
+      {/* Full result overlay (last requirement only) */}
       <AnimatePresence>
         {showFullResult && problemDetail ? (
           <ResultOverlay
             key={`result-${currentOrder}`}
             result={result}
             componentTypes={problemDetail.componentTypes}
-            onRetry={isLastRequirement && result.passed ? handleFullRetry : handleRetry}
-            nextProblemSlug={isLastRequirement && result.passed ? nextProblemSlug : undefined}
+            onRetry={result?.passed ? handleFullRetry : handleReset}
+            onDismiss={result?.passed ? undefined : handleDismissResult}
+            nextProblemSlug={result?.passed ? nextProblemSlug : undefined}
           />
         ) : null}
       </AnimatePresence>
+
+      <LeaveConfirmModal
+        open={leaveModal.open}
+        onConfirm={handleLeaveConfirm}
+        onCancel={handleLeaveCancel}
+      />
     </div>
   );
 }
