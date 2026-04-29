@@ -3,14 +3,15 @@
 import { useLeaderboard } from '@/lib/api';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 
 export default function LeaderboardPage() {
   const { data: entries, isLoading, isError } = useLeaderboard();
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="flex min-h-screen flex-col bg-[var(--bg-primary)]">
       <Navbar />
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-12 sm:px-6">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Leaderboard</h1>
           <p className="mt-2 text-[var(--text-secondary)]">Top engineers by total XP earned.</p>
@@ -67,6 +68,7 @@ export default function LeaderboardPage() {
               ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

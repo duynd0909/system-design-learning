@@ -34,10 +34,11 @@ interface ResultOverlayProps {
   result: SubmissionResponse;
   componentTypes: ComponentType[];
   onRetry: () => void;
+  onDismiss?: () => void;
   nextProblemSlug?: string | null;
 }
 
-export function ResultOverlay({ result, componentTypes, onRetry, nextProblemSlug }: ResultOverlayProps) {
+export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, nextProblemSlug }: ResultOverlayProps) {
   const prefersReduced = useReducedMotion();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -132,25 +133,47 @@ export function ResultOverlay({ result, componentTypes, onRetry, nextProblemSlug
 
         {/* Primary actions */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Button type="button" variant="secondary" onClick={onRetry}>
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Try Again
-          </Button>
-          {nextProblemSlug ? (
-            <Link
-              href={`/problems/${nextProblemSlug}`}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Next Problem
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
+          {result.passed ? (
+            <>
+              <Button type="button" variant="secondary" onClick={onRetry}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                Try Again
+              </Button>
+              {nextProblemSlug ? (
+                <Link
+                  href={`/problems/${nextProblemSlug}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Next Problem
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              ) : (
+                <Link
+                  href="/problems"
+                  className="inline-flex items-center justify-center rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Back to Problems
+                </Link>
+              )}
+            </>
           ) : (
-            <Link
-              href="/problems"
-              className="inline-flex items-center justify-center rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Back to Problems
-            </Link>
+            <>
+              {onDismiss && (
+                <Button type="button" onClick={onDismiss}>
+                  Edit Answers
+                </Button>
+              )}
+              <Button type="button" variant="secondary" onClick={onRetry}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                Reset All
+              </Button>
+              <Link
+                href="/problems"
+                className="col-span-full inline-flex items-center justify-center rounded-lg border border-[var(--text-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+              >
+                Back to Problems
+              </Link>
+            </>
           )}
         </div>
 

@@ -26,7 +26,7 @@ export class UsersService {
   }
 
   async getStats(userId: string) {
-    const [submissions, user, allProblems] = await Promise.all([
+    const [submissions, user, allProblems, requirementCounts] = await Promise.all([
       this.prisma.submission.findMany({
         where: { userId },
         select: {
@@ -34,6 +34,7 @@ export class UsersService {
           passed: true,
           xpEarned: true,
           problemId: true,
+          requirementOrder: true,
           problem: { select: { category: true } },
         },
       }),
@@ -44,6 +45,10 @@ export class UsersService {
       this.prisma.problem.findMany({
         where: { isPublished: true },
         select: { id: true, category: true },
+      }),
+      this.prisma.requirement.groupBy({
+        by: ['problemId'],
+        _max: { order: true },
       }),
     ]);
 
@@ -59,8 +64,12 @@ export class UsersService {
       ? Math.round((passedSubmissions / totalSubmissions) * 100)
       : 0;
 
+    // A problem is "solved" only when the last requirement's submission passes
+    const lastReqOrder = new Map(requirementCounts.map((r) => [r.problemId, r._max.order ?? 1]));
     const solvedProblemIds = new Set(
-      submissions.filter((s) => s.passed).map((s) => s.problemId),
+      submissions
+        .filter((s) => s.passed && s.requirementOrder != null && s.requirementOrder === lastReqOrder.get(s.problemId))
+        .map((s) => s.problemId),
     );
     const solved = solvedProblemIds.size;
 
