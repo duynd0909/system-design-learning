@@ -40,6 +40,7 @@ import {
   Play,
   RotateCcw,
   Send,
+  Share2,
   Sparkles,
   XCircle,
 } from 'lucide-react';
@@ -56,8 +57,9 @@ import { Button } from '@/components/ui/Button';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useProblemDetail, useRequirementGraph, useProblems, useSubmit } from '@/lib/api';
+import { useProblemDetail, useRequirementGraph, useProblems, useSubmit, useShareProblem } from '@/lib/api';
 import {
   ActorNode,
   BlankSlotNode,
@@ -132,6 +134,8 @@ interface GameHeaderProps {
   isReady: boolean;
   onSubmit: () => void;
   onNavigate: (href: string) => void;
+  onShare?: () => Promise<void>;
+  isSharing?: boolean;
 }
 
 function GameHeader({
@@ -150,6 +154,8 @@ function GameHeader({
   isReady,
   onSubmit,
   onNavigate,
+  onShare,
+  isSharing,
 }: GameHeaderProps) {
   const prefersReduced = useReducedMotion();
 
@@ -252,6 +258,18 @@ function GameHeader({
         <span className="hidden text-xs tabular-nums text-[var(--text-secondary)] sm:block">
           {filledCount}/{slotCount}
         </span>
+
+        {onShare && (
+          <button
+            type="button"
+            onClick={() => void onShare()}
+            disabled={isSharing}
+            aria-label="Share this challenge"
+            className="hidden h-8 w-8 items-center justify-center rounded-lg bg-[var(--text-primary)]/5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--text-primary)]/10 hover:text-[var(--text-primary)] disabled:opacity-50 sm:flex"
+          >
+            <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        )}
 
         <ThemeToggle className="h-8 w-8 rounded-lg bg-[var(--text-primary)]/5 hover:bg-[var(--text-primary)]/10" />
 
@@ -513,6 +531,8 @@ export default function ProblemGamePage() {
 
   const { data: reqGraph, isLoading: isGraphLoading, isFetching } = useRequirementGraph(slug, currentOrder);
   const submit = useSubmit(token);
+  const shareProblem = useShareProblem(token || undefined);
+  const toastCtx = useToast();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   // Reset when moving to a new requirement
@@ -924,6 +944,22 @@ export default function ProblemGamePage() {
     setElapsedSeconds(0);
   }, []);
 
+  const handleShareChallenge = useCallback(async () => {
+    try {
+      const response = await shareProblem.mutateAsync(slug);
+      await navigator.clipboard.writeText(response.url);
+      toastCtx?.toast('Challenge link copied!', 'success');
+    } catch {
+      // fallback: copy current URL
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toastCtx?.toast('Link copied!', 'success');
+      } catch {
+        toastCtx?.toast('Could not copy link', 'error');
+      }
+    }
+  }, [shareProblem, slug, toastCtx]);
+
   const handleFullRetry = useCallback(() => {
     hasRestoredRef.current = false;
     setResult(null);
@@ -1063,6 +1099,8 @@ export default function ProblemGamePage() {
         isReady={isReady}
         onSubmit={handleSubmit}
         onNavigate={handleNavigateAway}
+        onShare={handleShareChallenge}
+        isSharing={shareProblem.isPending}
       />
 
       {isLoading ? (
@@ -1240,6 +1278,8 @@ export default function ProblemGamePage() {
             onRetry={result?.passed ? handleFullRetry : handleReset}
             onDismiss={result?.passed ? undefined : handleDismissResult}
             nextProblemSlug={result?.passed ? nextProblemSlug : undefined}
+            onShare={handleShareChallenge}
+            isSharing={shareProblem.isPending}
           />
         ) : null}
       </AnimatePresence>

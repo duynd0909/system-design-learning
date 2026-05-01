@@ -1,13 +1,17 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import type { User } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ProblemsService } from './problems.service';
+import { ShareService } from '../share/share.service';
 
 @Controller('problems')
 export class ProblemsController {
-  constructor(private readonly problemsService: ProblemsService) {}
+  constructor(
+    private readonly problemsService: ProblemsService,
+    private readonly shareService: ShareService,
+  ) {}
 
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
@@ -17,8 +21,9 @@ export class ProblemsController {
     @Query('limit') limit?: string,
     @Query('difficulty') difficulty?: string,
     @Query('category') category?: string,
+    @Query('solved') solved?: string,
   ) {
-    return this.problemsService.findAll(user?.id, page, limit, difficulty, category);
+    return this.problemsService.findAll(user?.id, page, limit, difficulty, category, solved);
   }
 
   @Get('categories')
@@ -38,6 +43,12 @@ export class ProblemsController {
     @Param('order', ParseIntPipe) order: number,
   ) {
     return this.problemsService.getRequirementGraph(slug, order);
+  }
+
+  @Post(':slug/share')
+  @UseGuards(OptionalJwtAuthGuard)
+  createShareToken(@Param('slug') slug: string) {
+    return this.shareService.createToken(slug);
   }
 
   @Get(':slug/solution')

@@ -9,11 +9,14 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { ComponentsModule } from './components/components.module';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
+import { ShareModule } from './share/share.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.local' }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    RedisModule,
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -22,6 +25,7 @@ import { PrismaModule } from './prisma/prisma.module';
     LeaderboardModule,
     ComponentsModule,
     HealthModule,
+    ShareModule,
   ],
 })
 export class AppModule {}

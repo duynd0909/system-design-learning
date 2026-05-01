@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { LayoutDashboard, LogOut, Menu, Network, UserRound, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Button } from '@/components/ui/Button';
+import { StreakBadge } from '@/components/ui/StreakBadge';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 
@@ -77,6 +78,7 @@ export function Navbar({ overlay = false }: NavbarProps) {
                   >
                     <UserRound className="h-4 w-4 text-indigo-600 dark:text-[var(--accent-primary)]" aria-hidden="true" />
                     <span className="truncate">{user.displayName}</span>
+                    {user.streak >= 1 && <StreakBadge streak={user.streak} />}
                   </Link>
                   <Button
                     type="button"

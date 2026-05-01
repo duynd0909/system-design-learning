@@ -7,6 +7,8 @@ import confetti from 'canvas-confetti';
 import { CheckCircle2, XCircle, ChevronDown, Share2, RotateCcw, ArrowRight } from 'lucide-react';
 import type { SubmissionResponse, ComponentType } from '@stackdify/shared-types';
 import { Button } from '@/components/ui/Button';
+import { XpCounter } from '@/components/ui/XpCounter';
+import { StreakBadge } from '@/components/ui/StreakBadge';
 import { cn } from '@/lib/utils';
 import { scaleIn, spring } from '@/lib/animations';
 
@@ -36,9 +38,11 @@ interface ResultOverlayProps {
   onRetry: () => void;
   onDismiss?: () => void;
   nextProblemSlug?: string | null;
+  onShare?: () => Promise<void>;
+  isSharing?: boolean;
 }
 
-export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, nextProblemSlug }: ResultOverlayProps) {
+export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, nextProblemSlug, onShare, isSharing }: ResultOverlayProps) {
   const prefersReduced = useReducedMotion();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -64,11 +68,15 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      if (onShare) {
+        await onShare();
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard access denied — silently ignore
+      // clipboard access denied or share API failed — silently ignore
     }
   };
 
@@ -128,8 +136,28 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
         <p className="mt-2 text-sm text-[var(--text-secondary)]">{message}</p>
         <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">
           XP earned:{' '}
-          <span style={{ color: scoreColor }} className="font-semibold">{result.xpEarned}</span>
+          <XpCounter
+            to={result.xpEarned}
+            className="font-semibold"
+            colorVar={scoreColor}
+          />
         </p>
+        {result.xpBreakdown && (
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            {[
+              result.xpBreakdown.base > 0 && `+${result.xpBreakdown.base} first pass`,
+              result.xpBreakdown.attempt > 0 && `+${result.xpBreakdown.attempt} attempt`,
+              result.xpBreakdown.streakBonus > 0 && `+${result.xpBreakdown.streakBonus} streak bonus`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        )}
+        {result.streakAfter != null && result.streakAfter >= 1 && (
+          <div className="mt-2 flex justify-center">
+            <StreakBadge streak={result.streakAfter} animate={result.passed} />
+          </div>
+        )}
 
         {/* Primary actions */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -182,10 +210,11 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
           <Button
             type="button" variant="ghost" size="sm" className="flex-1"
             onClick={handleShare}
+            disabled={isSharing}
             aria-label="Copy challenge link to clipboard"
           >
             <Share2 className="h-4 w-4" aria-hidden="true" />
-            {copied ? 'Copied!' : 'Share'}
+            {isSharing ? 'Sharing…' : copied ? 'Copied!' : 'Share'}
           </Button>
           <Button
             type="button" variant="ghost" size="sm" className="flex-1"

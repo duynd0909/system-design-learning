@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { UserActivity } from '@stackdify/shared-types';
+import type { PublicUserProfile, UserActivity } from '@stackdify/shared-types';
 
 @Injectable()
 export class UsersService {
@@ -95,6 +95,48 @@ export class UsersService {
       totalXp: user.xp,
       level: user.level,
       streak: user.streak,
+      categoryBreakdown,
+    };
+  }
+
+  async getPublicProfile(username: string): Promise<PublicUserProfile> {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+      select: { id: true, username: true, displayName: true, avatarUrl: true, level: true, xp: true, streak: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const [submissions, allProblems, requirementCounts] = await Promise.all([
+      this.prisma.submission.findMany({
+        where: { userId: user.id },
+        select: { passed: true, problemId: true, requirementOrder: true, problem: { select: { category: true } } },
+      }),
+      this.prisma.problem.findMany({ where: { isPublished: true }, select: { id: true, category: true } }),
+      this.prisma.requirement.groupBy({ by: ['problemId'], _max: { order: true } }),
+    ]);
+
+    const lastReqOrder = new Map(requirementCounts.map((r) => [r.problemId, r._max.order ?? 1]));
+    const solvedProblemIds = new Set(
+      submissions
+        .filter((s) => s.passed && s.requirementOrder != null && s.requirementOrder === lastReqOrder.get(s.problemId))
+        .map((s) => s.problemId),
+    );
+
+    const categoryBreakdown: Record<string, { solved: number; total: number }> = {};
+    for (const p of allProblems) {
+      if (!categoryBreakdown[p.category]) categoryBreakdown[p.category] = { solved: 0, total: 0 };
+      categoryBreakdown[p.category].total += 1;
+      if (solvedProblemIds.has(p.id)) categoryBreakdown[p.category].solved += 1;
+    }
+
+    return {
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl ?? undefined,
+      level: user.level,
+      xp: user.xp,
+      streak: user.streak,
+      solvedCount: solvedProblemIds.size,
       categoryBreakdown,
     };
   }

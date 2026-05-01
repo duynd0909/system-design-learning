@@ -1,11 +1,16 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 import { scoreSubmission } from '@stackdify/game-engine';
 import type { PaginatedResponse, SubmissionHistoryItem } from '@stackdify/shared-types';
 import type { CreateSubmissionDto } from './dto/create-submission.dto';
 
-const XP_PER_POINT = 10;
+const ATTEMPT_XP = 10;
+const FIRST_PASS_XP = 50;
+const STREAK_BONUS_XP = 25;
+const STREAK_BONUS_THRESHOLD = 3;
+
 const DEFAULT_HISTORY_LIMIT = 20;
 const MAX_HISTORY_LIMIT = 100;
 
@@ -23,9 +28,16 @@ function positiveInt(value: string | undefined, fallback: number) {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function startOfDayUtc(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
 @Injectable()
 export class SubmissionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly leaderboard: LeaderboardService,
+  ) {}
 
   async create(userId: string, dto: CreateSubmissionDto) {
     // Fetch the specific requirement's answer key
@@ -48,7 +60,42 @@ export class SubmissionsService {
     const isLastRequirement = dto.requirementOrder === totalRequirements;
 
     const result = scoreSubmission(dto.slotAnswers, answer);
-    const xpEarned = result.passed ? XP_PER_POINT * Object.keys(answer).length : 0;
+
+    // First-pass detection (outside transaction to keep it short)
+    const priorPassCount = await this.prisma.submission.count({
+      where: {
+        userId,
+        problemId: dto.problemId,
+        requirementOrder: dto.requirementOrder,
+        passed: true,
+      },
+    });
+
+    // Streak computation
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { streak: true, lastActiveAt: true, xp: true, username: true, displayName: true, avatarUrl: true, level: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const now = new Date();
+    const today = startOfDayUtc(now);
+    const yesterday = new Date(today.getTime() - 86400_000);
+
+    let newStreak: number;
+    const lastActive = user.lastActiveAt;
+    if (lastActive >= today) {
+      newStreak = user.streak; // already submitted today
+    } else if (lastActive >= yesterday) {
+      newStreak = user.streak + 1; // consecutive day
+    } else {
+      newStreak = 1; // streak broken
+    }
+
+    // XP calculation
+    const firstPassXp = result.passed && priorPassCount === 0 ? FIRST_PASS_XP : 0;
+    const streakBonus = result.passed && newStreak >= STREAK_BONUS_THRESHOLD ? STREAK_BONUS_XP : 0;
+    const xpEarned = ATTEMPT_XP + firstPassXp + streakBonus;
 
     const slotResultsJson: Prisma.InputJsonArray = result.slotResults.map(
       (slotResult): Prisma.InputJsonObject => ({
@@ -59,7 +106,7 @@ export class SubmissionsService {
       }),
     );
 
-    const submission = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const [submission, updatedUser] = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const sub = await tx.submission.create({
         data: {
           userId,
@@ -74,14 +121,27 @@ export class SubmissionsService {
         },
       });
 
-      if (xpEarned > 0) {
-        await tx.user.update({
-          where: { id: userId },
-          data: { xp: { increment: xpEarned } },
-        });
-      }
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: {
+          xp: { increment: xpEarned },
+          streak: newStreak,
+          lastActiveAt: now,
+        },
+        select: { xp: true, level: true },
+      });
 
-      return sub;
+      return [sub, updated] as const;
+    });
+
+    // Sync leaderboard cache asynchronously (non-blocking)
+    void this.leaderboard.syncUserScore(userId, updatedUser.xp, {
+      userId,
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl ?? undefined,
+      level: updatedUser.level,
+      passedCount: 0, // approximate; full cache refresh on next getGlobal() miss
     });
 
     return {
@@ -93,6 +153,13 @@ export class SubmissionsService {
       requirementOrder: dto.requirementOrder,
       isLastRequirement,
       slotResults: result.slotResults,
+      xpBreakdown: {
+        base: firstPassXp,
+        attempt: ATTEMPT_XP,
+        streakBonus,
+        total: xpEarned,
+      },
+      streakAfter: newStreak,
       createdAt: submission.createdAt.toISOString(),
     };
   }

@@ -8,6 +8,7 @@ import {
   Award,
   CheckCircle2,
   Flame,
+  Share2,
   Target,
   TrendingUp,
   Zap,
@@ -15,6 +16,7 @@ import {
 import type { Difficulty } from '@stackdify/shared-types';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -207,6 +209,20 @@ export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useMyStats(token);
   const { data: submissionsPage, isLoading: subsLoading } = useMySubmissions(token, 1, 10);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleShareProfile = async () => {
+    if (!user) return;
+    const url = `${window.location.origin}/profile/${user.username}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard access denied — silently ignore
+    }
+  };
+
   const currentYear = new Date().getFullYear();
   const [activityYear, setActivityYear] = useState(currentYear);
   const availableYears = [currentYear - 1, currentYear];
@@ -243,15 +259,30 @@ export default function DashboardPage() {
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         {/* Welcome header */}
-        <div className="mb-8">
-          {isLoading ? (
-            <Skeleton className="h-9 w-56" />
-          ) : (
-            <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
-              Welcome back, {user?.displayName ?? user?.username ?? 'engineer'}
-            </h1>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            {isLoading ? (
+              <Skeleton className="h-9 w-56" />
+            ) : (
+              <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
+                Welcome back, {user?.displayName ?? user?.username ?? 'engineer'}
+              </h1>
+            )}
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Here's your practice progress at a glance.</p>
+          </div>
+          {user && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => void handleShareProfile()}
+              className="shrink-0"
+              aria-label="Copy profile link to clipboard"
+            >
+              <Share2 className="h-4 w-4" aria-hidden="true" />
+              {copied ? 'Copied!' : 'Share Profile'}
+            </Button>
           )}
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">Here's your practice progress at a glance.</p>
         </div>
 
         {/* Stats row */}
