@@ -15,6 +15,8 @@ import type {
   UserActivity,
   PaginatedResponse,
   Difficulty,
+  ShareTokenResponse,
+  PublicUserProfile,
 } from '@stackdify/shared-types';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -45,9 +47,10 @@ interface ProblemListParams {
   limit?: number;
   difficulty?: Difficulty | '';
   category?: string;
+  solved?: 'true' | 'false' | '';
 }
 
-function problemListPath({ page = 1, limit = DEFAULT_PROBLEMS_LIMIT, difficulty, category }: ProblemListParams) {
+function problemListPath({ page = 1, limit = DEFAULT_PROBLEMS_LIMIT, difficulty, category, solved }: ProblemListParams) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
@@ -55,6 +58,7 @@ function problemListPath({ page = 1, limit = DEFAULT_PROBLEMS_LIMIT, difficulty,
 
   if (difficulty) params.set('difficulty', difficulty);
   if (category) params.set('category', category);
+  if (solved) params.set('solved', solved);
 
   return `/problems?${params.toString()}`;
 }
@@ -103,17 +107,17 @@ async function fetchProblemsPage(params: ProblemListParams, token?: string) {
 }
 
 export function useInfiniteProblems(params: Omit<ProblemListParams, 'page'> & { token?: string } = {}) {
-  const { token, limit = DEFAULT_PROBLEMS_LIMIT, difficulty, category } = params;
+  const { token, limit = DEFAULT_PROBLEMS_LIMIT, difficulty, category, solved } = params;
 
   return useInfiniteQuery({
     queryKey: [
       'problems',
       token || null,
       'infinite',
-      { difficulty: difficulty || null, category: category || null, limit },
+      { difficulty: difficulty || null, category: category || null, solved: solved || null, limit },
     ],
     queryFn: ({ pageParam }) =>
-      fetchProblemsPage({ page: pageParam as number, limit, difficulty, category }, token || undefined),
+      fetchProblemsPage({ page: pageParam as number, limit, difficulty, category, solved }, token || undefined),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
   });
@@ -223,5 +227,24 @@ export function useProblemSolution(slug: string, token: string) {
     queryFn: () => apiFetch(`/problems/${slug}/solution`, undefined, token),
     enabled: !!slug && !!token,
     retry: false,
+  });
+}
+
+// ─── Share ────────────────────────────────────────────────────────────────────
+
+export function useShareProblem(token?: string) {
+  return useMutation<ShareTokenResponse, Error, string>({
+    mutationFn: (slug) =>
+      apiFetch(`/problems/${slug}/share`, { method: 'POST' }, token || undefined),
+  });
+}
+
+// ─── Public Profile ───────────────────────────────────────────────────────────
+
+export function usePublicProfile(username: string) {
+  return useQuery<PublicUserProfile>({
+    queryKey: ['users', 'profile', username],
+    queryFn: () => apiFetch(`/users/profile/${username}`),
+    enabled: !!username,
   });
 }

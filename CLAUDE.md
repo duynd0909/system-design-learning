@@ -422,19 +422,26 @@ Test coverage target: **> 90%** (Jest). Run: `npm test --filter=game-engine`.
 |--------|------|--------|--------|
 | 1 | Foundation & Auth | ✅ Complete | `sprint/1-foundation` |
 | 2 | Core Game Loop | ✅ Complete | `sprint/2-game-loop` |
-| 3 | Progressive Requirements | 🟡 In Progress | `main` |
-| 4 | Social & Discovery | ⬜ Not started | `sprint/4-social` |
+| 3 | Progressive Requirements | ✅ Complete | `main` |
+| 4 | Social & Discovery | 🟡 In Progress | `dev` |
 | 5 | Scale & Quality | ⬜ Not started | `sprint/5-scale` |
 
-**Current Sprint: 3 — Progressive Requirements**
+**Current Sprint: 4 — Social & Discovery**
 
-Sprint 3 scope (implemented 2026-04-26):
-- `Requirement` model replaces `ProblemGraph` (2–4 reqs per problem, sequential unlock)
-- New API endpoints: `GET /problems/:slug` → `ProblemDetailResponse`; `GET /problems/:slug/requirements/:order` → `RequirementGraphResponse`
-- `buildAccumulatedGraph()` in game-engine composes prior (revealed) + current (blanked) requirements
-- `RequirementsSidebar` component — locked/active/completed states, progress bar
-- Game page: sidebar + canvas split layout, compact per-requirement result, full modal on final pass
-- Seed updated: Instagram (3 reqs), YouTube (4 reqs)
+Sprint 4 scope (implemented 2026-05-01):
+- Redis sorted-set leaderboard cache (60s TTL); `syncUserScore()` called on every submission
+- Corrected XP mechanics: +10 attempt, +50 first pass, +25 streak bonus (streak ≥ 3)
+- Streak tracking: increment/reset `user.streak` + `lastActiveAt` in submission transaction
+- Share tokens: `POST /problems/:slug/share` → Redis token (7-day TTL); `GET /share/:token` → 302 redirect
+- Public user profile: `GET /users/profile/:username` (unauthenticated)
+- `?solved=true/false` filter on `GET /problems` (post-query filter using existing solvedIds)
+- Notifications mock: `POST /users/me/notifications` → 201
+- New shared types: `XpBreakdown`, `ShareTokenResponse`, `PublicUserProfile`; `User.streak`, `SubmissionResponse.xpBreakdown/streakAfter`
+- Frontend: `XpCounter` + `StreakBadge` components; animated XP + streak in ResultOverlay
+- Frontend: fuse.js fuzzy search + solved filter on problems page
+- Frontend: share button in GameHeader + ResultOverlay (copies `/share/:token` URL)
+- Frontend: `/profile/[username]` public profile page
+- Frontend: `SocialProofSection` on landing page (top 5 leaderboard)
 
 ---
 

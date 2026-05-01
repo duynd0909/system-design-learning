@@ -40,6 +40,7 @@ import {
   Play,
   RotateCcw,
   Send,
+  Share2,
   Sparkles,
   XCircle,
 } from 'lucide-react';
@@ -56,8 +57,9 @@ import { Button } from '@/components/ui/Button';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useProblemDetail, useRequirementGraph, useProblems, useSubmit } from '@/lib/api';
+import { useProblemDetail, useRequirementGraph, useProblems, useSubmit, useShareProblem } from '@/lib/api';
 import {
   ActorNode,
   BlankSlotNode,
@@ -132,6 +134,8 @@ interface GameHeaderProps {
   isReady: boolean;
   onSubmit: () => void;
   onNavigate: (href: string) => void;
+  onShare?: () => Promise<void>;
+  isSharing?: boolean;
 }
 
 function GameHeader({
@@ -150,6 +154,8 @@ function GameHeader({
   isReady,
   onSubmit,
   onNavigate,
+  onShare,
+  isSharing,
 }: GameHeaderProps) {
   const prefersReduced = useReducedMotion();
 
@@ -253,6 +259,18 @@ function GameHeader({
           {filledCount}/{slotCount}
         </span>
 
+        {onShare && (
+          <button
+            type="button"
+            onClick={() => void onShare()}
+            disabled={isSharing}
+            aria-label="Share this challenge"
+            className="hidden h-8 w-8 items-center justify-center rounded-lg bg-[var(--text-primary)]/5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--text-primary)]/10 hover:text-[var(--text-primary)] disabled:opacity-50 sm:flex"
+          >
+            <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        )}
+
         <ThemeToggle className="h-8 w-8 rounded-lg bg-[var(--text-primary)]/5 hover:bg-[var(--text-primary)]/10" />
 
         {submitError && (
@@ -299,6 +317,41 @@ function PaletteOverlay({ component }: { component: ComponentType | undefined })
       </span>
       <span className="text-sm font-semibold text-[var(--text-primary)]">{component.label}</span>
     </div>
+  );
+}
+
+function MobileReadOnlyNotice({ title }: { title?: string }) {
+  return (
+    <main className="flex flex-1 items-center justify-center bg-[var(--bg-game-canvas)] px-4 py-8 md:hidden">
+      <section className="w-full max-w-md rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] p-5 shadow-xl">
+        <div className="mb-4 overflow-hidden rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-4">
+          <div className="relative h-44">
+            <div className="absolute left-2 top-14 h-11 w-11 rounded-full bg-[var(--accent-primary)]/90" />
+            <div className="absolute left-[34%] top-6 h-14 w-28 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--slot-filled)] shadow-sm" />
+            <div className="absolute left-[34%] top-28 h-14 w-28 rounded-lg border-2 border-dashed border-[var(--slot-blank)] bg-[var(--slot-blank)]/10" />
+            <div className="absolute right-3 top-20 h-16 w-32 rounded-lg bg-[var(--accent-game)]/90 shadow-sm" />
+            <div className="absolute left-[72px] top-[78px] h-1 w-[105px] rotate-[-18deg] rounded bg-[var(--accent-primary)]/45" />
+            <div className="absolute left-[72px] top-[98px] h-1 w-[105px] rotate-[18deg] rounded bg-[var(--accent-primary)]/45" />
+            <div className="absolute right-[118px] top-[88px] h-1 w-[92px] rotate-[18deg] rounded bg-[var(--accent-game)]/55" />
+            <div className="absolute right-[118px] top-[118px] h-1 w-[92px] rotate-[-18deg] rounded bg-[var(--accent-game)]/55" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+          <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+          Mobile preview
+        </div>
+        <h1 className="mt-2 font-display text-2xl font-bold text-[var(--text-primary)]">
+          {title ?? 'System design canvas'}
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+          The interactive graph editor needs more room for dragging, panning, and comparing components. Open this problem on a tablet or desktop to play.
+        </p>
+        <Link href="/problems" className="mt-5 inline-flex text-sm font-semibold text-[var(--accent-primary)]">
+          Browse problems
+        </Link>
+      </section>
+    </main>
   );
 }
 
@@ -513,6 +566,8 @@ export default function ProblemGamePage() {
 
   const { data: reqGraph, isLoading: isGraphLoading, isFetching } = useRequirementGraph(slug, currentOrder);
   const submit = useSubmit(token);
+  const shareProblem = useShareProblem(token || undefined);
+  const toastCtx = useToast();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   // Reset when moving to a new requirement
@@ -924,6 +979,22 @@ export default function ProblemGamePage() {
     setElapsedSeconds(0);
   }, []);
 
+  const handleShareChallenge = useCallback(async () => {
+    try {
+      const response = await shareProblem.mutateAsync(slug);
+      await navigator.clipboard.writeText(response.url);
+      toastCtx?.toast('Challenge link copied!', 'success');
+    } catch {
+      // fallback: copy current URL
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toastCtx?.toast('Link copied!', 'success');
+      } catch {
+        toastCtx?.toast('Could not copy link', 'error');
+      }
+    }
+  }, [shareProblem, slug, toastCtx]);
+
   const handleFullRetry = useCallback(() => {
     hasRestoredRef.current = false;
     setResult(null);
@@ -1063,45 +1134,50 @@ export default function ProblemGamePage() {
         isReady={isReady}
         onSubmit={handleSubmit}
         onNavigate={handleNavigateAway}
+        onShare={handleShareChallenge}
+        isSharing={shareProblem.isPending}
       />
 
-      {isLoading ? (
-        <div className="flex flex-1 overflow-hidden">
-          <Skeleton className="h-full w-[300px] shrink-0 rounded-none" />
-          <div className="flex-1 p-8">
-            <Skeleton className="mb-4 h-9 w-72" />
-            <Skeleton className="h-[calc(100%-5rem)] w-full rounded-xl" />
-          </div>
-        </div>
-      ) : isError || !problemDetail ? (
-        <main className="mx-auto max-w-3xl flex-1 px-4 py-16 text-center sm:px-6">
-          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Problem unavailable</h1>
-          <p className="mt-3 text-[var(--text-secondary)]">The API could not load this system design problem.</p>
-          <Link href="/problems" className="mt-6 inline-flex text-sm font-semibold text-[var(--accent-primary)]">
-            Back to problems
-          </Link>
-        </main>
-      ) : (
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <MobileReadOnlyNotice title={problemDetail?.problem.title} />
+
+      <div className="hidden min-h-0 flex-1 md:flex md:flex-col">
+        {isLoading ? (
           <div className="flex flex-1 overflow-hidden">
-            {/* Left sidebar — resizable */}
-            <div
-              ref={sidebarContainerRef}
-              style={{ width: 300 }}
-              className="shrink-0 overflow-hidden"
-            >
-              <RequirementsSidebar
-                problem={problemDetail.problem}
-                requirements={problemDetail.requirements}
-                components={problemDetail.componentTypes}
-                placedSlugs={placedSlugs}
-                currentOrder={currentOrder}
-                completedOrders={completedOrders}
-                isLoading={isGraphLoading}
-                onSelectRequirement={handleSelectRequirement}
-                onComponentClick={handleComponentClick}
-              />
+            <Skeleton className="h-full w-[300px] shrink-0 rounded-none" />
+            <div className="flex-1 p-8">
+              <Skeleton className="mb-4 h-9 w-72" />
+              <Skeleton className="h-[calc(100%-5rem)] w-full rounded-xl" />
             </div>
+          </div>
+        ) : isError || !problemDetail ? (
+          <main className="mx-auto max-w-3xl flex-1 px-4 py-16 text-center sm:px-6">
+            <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Problem unavailable</h1>
+            <p className="mt-3 text-[var(--text-secondary)]">The API could not load this system design problem.</p>
+            <Link href="/problems" className="mt-6 inline-flex text-sm font-semibold text-[var(--accent-primary)]">
+              Back to problems
+            </Link>
+          </main>
+        ) : (
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className="flex flex-1 overflow-hidden">
+              {/* Left sidebar — resizable */}
+              <div
+                ref={sidebarContainerRef}
+                style={{ width: 300 }}
+                className="shrink-0 overflow-hidden"
+              >
+                <RequirementsSidebar
+                  problem={problemDetail.problem}
+                  requirements={problemDetail.requirements}
+                  components={problemDetail.componentTypes}
+                  placedSlugs={placedSlugs}
+                  currentOrder={currentOrder}
+                  completedOrders={completedOrders}
+                  isLoading={isGraphLoading}
+                  onSelectRequirement={handleSelectRequirement}
+                  onComponentClick={handleComponentClick}
+                />
+              </div>
 
             {/* Drag splitter */}
             <div
@@ -1227,8 +1303,9 @@ export default function ProblemGamePage() {
           <DragOverlay>
             <PaletteOverlay component={activeComponent} />
           </DragOverlay>
-        </DndContext>
-      )}
+          </DndContext>
+        )}
+      </div>
 
       {/* Full result overlay (last requirement only) */}
       <AnimatePresence>
@@ -1240,6 +1317,8 @@ export default function ProblemGamePage() {
             onRetry={result?.passed ? handleFullRetry : handleReset}
             onDismiss={result?.passed ? undefined : handleDismissResult}
             nextProblemSlug={result?.passed ? nextProblemSlug : undefined}
+            onShare={handleShareChallenge}
+            isSharing={shareProblem.isPending}
           />
         ) : null}
       </AnimatePresence>

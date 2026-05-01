@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { CheckCircle2, LayoutGrid, List } from 'lucide-react';
+import { CheckCircle2, LayoutGrid, List, Search } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Fuse from 'fuse.js';
 import { Difficulty } from '@stackdify/shared-types';
 import type { ProblemSummary } from '@stackdify/shared-types';
 import { useInfiniteProblems, useProblemCategories } from '@/lib/api';
@@ -170,9 +171,11 @@ function ProblemsPageContent() {
 
   const selectedDifficulty = searchParams.get('difficulty') ?? '';
   const selectedCategory = searchParams.get('category') ?? '';
+  const selectedSolved = (searchParams.get('solved') ?? '') as 'true' | 'false' | '';
   const difficultyFilter = DIFFICULTIES.some(({ value }) => value === selectedDifficulty)
     ? (selectedDifficulty as Difficulty)
     : '';
+  const [searchQuery, setSearchQuery] = useState('');
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   // Pass token so the API embeds isSolved + completedRequirementOrders per problem.
   const {
@@ -186,6 +189,7 @@ function ProblemsPageContent() {
     token: token || undefined,
     difficulty: difficultyFilter,
     category: selectedCategory,
+    solved: isAuthenticated ? selectedSolved : '',
   });
   const { data: categoryData } = useProblemCategories();
 
@@ -208,6 +212,15 @@ function ProblemsPageContent() {
     [problemPages],
   );
   const totalProblems = problemPages?.pages[0]?.total ?? 0;
+
+  const fuse = useMemo(
+    () => new Fuse(problems, { keys: ['title', 'description', 'category'], threshold: 0.35, includeScore: true }),
+    [problems],
+  );
+  const filteredProblems = useMemo(
+    () => (searchQuery.trim() ? fuse.search(searchQuery).map((r) => r.item) : problems),
+    [fuse, problems, searchQuery],
+  );
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set([...(categoryData ?? []), ...(selectedCategory ? [selectedCategory] : [])])).sort();
@@ -301,13 +314,40 @@ function ProblemsPageContent() {
             </select>
           )}
 
+          {/* Solved filter (authenticated only) */}
+          {isAuthenticated && (
+            <select
+              value={selectedSolved}
+              onChange={(e) => setFilter('solved', e.target.value)}
+              aria-label="Filter by solved status"
+              className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
+            >
+              <option value="">All</option>
+              <option value="true">Solved</option>
+              <option value="false">Unsolved</option>
+            </select>
+          )}
+
+          {/* Search input */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" aria-hidden="true" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search problems…"
+              aria-label="Search problems"
+              className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] py-1.5 pl-8 pr-3.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
+            />
+          </div>
+
           {/* Right side: result count + view toggle */}
           <div className="ml-auto flex items-center gap-2">
             {!isLoading && (
               <span className="text-sm text-[var(--text-secondary)]">
-                {problems.length}
-                {totalProblems > problems.length ? ` of ${totalProblems}` : ''}{' '}
-                {totalProblems === 1 ? 'problem' : 'problems'}
+                {filteredProblems.length}
+                {totalProblems > filteredProblems.length && !searchQuery ? ` of ${totalProblems}` : ''}{' '}
+                {filteredProblems.length === 1 ? 'problem' : 'problems'}
               </span>
             )}
             <div
@@ -358,7 +398,7 @@ function ProblemsPageContent() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-              : problems.map((problem) => (
+              : filteredProblems.map((problem) => (
                   <ProblemCard key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
                 ))}
             {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={`next-${i}`} />)}
@@ -370,18 +410,19 @@ function ProblemsPageContent() {
           <div className="flex flex-col gap-2">
             {isLoading
               ? Array.from({ length: 5 }).map((_, i) => <SkeletonListRow key={i} />)
-              : problems.map((problem) => (
+              : filteredProblems.map((problem) => (
                   <ProblemListRow key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
                 ))}
             {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonListRow key={`next-${i}`} />)}
           </div>
         )}
 
-        <div ref={sentinelRef} className="h-8" aria-hidden="true" />
+        {/* Infinite scroll sentinel — hide when search is active (all results already loaded) */}
+        {!searchQuery && <div ref={sentinelRef} className="h-8" aria-hidden="true" />}
 
-        {!isLoading && problems.length === 0 && !isError && (
+        {!isLoading && filteredProblems.length === 0 && !isError && (
           <div className="py-16 text-center text-[var(--text-secondary)]">
-            No problems match the selected filters.
+            {searchQuery ? `No problems match "${searchQuery}".` : 'No problems match the selected filters.'}
           </div>
         )}
       </main>

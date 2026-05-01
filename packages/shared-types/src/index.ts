@@ -162,6 +162,13 @@ export interface SlotExplanation {
   explanation: string;
 }
 
+export interface XpBreakdown {
+  base: number;        // 50 on first pass, else 0
+  attempt: number;     // always 10
+  streakBonus: number; // 25 if passed && streak >= 3, else 0
+  total: number;
+}
+
 export interface SubmissionResponse {
   id: string;
   score: number;
@@ -172,6 +179,8 @@ export interface SubmissionResponse {
   isLastRequirement: boolean;
   slotResults: SlotResult[];
   explanation?: SlotExplanation[];
+  xpBreakdown?: XpBreakdown;
+  streakAfter?: number;
   createdAt: string;
 }
 
@@ -210,6 +219,7 @@ export interface User {
   avatarUrl?: string;
   xp: number;
   level: number;
+  streak: number;
   createdAt: string;
 }
 
@@ -302,6 +312,27 @@ export interface ApiError {
   statusCode: number;
   message: string;
   error?: string;
+}
+
+// ─── Share Token ─────────────────────────────────────────────────────────────
+
+export interface ShareTokenResponse {
+  token: string;
+  url: string;         // full frontend URL e.g. http://localhost:3000/share/:token
+  expiresIn: number;   // 604800 (7 days in seconds)
+}
+
+// ─── Public User Profile ──────────────────────────────────────────────────────
+
+export interface PublicUserProfile {
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  level: number;
+  xp: number;
+  streak: number;
+  solvedCount: number;
+  categoryBreakdown: Record<string, { solved: number; total: number }>;
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────

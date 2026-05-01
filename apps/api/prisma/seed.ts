@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Difficulty, type Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { config as loadEnv } from 'dotenv';
 import { Pool } from 'pg';
@@ -10,6 +10,24 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL ?? 'postgresql://stackdify:stackdify@localhost:5432/stackdify_dev',
 });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+
+interface RequirementSeed {
+  order: number;
+  title: string;
+  description: string;
+  nodes: Array<Record<string, unknown>>;
+  edges: Array<Record<string, unknown>>;
+  answer: Record<string, string>;
+}
+
+interface ProblemSeed {
+  slug: string;
+  title: string;
+  description: string;
+  difficulty: Difficulty;
+  category: string;
+  requirements: RequirementSeed[];
+}
 
 // ─── Component types ──────────────────────────────────────────────────────────
 
@@ -375,6 +393,321 @@ const zoomReq3 = {
   answer: { 'cache-1': 'cache', 'db-1': 'relational-db', 'obj-1': 'object-storage' },
 };
 
+const sprint5ProblemSeeds: ProblemSeed[] = [
+  {
+    slug: 'uber',
+    title: 'Design Uber',
+    description: 'Design a ride-hailing marketplace that matches riders with nearby drivers, tracks trips in real time, and processes payments reliably.',
+    difficulty: 'HARD',
+    category: 'Marketplace',
+    requirements: [
+      {
+        order: 1,
+        title: 'Route riders into the platform',
+        description: 'Riders and drivers need reliable entry points before any matching logic can run.',
+        nodes: [
+          { id: 'user-1', type: 'actor', position: { x: 0, y: 260 }, data: { label: 'Rider App' } },
+          { id: 'driver-1', type: 'actor', position: { x: 0, y: 460 }, data: { label: 'Driver App' } },
+          { id: 'dns-1', type: 'component', position: { x: 280, y: 260 }, data: { componentSlug: 'dns', label: 'DNS' } },
+          { id: 'api-gw', type: 'component', position: { x: 560, y: 260 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
+          { id: 'lb-1', type: 'component', position: { x: 840, y: 260 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+        ],
+        edges: [
+          { id: 'e-r-dns', source: 'user-1', target: 'dns-1', label: 'lookup' },
+          { id: 'e-d-dns', source: 'driver-1', target: 'dns-1', label: 'lookup' },
+          { id: 'e-dns-api', source: 'dns-1', target: 'api-gw' },
+          { id: 'e-api-lb', source: 'api-gw', target: 'lb-1' },
+        ],
+        answer: { 'dns-1': 'dns', 'api-gw': 'api-gateway', 'lb-1': 'load-balancer' },
+      },
+      {
+        order: 2,
+        title: 'Match riders and drivers nearby',
+        description: 'The platform needs fast location reads, trip state, and a matching service.',
+        nodes: [
+          { id: 'app-1', type: 'component', position: { x: 1120, y: 180 }, data: { componentSlug: 'app-server', label: 'Matching Service' } },
+          { id: 'cache-1', type: 'component', position: { x: 1400, y: 120 }, data: { componentSlug: 'cache', label: 'Location Cache' } },
+          { id: 'db-1', type: 'component', position: { x: 1400, y: 340 }, data: { componentSlug: 'relational-db', label: 'Trip DB' } },
+        ],
+        edges: [
+          { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
+          { id: 'e-app-cache', source: 'app-1', target: 'cache-1', label: 'nearby drivers' },
+          { id: 'e-app-db', source: 'app-1', target: 'db-1', label: 'trip state' },
+        ],
+        answer: { 'app-1': 'app-server', 'cache-1': 'cache', 'db-1': 'relational-db' },
+      },
+      {
+        order: 3,
+        title: 'Process events and search locations',
+        description: 'Trips emit asynchronous events and location search must stay fast under heavy demand.',
+        nodes: [
+          { id: 'mq-1', type: 'component', position: { x: 1120, y: 500 }, data: { componentSlug: 'message-queue', label: 'Trip Events Queue' } },
+          { id: 'search-1', type: 'component', position: { x: 1680, y: 120 }, data: { componentSlug: 'search-engine', label: 'Geo Search' } },
+          { id: 'nosql-1', type: 'component', position: { x: 1680, y: 340 }, data: { componentSlug: 'nosql-db', label: 'Driver Location Store' } },
+        ],
+        edges: [
+          { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'events' },
+          { id: 'e-app-search', source: 'app-1', target: 'search-1', label: 'pickup search' },
+          { id: 'e-cache-nosql', source: 'cache-1', target: 'nosql-1', label: 'location snapshots' },
+        ],
+        answer: { 'mq-1': 'message-queue', 'search-1': 'search-engine', 'nosql-1': 'nosql-db' },
+      },
+    ],
+  },
+  {
+    slug: 'twitter-x',
+    title: 'Design Twitter/X',
+    description: 'Design a social feed platform that supports posting, timelines, search, media uploads, and viral fan-out.',
+    difficulty: 'HARD',
+    category: 'Social Media',
+    requirements: [
+      {
+        order: 1,
+        title: 'Serve global feed traffic',
+        description: 'Users need a low-latency path into timeline and posting APIs.',
+        nodes: [
+          { id: 'user-1', type: 'actor', position: { x: 0, y: 260 }, data: { label: 'User' } },
+          { id: 'dns-1', type: 'component', position: { x: 280, y: 180 }, data: { componentSlug: 'dns', label: 'DNS' } },
+          { id: 'cdn-1', type: 'component', position: { x: 280, y: 420 }, data: { componentSlug: 'cdn', label: 'Media CDN' } },
+          { id: 'lb-1', type: 'component', position: { x: 560, y: 260 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+        ],
+        edges: [
+          { id: 'e-u-dns', source: 'user-1', target: 'dns-1' },
+          { id: 'e-u-cdn', source: 'user-1', target: 'cdn-1', label: 'media' },
+          { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+        ],
+        answer: { 'dns-1': 'dns', 'cdn-1': 'cdn', 'lb-1': 'load-balancer' },
+      },
+      {
+        order: 2,
+        title: 'Store posts and hot timelines',
+        description: 'Timeline reads are much more frequent than writes, so the serving path needs caching.',
+        nodes: [
+          { id: 'app-1', type: 'component', position: { x: 840, y: 180 }, data: { componentSlug: 'app-server', label: 'Timeline Service' } },
+          { id: 'cache-1', type: 'component', position: { x: 1120, y: 120 }, data: { componentSlug: 'cache', label: 'Timeline Cache' } },
+          { id: 'db-1', type: 'component', position: { x: 1120, y: 340 }, data: { componentSlug: 'nosql-db', label: 'Post Store' } },
+        ],
+        edges: [
+          { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
+          { id: 'e-app-cache', source: 'app-1', target: 'cache-1', label: 'hot timelines' },
+          { id: 'e-app-db', source: 'app-1', target: 'db-1', label: 'posts' },
+        ],
+        answer: { 'app-1': 'app-server', 'cache-1': 'cache', 'db-1': 'nosql-db' },
+      },
+      {
+        order: 3,
+        title: 'Fan out posts and support search',
+        description: 'New posts need asynchronous fan-out, search indexing, and durable media storage.',
+        nodes: [
+          { id: 'mq-1', type: 'component', position: { x: 1400, y: 120 }, data: { componentSlug: 'message-queue', label: 'Fanout Queue' } },
+          { id: 'search-1', type: 'component', position: { x: 1400, y: 340 }, data: { componentSlug: 'search-engine', label: 'Search Index' } },
+          { id: 'obj-1', type: 'component', position: { x: 1400, y: 560 }, data: { componentSlug: 'object-storage', label: 'Media Storage' } },
+        ],
+        edges: [
+          { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'post events' },
+          { id: 'e-mq-search', source: 'mq-1', target: 'search-1', label: 'index' },
+          { id: 'e-cdn-obj', source: 'cdn-1', target: 'obj-1', label: 'origin' },
+        ],
+        answer: { 'mq-1': 'message-queue', 'search-1': 'search-engine', 'obj-1': 'object-storage' },
+      },
+    ],
+  },
+  {
+    slug: 'netflix',
+    title: 'Design Netflix',
+    description: 'Design a streaming platform that serves personalized catalogs and high-quality video playback to global viewers.',
+    difficulty: 'HARD',
+    category: 'Video Streaming',
+    requirements: [
+      {
+        order: 1,
+        title: 'Route viewer playback traffic',
+        description: 'Viewers need reliable API traffic and video delivery close to their region.',
+        nodes: [
+          { id: 'viewer-1', type: 'actor', position: { x: 0, y: 300 }, data: { label: 'Viewer' } },
+          { id: 'dns-1', type: 'component', position: { x: 280, y: 180 }, data: { componentSlug: 'dns', label: 'DNS' } },
+          { id: 'cdn-1', type: 'component', position: { x: 280, y: 460 }, data: { componentSlug: 'cdn', label: 'Video CDN' } },
+          { id: 'lb-1', type: 'component', position: { x: 560, y: 180 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+        ],
+        edges: [
+          { id: 'e-v-dns', source: 'viewer-1', target: 'dns-1' },
+          { id: 'e-v-cdn', source: 'viewer-1', target: 'cdn-1', label: 'playback' },
+          { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+        ],
+        answer: { 'dns-1': 'dns', 'cdn-1': 'cdn', 'lb-1': 'load-balancer' },
+      },
+      {
+        order: 2,
+        title: 'Serve catalog and profiles',
+        description: 'Catalog and profile reads need low latency and durable account metadata.',
+        nodes: [
+          { id: 'api-gw', type: 'component', position: { x: 840, y: 180 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
+          { id: 'app-1', type: 'component', position: { x: 1120, y: 180 }, data: { componentSlug: 'app-server', label: 'Catalog Service' } },
+          { id: 'cache-1', type: 'component', position: { x: 1400, y: 100 }, data: { componentSlug: 'cache', label: 'Catalog Cache' } },
+          { id: 'db-1', type: 'component', position: { x: 1400, y: 320 }, data: { componentSlug: 'relational-db', label: 'User DB' } },
+        ],
+        edges: [
+          { id: 'e-lb-api', source: 'lb-1', target: 'api-gw' },
+          { id: 'e-api-app', source: 'api-gw', target: 'app-1' },
+          { id: 'e-app-cache', source: 'app-1', target: 'cache-1' },
+          { id: 'e-app-db', source: 'app-1', target: 'db-1' },
+        ],
+        answer: { 'api-gw': 'api-gateway', 'app-1': 'app-server', 'cache-1': 'cache', 'db-1': 'relational-db' },
+      },
+      {
+        order: 3,
+        title: 'Transcode and store videos',
+        description: 'Uploaded source files must be transcoded and served as adaptive bitrate streams.',
+        nodes: [
+          { id: 'mq-1', type: 'component', position: { x: 1120, y: 500 }, data: { componentSlug: 'message-queue', label: 'Transcode Queue' } },
+          { id: 'media-1', type: 'component', position: { x: 1400, y: 500 }, data: { componentSlug: 'media-server', label: 'Transcoder' } },
+          { id: 'obj-1', type: 'component', position: { x: 1680, y: 500 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
+        ],
+        edges: [
+          { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'encode jobs' },
+          { id: 'e-mq-media', source: 'mq-1', target: 'media-1' },
+          { id: 'e-media-obj', source: 'media-1', target: 'obj-1' },
+          { id: 'e-cdn-obj', source: 'cdn-1', target: 'obj-1', label: 'origin pull' },
+        ],
+        answer: { 'mq-1': 'message-queue', 'media-1': 'media-server', 'obj-1': 'object-storage' },
+      },
+      {
+        order: 4,
+        title: 'Recommend titles',
+        description: 'Personalized recommendations need searchable metadata and flexible viewing signals.',
+        nodes: [
+          { id: 'search-1', type: 'component', position: { x: 1680, y: 120 }, data: { componentSlug: 'search-engine', label: 'Title Search' } },
+          { id: 'nosql-1', type: 'component', position: { x: 1680, y: 320 }, data: { componentSlug: 'nosql-db', label: 'Viewing Signals' } },
+        ],
+        edges: [
+          { id: 'e-app-search', source: 'app-1', target: 'search-1' },
+          { id: 'e-app-nosql', source: 'app-1', target: 'nosql-1' },
+        ],
+        answer: { 'search-1': 'search-engine', 'nosql-1': 'nosql-db' },
+      },
+    ],
+  },
+  {
+    slug: 'airbnb',
+    title: 'Design Airbnb',
+    description: 'Design a lodging marketplace with searchable listings, booking workflows, messaging, and photo-heavy listing pages.',
+    difficulty: 'MEDIUM',
+    category: 'Marketplace',
+    requirements: [
+      {
+        order: 1,
+        title: 'Route marketplace traffic',
+        description: 'Guests and hosts need reliable access to listing and booking services.',
+        nodes: [
+          { id: 'guest-1', type: 'actor', position: { x: 0, y: 240 }, data: { label: 'Guest' } },
+          { id: 'host-1', type: 'actor', position: { x: 0, y: 440 }, data: { label: 'Host' } },
+          { id: 'dns-1', type: 'component', position: { x: 280, y: 240 }, data: { componentSlug: 'dns', label: 'DNS' } },
+          { id: 'lb-1', type: 'component', position: { x: 560, y: 240 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+          { id: 'app-1', type: 'component', position: { x: 840, y: 240 }, data: { componentSlug: 'app-server', label: 'Marketplace App' } },
+        ],
+        edges: [
+          { id: 'e-g-dns', source: 'guest-1', target: 'dns-1' },
+          { id: 'e-h-dns', source: 'host-1', target: 'dns-1' },
+          { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+          { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
+        ],
+        answer: { 'dns-1': 'dns', 'lb-1': 'load-balancer', 'app-1': 'app-server' },
+      },
+      {
+        order: 2,
+        title: 'Search listings and book stays',
+        description: 'Listing discovery and booking writes need different storage and caching behavior.',
+        nodes: [
+          { id: 'search-1', type: 'component', position: { x: 1120, y: 120 }, data: { componentSlug: 'search-engine', label: 'Listing Search' } },
+          { id: 'cache-1', type: 'component', position: { x: 1120, y: 300 }, data: { componentSlug: 'cache', label: 'Availability Cache' } },
+          { id: 'db-1', type: 'component', position: { x: 1400, y: 240 }, data: { componentSlug: 'relational-db', label: 'Booking DB' } },
+        ],
+        edges: [
+          { id: 'e-app-search', source: 'app-1', target: 'search-1' },
+          { id: 'e-app-cache', source: 'app-1', target: 'cache-1' },
+          { id: 'e-app-db', source: 'app-1', target: 'db-1' },
+        ],
+        answer: { 'search-1': 'search-engine', 'cache-1': 'cache', 'db-1': 'relational-db' },
+      },
+      {
+        order: 3,
+        title: 'Store photos and async messages',
+        description: 'Listing photos and guest-host communication should not block booking requests.',
+        nodes: [
+          { id: 'cdn-1', type: 'component', position: { x: 280, y: 560 }, data: { componentSlug: 'cdn', label: 'Photo CDN' } },
+          { id: 'obj-1', type: 'component', position: { x: 1120, y: 560 }, data: { componentSlug: 'object-storage', label: 'Photo Storage' } },
+          { id: 'mq-1', type: 'component', position: { x: 1400, y: 460 }, data: { componentSlug: 'message-queue', label: 'Messaging Queue' } },
+        ],
+        edges: [
+          { id: 'e-g-cdn', source: 'guest-1', target: 'cdn-1', label: 'photos' },
+          { id: 'e-cdn-obj', source: 'cdn-1', target: 'obj-1', label: 'origin' },
+          { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'messages' },
+        ],
+        answer: { 'cdn-1': 'cdn', 'obj-1': 'object-storage', 'mq-1': 'message-queue' },
+      },
+    ],
+  },
+  {
+    slug: 'discord',
+    title: 'Design Discord',
+    description: 'Design a real-time community chat platform with channels, presence, media sharing, and durable message history.',
+    difficulty: 'MEDIUM',
+    category: 'Real-Time Communication',
+    requirements: [
+      {
+        order: 1,
+        title: 'Connect clients to real-time services',
+        description: 'Clients need a reliable route into gateway and chat services.',
+        nodes: [
+          { id: 'user-1', type: 'actor', position: { x: 0, y: 300 }, data: { label: 'Client' } },
+          { id: 'dns-1', type: 'component', position: { x: 280, y: 220 }, data: { componentSlug: 'dns', label: 'DNS' } },
+          { id: 'lb-1', type: 'component', position: { x: 560, y: 220 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+          { id: 'api-gw', type: 'component', position: { x: 840, y: 220 }, data: { componentSlug: 'api-gateway', label: 'Realtime Gateway' } },
+        ],
+        edges: [
+          { id: 'e-u-dns', source: 'user-1', target: 'dns-1' },
+          { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+          { id: 'e-lb-api', source: 'lb-1', target: 'api-gw' },
+        ],
+        answer: { 'dns-1': 'dns', 'lb-1': 'load-balancer', 'api-gw': 'api-gateway' },
+      },
+      {
+        order: 2,
+        title: 'Handle chat fanout and presence',
+        description: 'Messages and presence changes must fan out to many connected clients quickly.',
+        nodes: [
+          { id: 'app-1', type: 'component', position: { x: 1120, y: 160 }, data: { componentSlug: 'app-server', label: 'Chat Service' } },
+          { id: 'mq-1', type: 'component', position: { x: 1400, y: 100 }, data: { componentSlug: 'message-queue', label: 'Message Fanout' } },
+          { id: 'cache-1', type: 'component', position: { x: 1400, y: 320 }, data: { componentSlug: 'cache', label: 'Presence Cache' } },
+        ],
+        edges: [
+          { id: 'e-api-app', source: 'api-gw', target: 'app-1' },
+          { id: 'e-app-mq', source: 'app-1', target: 'mq-1' },
+          { id: 'e-app-cache', source: 'app-1', target: 'cache-1' },
+        ],
+        answer: { 'app-1': 'app-server', 'mq-1': 'message-queue', 'cache-1': 'cache' },
+      },
+      {
+        order: 3,
+        title: 'Persist messages and media',
+        description: 'Channel history and attachments need durable storage with efficient retrieval.',
+        nodes: [
+          { id: 'db-1', type: 'component', position: { x: 1680, y: 120 }, data: { componentSlug: 'nosql-db', label: 'Message Store' } },
+          { id: 'obj-1', type: 'component', position: { x: 1680, y: 340 }, data: { componentSlug: 'object-storage', label: 'Attachment Storage' } },
+          { id: 'cdn-1', type: 'component', position: { x: 280, y: 520 }, data: { componentSlug: 'cdn', label: 'Attachment CDN' } },
+        ],
+        edges: [
+          { id: 'e-app-db', source: 'app-1', target: 'db-1' },
+          { id: 'e-app-obj', source: 'app-1', target: 'obj-1' },
+          { id: 'e-cdn-obj', source: 'cdn-1', target: 'obj-1' },
+          { id: 'e-u-cdn', source: 'user-1', target: 'cdn-1' },
+        ],
+        answer: { 'db-1': 'nosql-db', 'obj-1': 'object-storage', 'cdn-1': 'cdn' },
+      },
+    ],
+  },
+];
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -494,6 +827,50 @@ async function main() {
       update: { title: req.title, description: req.description, nodes: req.nodes, edges: req.edges, answer: req.answer },
       create: { problemId: zoom.id, order: req.order, title: req.title, description: req.description, nodes: req.nodes, edges: req.edges, answer: req.answer },
     });
+  }
+
+  for (const seed of sprint5ProblemSeeds) {
+    console.log(`Seeding ${seed.title} problem...`);
+    const problem = await prisma.problem.upsert({
+      where: { slug: seed.slug },
+      update: {
+        title: seed.title,
+        description: seed.description,
+        difficulty: seed.difficulty,
+        category: seed.category,
+        isPublished: true,
+      },
+      create: {
+        slug: seed.slug,
+        title: seed.title,
+        description: seed.description,
+        difficulty: seed.difficulty,
+        category: seed.category,
+        isPublished: true,
+      },
+    });
+
+    for (const req of seed.requirements) {
+      await prisma.requirement.upsert({
+        where: { problemId_order: { problemId: problem.id, order: req.order } },
+        update: {
+          title: req.title,
+          description: req.description,
+          nodes: req.nodes as Prisma.InputJsonArray,
+          edges: req.edges as Prisma.InputJsonArray,
+          answer: req.answer as Prisma.InputJsonObject,
+        },
+        create: {
+          problemId: problem.id,
+          order: req.order,
+          title: req.title,
+          description: req.description,
+          nodes: req.nodes as Prisma.InputJsonArray,
+          edges: req.edges as Prisma.InputJsonArray,
+          answer: req.answer as Prisma.InputJsonObject,
+        },
+      });
+    }
   }
 
   console.log('Seed complete.');

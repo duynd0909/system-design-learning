@@ -41,6 +41,7 @@ export class ProblemsService {
     rawLimit?: string,
     rawDifficulty?: string,
     rawCategory?: string,
+    rawSolved?: string,
   ): Promise<PaginatedResponse<ProblemSummary>> {
     const page = positiveInt(rawPage, 1);
     const limit = Math.min(positiveInt(rawLimit, DEFAULT_PROBLEM_LIMIT), MAX_PROBLEM_LIMIT);
@@ -117,16 +118,25 @@ export class ProblemsService {
       completedOrdersByProblem.set(s.problemId, set);
     }
 
+    let enriched = summaries.map((s) => ({
+      ...s,
+      isSolved: solvedIds.has(s.id),
+      completedRequirementOrders: Array.from(completedOrdersByProblem.get(s.id) ?? []).sort((a, b) => a - b),
+    }));
+
+    // Post-filter by solved status when userId is present
+    if (rawSolved === 'true') {
+      enriched = enriched.filter((s) => s.isSolved);
+    } else if (rawSolved === 'false') {
+      enriched = enriched.filter((s) => !s.isSolved);
+    }
+
     return {
-      data: summaries.map((s) => ({
-        ...s,
-        isSolved: solvedIds.has(s.id),
-        completedRequirementOrders: Array.from(completedOrdersByProblem.get(s.id) ?? []).sort((a, b) => a - b),
-      })),
-      total,
+      data: enriched,
+      total: rawSolved ? enriched.length : total,
       page,
       limit,
-      hasNextPage: skip + summaries.length < total,
+      hasNextPage: rawSolved ? false : skip + enriched.length < total,
     };
   }
 

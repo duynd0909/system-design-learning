@@ -8,8 +8,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly pool: Pool;
 
   constructor() {
+    const poolMax = Number(process.env.DATABASE_POOL_MAX ?? '10');
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL ?? 'postgresql://stackdify:stackdify@localhost:5432/stackdify_dev',
+      max: Number.isInteger(poolMax) && poolMax > 0 ? poolMax : 10,
     });
     super({ adapter: new PrismaPg(pool) });
     this.pool = pool;

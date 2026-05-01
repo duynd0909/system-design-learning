@@ -163,7 +163,7 @@ function PortHandle({
   type,
   position,
   label,
-  category,
+  category: _category,
 }: {
   type: 'source' | 'target';
   position: Position.Left | Position.Right;

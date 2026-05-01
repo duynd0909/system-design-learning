@@ -3,6 +3,7 @@ import { Gamepad2, Network, TrendingUp, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { BentoGrid, type BentoItem } from '@/components/ui/bento-grid';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import { SocialProofSection } from '@/components/marketing/SocialProofSection';
 
 const features: BentoItem[] = [
   {
@@ -147,6 +148,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Social proof — leaderboard teaser */}
+      <SocialProofSection />
 
       {/* Features */}
       <section className="bg-[var(--bg-primary)] px-4 py-20">
