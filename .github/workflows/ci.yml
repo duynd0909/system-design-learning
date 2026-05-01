@@ -35,7 +35,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://stackdify:stackdify@localhost:5432/stackdify_dev
       REDIS_URL: redis://localhost:6379
-      JWT_SECRET: [6s:jJC]z8UE$a;Cw*1ZP77{fN>twla<#O]KQ%_RqM-n
+      JWT_SECRET: '[6s:jJC]z8UE$a;Cw*1ZP77{fN>twla<#O]KQ%_RqM-n'
       ADMIN_EMAILS: admin@stackdify.test
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api/v1
       CORS_ORIGIN: http://127.0.0.1:3000
