@@ -101,8 +101,10 @@ export class AuthService {
         username: user.username,
         displayName: user.displayName,
         avatarUrl: user.avatarUrl ?? undefined,
+        role: user.role,
         xp: user.xp,
         level: user.level,
+        streak: user.streak,
         createdAt: user.createdAt.toISOString(),
       },
     };

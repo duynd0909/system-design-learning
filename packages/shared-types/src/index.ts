@@ -6,6 +6,12 @@ export enum Difficulty {
   HARD = 'HARD',
 }
 
+export enum Role {
+  USER = 'USER',
+  CONTENT_EDITOR = 'CONTENT_EDITOR',
+  ADMIN = 'ADMIN',
+}
+
 // ─── Component Types ─────────────────────────────────────────────────────────
 
 export interface ComponentType {
@@ -96,6 +102,7 @@ export interface Problem {
   difficulty: Difficulty;
   category: string;
   isPublished: boolean;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -217,6 +224,7 @@ export interface User {
   username: string;
   displayName: string;
   avatarUrl?: string;
+  role: Role;
   xp: number;
   level: number;
   streak: number;
@@ -343,4 +351,68 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   hasNextPage: boolean;
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface DailyCount {
+  date: string;  // YYYY-MM-DD
+  count: number;
+}
+
+export interface ProblemPassRate {
+  slug: string;
+  title: string;
+  passRate: number;
+  totalSubmissions: number;
+}
+
+export interface AdminStatsResponse {
+  totals: {
+    problems: number;
+    publishedProblems: number;
+    hiddenProblems: number;
+    deletedProblems: number;
+    requirements: number;
+    users: number;
+    submissions: number;
+    passRate: number;
+  };
+  submissionsPerDay: DailyCount[];
+  newUsersPerDay: DailyCount[];
+  passRateByProblem: ProblemPassRate[];
+  difficultyDistribution: Record<'EASY' | 'MEDIUM' | 'HARD', number>;
+  recentSubmissions: Array<{
+    id: string;
+    score: number;
+    passed: boolean;
+    createdAt: string;
+    user: { username: string; displayName: string };
+    problem: { slug: string; title: string };
+  }>;
+  problemQuality: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    isPublished: boolean;
+    deletedAt: string | null;
+    requirementCount: number;
+    submissionCount: number;
+    passRate: number;
+  }>;
+}
+
+export interface AdminProblemListItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  difficulty: Difficulty;
+  category: string;
+  isPublished: boolean;
+  deletedAt: string | null;
+  requirementCount: number;
+  submissionCount: number;
+  createdAt: string;
+  updatedAt: string;
 }

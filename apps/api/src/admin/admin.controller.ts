@@ -57,4 +57,9 @@ export class AdminController {
   deleteProblem(@Param('slug') slug: string) {
     return this.adminService.deleteProblem(slug);
   }
+
+  @Patch('problems/:slug/restore')
+  restoreProblem(@Param('slug') slug: string) {
+    return this.adminService.restoreProblem(slug);
+  }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useInfiniteQuery, useQuery, useMutation } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
   ProblemSummary,
   ProblemDetailResponse,
@@ -17,6 +17,9 @@ import type {
   Difficulty,
   ShareTokenResponse,
   PublicUserProfile,
+  AdminStatsResponse,
+  AdminProblemListItem,
+  ComponentType,
 } from '@stackdify/shared-types';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -246,5 +249,107 @@ export function usePublicProfile(username: string) {
     queryKey: ['users', 'profile', username],
     queryFn: () => apiFetch(`/users/profile/${username}`),
     enabled: !!username,
+  });
+}
+
+// ─── Component Types ──────────────────────────────────────────────────────────
+
+export function useComponentTypes() {
+  return useQuery<ComponentType[]>({
+    queryKey: ['components'],
+    queryFn: () => apiFetch('/components'),
+    staleTime: 10 * 60_000,
+  });
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export function useAdminStats(token: string) {
+  return useQuery<AdminStatsResponse>({
+    queryKey: ['admin', 'stats'],
+    queryFn: () => apiFetch('/admin/stats', undefined, token),
+    enabled: !!token,
+    staleTime: 60_000,
+  });
+}
+
+export function useAdminProblems(token: string, status?: 'published' | 'hidden' | 'deleted') {
+  return useQuery<AdminProblemListItem[]>({
+    queryKey: ['admin', 'problems', status ?? 'all'],
+    queryFn: () => apiFetch(`/admin/problems${status ? `?status=${status}` : ''}`, undefined, token),
+    enabled: !!token,
+  });
+}
+
+export function useAdminProblem(token: string, slug: string) {
+  return useQuery({
+    queryKey: ['admin', 'problems', slug],
+    queryFn: () => apiFetch<{ problem: AdminProblemListItem; requirements: unknown[] }>(`/admin/problems/${slug}`, undefined, token),
+    enabled: !!token && !!slug,
+  });
+}
+
+export function usePublishProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, string>({
+    mutationFn: (slug) => apiFetch(`/admin/problems/${slug}/publish`, { method: 'PATCH' }, token),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['admin', 'problems'] }); },
+  });
+}
+
+export function useHideProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, string>({
+    mutationFn: (slug) => apiFetch(`/admin/problems/${slug}/hide`, { method: 'PATCH' }, token),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['admin', 'problems'] }); },
+  });
+}
+
+export function useSoftDeleteProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, string>({
+    mutationFn: (slug) => apiFetch(`/admin/problems/${slug}`, { method: 'DELETE' }, token),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['admin', 'problems'] }); },
+  });
+}
+
+export function useRestoreProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, string>({
+    mutationFn: (slug) => apiFetch(`/admin/problems/${slug}/restore`, { method: 'PATCH' }, token),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['admin', 'problems'] }); },
+  });
+}
+
+export function useCreateProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<{ id: string; slug: string }, Error, Record<string, unknown>>({
+    mutationFn: (data) => apiFetch('/admin/problems', { method: 'POST', body: JSON.stringify(data) }, token),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'problems'] });
+      void qc.invalidateQueries({ queryKey: ['problems'] });
+    },
+  });
+}
+
+export function useUpdateProblem(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, { slug: string; data: Record<string, unknown> }>({
+    mutationFn: ({ slug, data }) => apiFetch(`/admin/problems/${slug}`, { method: 'PATCH', body: JSON.stringify(data) }, token),
+    onSuccess: (_, { slug }) => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'problems'] });
+      void qc.invalidateQueries({ queryKey: ['admin', 'problems', slug] });
+    },
+  });
+}
+
+export function useReplaceRequirements(token: string) {
+  const qc = useQueryClient();
+  return useMutation<unknown, Error, { slug: string; requirements: unknown[] }>({
+    mutationFn: ({ slug, requirements }) =>
+      apiFetch(`/admin/problems/${slug}/requirements`, { method: 'PUT', body: JSON.stringify({ requirements }) }, token),
+    onSuccess: (_, { slug }) => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'problems', slug] });
+    },
   });
 }
