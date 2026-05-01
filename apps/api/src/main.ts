@@ -2,12 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { initSentry } from './common/sentry';
 
 async function bootstrap() {
+  initSentry();
+
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
+  app.enableShutdownHooks();
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
@@ -15,6 +20,7 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v1');
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({

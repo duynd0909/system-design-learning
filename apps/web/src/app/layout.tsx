@@ -7,6 +7,7 @@ import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'http://localhost:3000'),
   title: 'Stackdify',
   description: 'Gamified system design practice for software engineers — drag, drop, and learn.',
   icons: { icon: '/favicon.ico' },

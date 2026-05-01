@@ -11,6 +11,7 @@ import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ShareModule } from './share/share.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ShareModule } from './share/share.module';
     ComponentsModule,
     HealthModule,
     ShareModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

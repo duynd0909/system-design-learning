@@ -1,0 +1,20 @@
+{
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "diagnostics": {
+          "ignoreCodes": [151002]
+        }
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@stackdify/shared-types$": "<rootDir>/../../packages/shared-types/src/index.ts",
+    "^@stackdify/game-engine$": "<rootDir>/../../packages/game-engine/src/index.ts"
+  }
+}

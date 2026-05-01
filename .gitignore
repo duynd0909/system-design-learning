@@ -21,6 +21,10 @@ build/
 
 # Test coverage
 coverage/
+.lighthouseci/
+apps/web/.lighthouseci/
+apps/web/playwright-report/
+apps/web/test-results/
 
 # OS files
 .DS_Store

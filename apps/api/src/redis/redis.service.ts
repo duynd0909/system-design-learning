@@ -8,6 +8,15 @@ export class RedisService {
 
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
+  async ping(): Promise<boolean> {
+    try {
+      return (await this.redis.ping()) === 'PONG';
+    } catch (err) {
+      this.logger.warn(`Redis ping failed: ${String(err)}`);
+      return false;
+    }
+  }
+
   async zadd(key: string, score: number, member: string): Promise<void> {
     try {
       await this.redis.zadd(key, score, member);

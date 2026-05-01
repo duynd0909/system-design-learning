@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: stackdify
+          POSTGRES_PASSWORD: stackdify
+          POSTGRES_DB: stackdify_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U stackdify -d stackdify_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://stackdify:stackdify@localhost:5432/stackdify_dev
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: [6s:jJC]z8UE$a;Cw*1ZP77{fN>twla<#O]KQ%_RqM-n
+      ADMIN_EMAILS: admin@stackdify.test
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api/v1
+      CORS_ORIGIN: http://127.0.0.1:3000
+      NEXTAUTH_SECRET: ci-nextauth-secret-min-32-characters
+      NEXTAUTH_URL: http://127.0.0.1:3000
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run deploy:db --workspace=@stackdify/api
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run test:e2e --workspace=@stackdify/api
+      - run: npm run build
+      - run: npx playwright install chromium
+      - run: npm run test:e2e --workspace=@stackdify/web
+      - run: npm run lighthouse --workspace=@stackdify/web
+      - run: npm audit --audit-level=critical

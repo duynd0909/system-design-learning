@@ -1,14 +1,19 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 
 @Controller('health')
 export class HealthController {
   private readonly startTime = Date.now();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   @Get()
-  async check() {
+  async check(@Res({ passthrough: true }) response: Response) {
     let dbStatus: 'ok' | 'error' = 'ok';
     try {
       await this.prisma.$queryRaw`SELECT 1`;
@@ -16,10 +21,14 @@ export class HealthController {
       dbStatus = 'error';
     }
 
+    const redisStatus: 'ok' | 'error' = (await this.redis.ping()) ? 'ok' : 'error';
+    const status = dbStatus === 'ok' && redisStatus === 'ok' ? 'ok' : 'error';
+    if (status === 'error') response.status(503);
+
     return {
-      status: dbStatus === 'ok' ? 'ok' : 'error',
+      status,
       db: dbStatus,
-      redis: 'ok',
+      redis: redisStatus,
       uptime: Math.floor((Date.now() - this.startTime) / 1000),
     };
   }

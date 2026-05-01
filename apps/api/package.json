@@ -13,16 +13,14 @@
     "prestart": "npm run build && npx prisma migrate deploy",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit --incremental false",
-    "lint": "eslint src --ext .ts",
-    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "test": "jest --passWithNoTests",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed.ts"
   },
   "dependencies": {
-    "@stackdify/game-engine": "*",
-    "@stackdify/shared-types": "*",
     "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.19",
@@ -33,6 +31,9 @@
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@sentry/node": "^10.51.0",
+    "@stackdify/game-engine": "*",
+    "@stackdify/shared-types": "*",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -60,8 +61,10 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/pg": "^8.11.14",
+    "@types/supertest": "^7.2.0",
     "jest": "^30.3.0",
     "prisma": "^7.8.0",
+    "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

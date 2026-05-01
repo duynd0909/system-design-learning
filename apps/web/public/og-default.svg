@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Stackdify system design practice">
+  <rect width="1200" height="630" fill="#0f0d1a"/>
+  <rect x="70" y="70" width="1060" height="490" rx="28" fill="#1a1730" stroke="#818cf8" stroke-opacity=".35" stroke-width="2"/>
+  <circle cx="240" cy="310" r="44" fill="#4f46e5"/>
+  <rect x="410" y="190" width="160" height="84" rx="16" fill="#ede9fe" fill-opacity=".96"/>
+  <rect x="410" y="356" width="160" height="84" rx="16" fill="#ede9fe" fill-opacity=".96"/>
+  <rect x="720" y="270" width="190" height="92" rx="18" fill="#f97316"/>
+  <path d="M284 310 C340 310 350 232 410 232" stroke="#818cf8" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M284 310 C340 310 350 398 410 398" stroke="#818cf8" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M570 232 C640 232 650 316 720 316" stroke="#fcd34d" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M570 398 C640 398 650 316 720 316" stroke="#fcd34d" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <text x="90" y="130" fill="#a78bfa" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700">Stackdify</text>
+  <text x="90" y="505" fill="#ede9fe" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">Practice system design</text>
+  <text x="90" y="548" fill="#a78bfa" font-family="Inter, Arial, sans-serif" font-size="28">Drag, drop, and learn real-world architecture.</text>
+</svg>
