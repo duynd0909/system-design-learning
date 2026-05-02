@@ -180,12 +180,17 @@ function GameHeader({
           type="button"
           aria-label="Go to Stackdify home"
           onClick={() => onNavigate('/')}
-          className="flex shrink-0 items-center gap-1.5"
+          className="flex shrink-0 items-center gap-1.5 group"
         >
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
-            <Network className="h-3.5 w-3.5" aria-hidden="true" />
-          </span>
-          <span className="hidden bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text font-display text-sm font-bold text-transparent sm:block dark:from-indigo-300 dark:to-purple-300">
+          <div
+            className="w-6 h-6 shrink-0 transition-transform group-hover:scale-105"
+            style={{
+              background: '#00ffa3',
+              clipPath:
+                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+            }}
+          />
+          <span className="hidden font-display text-sm font-bold text-[var(--text-primary)] sm:block">
             Stackdify
           </span>
         </button>
