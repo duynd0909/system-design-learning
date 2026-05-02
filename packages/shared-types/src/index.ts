@@ -416,3 +416,18 @@ export interface AdminProblemListItem {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface AdminRequirementDetail {
+  id: string;
+  order: number;
+  title: string;
+  description: string;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  answer: Record<string, string>;
+}
+
+export interface AdminProblemDetail {
+  problem: AdminProblemListItem;
+  requirements: AdminRequirementDetail[];
+}

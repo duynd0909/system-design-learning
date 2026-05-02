@@ -19,6 +19,7 @@ import type {
   PublicUserProfile,
   AdminStatsResponse,
   AdminProblemListItem,
+  AdminProblemDetail,
   ComponentType,
 } from '@stackdify/shared-types';
 
@@ -284,7 +285,7 @@ export function useAdminProblems(token: string, status?: 'published' | 'hidden' 
 export function useAdminProblem(token: string, slug: string) {
   return useQuery({
     queryKey: ['admin', 'problems', slug],
-    queryFn: () => apiFetch<{ problem: AdminProblemListItem; requirements: unknown[] }>(`/admin/problems/${slug}`, undefined, token),
+    queryFn: () => apiFetch<AdminProblemDetail>(`/admin/problems/${slug}`, undefined, token),
     enabled: !!token && !!slug,
   });
 }
@@ -323,7 +324,7 @@ export function useRestoreProblem(token: string) {
 
 export function useCreateProblem(token: string) {
   const qc = useQueryClient();
-  return useMutation<{ id: string; slug: string }, Error, Record<string, unknown>>({
+  return useMutation<{ id: string; slug: string }, Error, object>({
     mutationFn: (data) => apiFetch('/admin/problems', { method: 'POST', body: JSON.stringify(data) }, token),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['admin', 'problems'] });
@@ -334,7 +335,7 @@ export function useCreateProblem(token: string) {
 
 export function useUpdateProblem(token: string) {
   const qc = useQueryClient();
-  return useMutation<unknown, Error, { slug: string; data: Record<string, unknown> }>({
+  return useMutation<unknown, Error, { slug: string; data: object }>({
     mutationFn: ({ slug, data }) => apiFetch(`/admin/problems/${slug}`, { method: 'PATCH', body: JSON.stringify(data) }, token),
     onSuccess: (_, { slug }) => {
       void qc.invalidateQueries({ queryKey: ['admin', 'problems'] });

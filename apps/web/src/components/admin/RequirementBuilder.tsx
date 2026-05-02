@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import ReactFlow, {
+import {
+  ReactFlow,
   Background,
   Controls,
   addEdge,
@@ -11,6 +12,8 @@ import ReactFlow, {
   type Edge,
   type Connection,
   type NodeTypes,
+  type NodePositionChange,
+  type EdgeRemoveChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, Trash2, Eye, EyeOff, X, Target } from 'lucide-react';
@@ -18,7 +21,7 @@ import type { ComponentType, GraphEdge, GraphNode } from '@stackdify/shared-type
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
-import { categoryForComponent, getCategoryStyle, normalizeComponentCategory } from '@/components/game/graph-config';
+import { categoryForComponent, getCategoryStyle } from '@/components/game/graph-config';
 import { iconForComponent } from '@/components/game/component-icons';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -143,9 +146,10 @@ interface SingleCanvasProps {
   allPreviousNodes: GraphNode[];
   componentTypes: ComponentType[];
   onChange: (req: RequirementData) => void;
+  fullHeight?: boolean;
 }
 
-function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes, onChange }: SingleCanvasProps) {
+function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes, onChange, fullHeight }: SingleCanvasProps) {
   const [previewMode, setPreviewMode] = useState(false);
   const [actorName, setActorName] = useState('');
   const [showActorInput, setShowActorInput] = useState(false);
@@ -281,7 +285,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
   const onNodesChangeWithPersist = useCallback((changes: Parameters<typeof onNodesChange>[0]) => {
     onNodesChange(changes);
     // Persist position changes back to requirement
-    const positionChanges = changes.filter((c) => c.type === 'position' && c.position);
+    const positionChanges = changes.filter((c): c is NodePositionChange => c.type === 'position' && !!c.position);
     if (positionChanges.length > 0) {
       const updatedNodes = requirement.nodes.map((n) => {
         const change = positionChanges.find((c) => c.id === n.id);
@@ -341,7 +345,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
 
   const onEdgesChangeWithPersist = useCallback((changes: Parameters<typeof onEdgesChange>[0]) => {
     onEdgesChange(changes);
-    const removeChanges = changes.filter((c) => c.type === 'remove');
+    const removeChanges = changes.filter((c): c is EdgeRemoveChange => c.type === 'remove');
     if (removeChanges.length > 0) {
       const removedIds = new Set(removeChanges.map((c) => c.id));
       const newEdges = requirement.edges.filter((e) => !removedIds.has(e.id));
@@ -353,7 +357,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
   const answerCount = Object.keys(requirement.answer).length;
 
   return (
-    <div className="flex h-[480px] flex-col rounded-xl border border-[var(--text-primary)]/12 bg-[var(--bg-primary)] overflow-hidden">
+    <div className={cn('flex flex-col bg-[var(--bg-game-canvas)] overflow-hidden', fullHeight ? 'h-full' : 'h-[480px] rounded-xl border border-[var(--text-primary)]/12')}>
       {/* Toolbar */}
       <div className="flex items-center gap-2 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3 py-2">
         <span className="text-xs text-[var(--text-secondary)]">
@@ -428,7 +432,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
         )}
 
         {/* Flow canvas */}
-        <div className="flex-1">
+        <div className="relative flex-1 h-full">
           <ReactFlow
             nodes={nodesWithCb}
             edges={edges}
@@ -458,9 +462,10 @@ interface RequirementBuilderProps {
   initialRequirements?: RequirementData[];
   componentTypes: ComponentType[];
   onChange: (requirements: RequirementData[]) => void;
+  fullHeight?: boolean;
 }
 
-export function RequirementBuilder({ initialRequirements = [], componentTypes, onChange }: RequirementBuilderProps) {
+export function RequirementBuilder({ initialRequirements = [], componentTypes, onChange, fullHeight }: RequirementBuilderProps) {
   const [requirements, setRequirements] = useState<RequirementData[]>(
     initialRequirements.length > 0
       ? initialRequirements
@@ -507,6 +512,103 @@ export function RequirementBuilder({ initialRequirements = [], componentTypes, o
   );
 
   const activeReq = requirements[activeIdx];
+
+  if (fullHeight) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden">
+        {/* Sidebar + canvas */}
+        <div className="flex flex-1 min-h-0">
+          {/* Left sidebar: req list + metadata */}
+          <aside className="flex w-56 shrink-0 flex-col border-r border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] overflow-y-auto">
+            <div className="border-b border-[var(--text-primary)]/10 p-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">Requirements</p>
+              <div className="space-y-1">
+                {requirements.map((req, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveIdx(i)}
+                      className={cn(
+                        'flex-1 rounded-lg px-2.5 py-1.5 text-left text-xs font-semibold transition-colors',
+                        activeIdx === i
+                          ? 'bg-[var(--accent-primary)] text-white'
+                          : 'text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)]',
+                      )}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className={cn('flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold', activeIdx === i ? 'bg-white/20' : 'bg-[var(--text-primary)]/10')}>
+                          {req.order}
+                        </span>
+                        {req.title || `Requirement ${req.order}`}
+                      </span>
+                    </button>
+                    {requirements.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => deleteRequirement(i)}
+                        className="rounded p-0.5 text-[var(--text-secondary)] hover:text-[var(--slot-incorrect)] transition-colors"
+                        title="Remove"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addRequirement}
+                  className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)] transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                  Add Requirement
+                </button>
+              </div>
+            </div>
+
+            {activeReq && (
+              <div className="space-y-3 p-3">
+                <Input
+                  label="Title"
+                  placeholder="e.g. Route user traffic"
+                  value={activeReq.title}
+                  onChange={(e) => updateReq(activeIdx, { ...activeReq, title: e.target.value })}
+                />
+                <Input
+                  label="Description"
+                  placeholder="What challenge does the player face?"
+                  value={activeReq.description}
+                  onChange={(e) => updateReq(activeIdx, { ...activeReq, description: e.target.value })}
+                />
+                <div className="rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/60 p-2.5 text-xs text-[var(--text-secondary)]">
+                  <p className="font-medium text-[var(--text-primary)]">How to build</p>
+                  <ol className="mt-1.5 space-y-1 list-decimal list-inside">
+                    <li>Click a component in the palette to add it</li>
+                    <li>Drag nodes to position them</li>
+                    <li>Connect nodes by dragging between handles</li>
+                    <li>Click <span className="text-[var(--slot-blank)] font-semibold">⊙</span> to mark answer slots</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </aside>
+
+          {/* Canvas */}
+          <div className="flex-1 min-w-0">
+            {activeReq && (
+              <SingleRequirementCanvas
+                key={activeIdx}
+                requirement={activeReq}
+                allPreviousNodes={allPreviousNodes}
+                componentTypes={componentTypes}
+                onChange={(req) => updateReq(activeIdx, req)}
+                fullHeight
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

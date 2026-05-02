@@ -31,6 +31,8 @@ interface ProblemMetadataFormProps {
   isLoading?: boolean;
   submitLabel?: string;
   disableSlug?: boolean;
+  formId?: string;
+  hideSubmit?: boolean;
 }
 
 function validateSlug(slug: string) {
@@ -45,6 +47,8 @@ export function ProblemMetadataForm({
   isLoading,
   submitLabel = 'Save',
   disableSlug = false,
+  formId,
+  hideSubmit = false,
 }: ProblemMetadataFormProps) {
   const [values, setValues] = useState<ProblemMetadata>({
     slug: initialValues?.slug ?? '',
@@ -76,7 +80,7 @@ export function ProblemMetadataForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form id={formId} onSubmit={handleSubmit} className="space-y-4">
       <Input
         label="Slug"
         placeholder="e.g. design-twitter"
@@ -126,11 +130,13 @@ export function ProblemMetadataForm({
           </datalist>
         </div>
       </div>
-      <div className="flex justify-end pt-2">
-        <Button type="submit" variant="primary" size="sm" disabled={isLoading}>
-          {isLoading ? 'Saving…' : submitLabel}
-        </Button>
-      </div>
+      {!hideSubmit && (
+        <div className="flex justify-end pt-2">
+          <Button type="submit" variant="primary" size="sm" disabled={isLoading}>
+            {isLoading ? 'Saving…' : submitLabel}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

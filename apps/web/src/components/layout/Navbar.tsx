@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { StreakBadge } from '@/components/ui/StreakBadge';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
+import { Role } from '@stackdify/shared-types';
 
 interface NavbarProps {
   overlay?: boolean;
@@ -23,6 +24,7 @@ export function Navbar({ overlay = false }: NavbarProps) {
     { href: '/problems', label: 'Problems' },
     { href: '/leaderboard', label: 'Leaderboard' },
     ...(isAuthenticated ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+    ...(user?.role === Role.ADMIN ? [{ href: '/admin', label: 'Admin' }] : []),
   ];
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
