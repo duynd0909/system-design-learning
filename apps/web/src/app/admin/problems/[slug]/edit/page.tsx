@@ -95,7 +95,7 @@ export default function EditProblemPage() {
   const isDeleted = !!data?.problem.deletedAt;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[var(--bg-primary)]">
+    <div className="flex h-full flex-col overflow-hidden bg-[var(--bg-primary)]">
       {/* Compact header */}
       <header className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-4">
         {/* Left: breadcrumb + title */}
@@ -141,7 +141,7 @@ export default function EditProblemPage() {
             aria-selected={tab === 'metadata'}
             onClick={() => setTab('metadata')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+              'flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
               tab === 'metadata'
                 ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -156,7 +156,7 @@ export default function EditProblemPage() {
             aria-selected={tab === 'requirements'}
             onClick={() => setTab('requirements')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+              'flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
               tab === 'requirements'
                 ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',

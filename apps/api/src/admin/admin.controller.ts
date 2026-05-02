@@ -7,6 +7,8 @@ import {
   ReplaceRequirementsDto,
   UpdateAdminProblemDto,
 } from './dto/admin-problem.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { Role } from '@stackdify/shared-types';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -61,5 +63,25 @@ export class AdminController {
   @Patch('problems/:slug/restore')
   restoreProblem(@Param('slug') slug: string) {
     return this.adminService.restoreProblem(slug);
+  }
+
+  @Get('users')
+  listUsers(@Query('role') role?: Role) {
+    return this.adminService.listUsers(role);
+  }
+
+  @Patch('users/:id/role')
+  updateUserRole(@Param('id') id: string, @Body() dto: UpdateUserRoleDto) {
+    return this.adminService.updateUserRole(id, dto.role);
+  }
+
+  @Patch('users/:id/deactivate')
+  deactivateUser(@Param('id') id: string) {
+    return this.adminService.deactivateUser(id);
+  }
+
+  @Patch('users/:id/activate')
+  activateUser(@Param('id') id: string) {
+    return this.adminService.activateUser(id);
   }
 }

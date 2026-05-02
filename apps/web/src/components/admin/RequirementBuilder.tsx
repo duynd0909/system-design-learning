@@ -4,7 +4,9 @@ import { useState, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
+  MarkerType,
   addEdge,
   useNodesState,
   useEdgesState,
@@ -12,6 +14,7 @@ import {
   type Edge,
   type Connection,
   type NodeTypes,
+  type NodeProps,
   type NodePositionChange,
   type EdgeRemoveChange,
 } from '@xyflow/react';
@@ -21,8 +24,9 @@ import type { ComponentType, GraphEdge, GraphNode } from '@stackdify/shared-type
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
-import { categoryForComponent, getCategoryStyle } from '@/components/game/graph-config';
-import { iconForComponent } from '@/components/game/component-icons';
+import { categoryForComponent, getCategoryStyle, normalizeComponentCategory } from '@/components/game/graph-config';
+import { iconForComponent, ActorIcon } from '@/components/game/component-icons';
+import { GraphNodeShell, NodeHandles } from '@/components/game/GameNodes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,107 +39,118 @@ export interface RequirementData {
   answer: Record<string, string>;
 }
 
-// ─── Builder Node visual ──────────────────────────────────────────────────────
+// ─── Builder Node components ──────────────────────────────────────────────────
+// Reuse the exact same GraphNodeShell + NodeHandles as the game page so the
+// node appearance, handle positions, and edge routing are identical.
 
-interface BuilderNodeData extends Record<string, unknown> {
+interface BuilderComponentData extends Record<string, unknown> {
   componentSlug: string;
   label: string;
+  category?: string;
   isAnswer: boolean;
   isPrevious: boolean;
   onToggleAnswer?: (nodeId: string, slug: string) => void;
   onDelete?: (nodeId: string) => void;
 }
 
-function BuilderComponentNode({ id, data, selected }: { id: string; data: BuilderNodeData; selected?: boolean }) {
-  const cat = categoryForComponent({ slug: data.componentSlug, category: '' });
-  const style = getCategoryStyle(cat);
+function BuilderComponentNode({ id, data, selected }: NodeProps<Node<BuilderComponentData, 'component'>>) {
   const Icon = iconForComponent(data.componentSlug);
+  const category = normalizeComponentCategory(data.category, data.componentSlug);
+  const categoryStyle = getCategoryStyle(category);
 
   return (
-    <div
-      className={cn(
-        'relative rounded-xl border-2 bg-[var(--bg-secondary)] px-3 py-2 min-w-[110px] text-center shadow-sm',
-        data.isAnswer
-          ? 'border-[var(--slot-blank)] bg-[var(--slot-blank)]/8'
-          : data.isPrevious
-          ? 'border-[var(--text-primary)]/20 opacity-60'
-          : selected
-          ? 'border-[var(--accent-primary)]'
-          : 'border-[var(--text-primary)]/20',
-      )}
-      style={{ borderColor: data.isAnswer ? undefined : data.isPrevious ? undefined : style.border }}
+    <GraphNodeShell
+      ariaLabel={`${data.label} component`}
+      category={category}
+      selected={!data.isPrevious && !!selected}
+      dimmed={data.isPrevious}
+      visualState={data.isAnswer ? 'missing-config' : 'idle'}
     >
-      {/* Answer badge */}
+      <NodeHandles category={category} />
+
+      {/* ANSWER badge — floats above the node */}
       {data.isAnswer && (
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--slot-blank)] px-1.5 py-0.5 text-[9px] font-bold text-white">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--slot-blank)] px-2 py-0.5 text-[9px] font-bold leading-none text-white shadow">
           ANSWER
         </div>
       )}
 
-      <div className="flex flex-col items-center gap-1">
-        <div className="h-6 w-6 text-[var(--text-primary)]">
-          <Icon size={24} />
-        </div>
-        <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight">{data.label}</span>
-      </div>
-
-      {/* Action buttons — only for editable (non-previous) nodes */}
+      {/* Builder action buttons (answer toggle + delete) */}
       {!data.isPrevious && (
-        <div className="absolute -right-2 -top-2 flex gap-0.5">
+        <div className="absolute -right-1 -top-2.5 flex items-center gap-0.5">
           <button
             type="button"
-            title={data.isAnswer ? 'Unmark answer' : 'Mark as answer slot'}
-            onClick={() => data.onToggleAnswer?.(id, data.componentSlug)}
+            title={data.isAnswer ? 'Unmark answer slot' : 'Mark as answer slot'}
+            onClick={(e) => { e.stopPropagation(); data.onToggleAnswer?.(id, data.componentSlug); }}
             className={cn(
-              'rounded-full p-0.5 text-[10px] transition-colors',
+              'flex h-4 w-4 items-center justify-center rounded-full border transition-colors',
               data.isAnswer
-                ? 'bg-[var(--slot-blank)] text-white'
-                : 'bg-[var(--bg-secondary)] border border-[var(--text-primary)]/20 text-[var(--text-secondary)] hover:bg-[var(--slot-blank)]/20',
+                ? 'border-[var(--slot-blank)] bg-[var(--slot-blank)] text-white'
+                : 'border-[var(--text-primary)]/25 bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:border-[var(--slot-blank)]/60 hover:text-[var(--slot-blank)]',
             )}
           >
-            <Target className="h-2.5 w-2.5" />
+            <Target className="h-2 w-2" />
           </button>
           <button
             type="button"
             title="Delete node"
-            onClick={() => data.onDelete?.(id)}
-            className="rounded-full border border-[var(--text-primary)]/20 bg-[var(--bg-secondary)] p-0.5 text-[var(--text-secondary)] hover:bg-[var(--slot-incorrect)]/20 hover:text-[var(--slot-incorrect)] transition-colors"
+            onClick={(e) => { e.stopPropagation(); data.onDelete?.(id); }}
+            className="flex h-4 w-4 items-center justify-center rounded-full border border-[var(--text-primary)]/25 bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors hover:border-[var(--slot-incorrect)]/60 hover:text-[var(--slot-incorrect)]"
           >
-            <X className="h-2.5 w-2.5" />
+            <X className="h-2 w-2" />
           </button>
         </div>
       )}
 
-      {/* React Flow handles */}
-      <div className="absolute left-0 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--text-primary)]/30 bg-[var(--bg-secondary)]" />
-      <div className="absolute right-0 top-1/2 h-3 w-3 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--text-primary)]/30 bg-[var(--bg-secondary)]" />
-    </div>
+      {/* Same inner layout as ComponentNode */}
+      <div className="flex items-center gap-2">
+        <span className={cn('grid h-9 w-9 place-items-center rounded-md border', categoryStyle.bgClass, categoryStyle.borderClass, categoryStyle.textClass)}>
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold">{data.label}</div>
+          <div className="truncate text-[10px] uppercase tracking-wide text-[var(--text-secondary)]">{data.componentSlug}</div>
+        </div>
+      </div>
+    </GraphNodeShell>
   );
 }
 
-interface ActorBuilderData extends Record<string, unknown> {
+interface BuilderActorData extends Record<string, unknown> {
   label: string;
   isPrevious: boolean;
   onDelete?: (nodeId: string) => void;
 }
 
-function BuilderActorNode({ id, data }: { id: string; data: ActorBuilderData }) {
+function BuilderActorNode({ id, data, selected }: NodeProps<Node<BuilderActorData, 'actor'>>) {
   return (
-    <div className={cn('relative rounded-full border-2 border-dashed border-[var(--text-secondary)]/40 bg-[var(--bg-secondary)] px-4 py-2 text-center', data.isPrevious && 'opacity-60')}>
-      <span className="text-xs font-semibold text-[var(--text-secondary)]">{data.label}</span>
+    <GraphNodeShell
+      ariaLabel={`${data.label} actor`}
+      category="networking"
+      selected={!data.isPrevious && !!selected}
+      dimmed={data.isPrevious}
+      className="min-w-32 rounded-full bg-[var(--bg-primary)]"
+    >
+      <NodeHandles category="networking" />
+
       {!data.isPrevious && (
         <button
           type="button"
-          title="Delete"
-          onClick={() => data.onDelete?.(id)}
-          className="absolute -right-2 -top-2 rounded-full border border-[var(--text-primary)]/20 bg-[var(--bg-secondary)] p-0.5 text-[var(--text-secondary)] hover:text-[var(--slot-incorrect)] transition-colors"
+          title="Delete actor"
+          onClick={(e) => { e.stopPropagation(); data.onDelete?.(id); }}
+          className="absolute -right-1 -top-2.5 flex h-4 w-4 items-center justify-center rounded-full border border-[var(--text-primary)]/25 bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors hover:border-[var(--slot-incorrect)]/60 hover:text-[var(--slot-incorrect)]"
         >
-          <X className="h-2.5 w-2.5" />
+          <X className="h-2 w-2" />
         </button>
       )}
-      <div className="absolute left-0 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--text-primary)]/30 bg-[var(--bg-secondary)]" />
-      <div className="absolute right-0 top-1/2 h-3 w-3 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--text-primary)]/30 bg-[var(--bg-secondary)]" />
-    </div>
+
+      <div className="flex items-center gap-2">
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+          <ActorIcon />
+        </span>
+        <span className="text-sm font-semibold">{data.label}</span>
+      </div>
+    </GraphNodeShell>
   );
 }
 
@@ -159,7 +174,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
       const prevIds = new Set(prevNodes.map((n) => n.id));
       const prevFlowNodes: Node[] = prevNodes.map((n) => ({
         id: n.id,
-        type: n.type === 'actor' ? 'builderActor' : 'builderComponent',
+        type: n.type === 'actor' ? 'actor' : 'component',
         position: n.position,
         draggable: false,
         data: n.type === 'actor'
@@ -176,17 +191,17 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
         if (n.type === 'actor') {
           return {
             id: n.id,
-            type: 'builderActor',
+            type: 'actor',
             position: n.position,
             draggable: !isPreview,
             data: { label: (n.data as { label: string }).label, isPrevious: false },
           };
         }
         const slug = (n.data as { componentSlug: string }).componentSlug;
-        const isAnswer = slug in req.answer || n.id in req.answer;
+        const isAnswer = n.id in req.answer;
         return {
           id: n.id,
-          type: 'builderComponent',
+          type: 'component',
           position: n.position,
           draggable: !isPreview,
           data: {
@@ -209,7 +224,8 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
       source: e.source,
       target: e.target,
       label: e.label,
-      animated: e.animated,
+      animated: e.animated ?? false,
+      markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--text-secondary)' },
       style: { stroke: 'var(--text-secondary)', strokeWidth: 1.5 },
     })), []);
 
@@ -217,21 +233,17 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
   const [edges, setEdges, onEdgesChange] = useEdgesState(buildFlowEdges(requirement));
 
   const nodeTypes: NodeTypes = useMemo(() => ({
-    builderComponent: (props) => (
-      <BuilderComponentNode
-        id={props.id}
-        data={props.data as BuilderNodeData}
-        selected={props.selected}
-      />
-    ),
-    builderActor: (props) => (
-      <BuilderActorNode id={props.id} data={props.data as ActorBuilderData} />
-    ),
+    component: BuilderComponentNode as NodeTypes[string],
+    actor: BuilderActorNode as NodeTypes[string],
   }), []);
 
   const onConnect = useCallback((connection: Connection) => {
     setEdges((eds) => {
-      const newEdges = addEdge({ ...connection, style: { stroke: 'var(--text-secondary)', strokeWidth: 1.5 } }, eds);
+      const newEdges = addEdge({
+        ...connection,
+        markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--text-secondary)' },
+        style: { stroke: 'var(--text-secondary)', strokeWidth: 1.5 },
+      }, eds);
       const updatedEdges: GraphEdge[] = newEdges.map((e) => ({
         id: e.id,
         source: e.source,
@@ -255,7 +267,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
     }
     setNodes((nds) => nds.map((n) =>
       n.id === nodeId
-        ? { ...n, data: { ...(n.data as BuilderNodeData), isAnswer: nodeId in newAnswer } }
+        ? { ...n, data: { ...(n.data as BuilderComponentData), isAnswer: nodeId in newAnswer } }
         : n,
     ));
     onChange({ ...requirement, answer: newAnswer });
@@ -273,11 +285,11 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
 
   // Inject callbacks into node data
   const nodesWithCb = useMemo(() => nodes.map((n) => {
-    if (n.type === 'builderComponent') {
-      return { ...n, data: { ...(n.data as BuilderNodeData), onToggleAnswer: handleToggleAnswer, onDelete: handleDeleteNode } };
+    if (n.type === 'component') {
+      return { ...n, data: { ...(n.data as BuilderComponentData), onToggleAnswer: handleToggleAnswer, onDelete: handleDeleteNode } };
     }
-    if (n.type === 'builderActor') {
-      return { ...n, data: { ...(n.data as ActorBuilderData), onDelete: handleDeleteNode } };
+    if (n.type === 'actor') {
+      return { ...n, data: { ...(n.data as BuilderActorData), onDelete: handleDeleteNode } };
     }
     return n;
   }), [nodes, handleToggleAnswer, handleDeleteNode]);
@@ -309,7 +321,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
     };
     const flowNode: Node = {
       id,
-      type: 'builderComponent',
+      type: 'component',
       position,
       draggable: true,
       data: {
@@ -332,7 +344,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
     const newNode: GraphNode = { id, type: 'actor', position, data: { label: label.trim() } };
     const flowNode: Node = {
       id,
-      type: 'builderActor',
+      type: 'actor',
       position,
       draggable: true,
       data: { label: label.trim(), isPrevious: false, onDelete: handleDeleteNode },
@@ -447,7 +459,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
             elementsSelectable={!previewMode}
             deleteKeyCode="Delete"
           >
-            <Background />
+            <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
             <Controls />
           </ReactFlow>
         </div>

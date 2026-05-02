@@ -15,26 +15,39 @@
 }
 
 @keyframes slot-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
   }
+
   50% {
     box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.4);
   }
 }
 
 @keyframes submit-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
   }
+
   50% {
     box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.3);
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes system-edge-dash {
@@ -44,10 +57,13 @@
 }
 
 @keyframes aurora-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.05);
@@ -92,7 +108,7 @@
   --bg-secondary: #1a1730;
   --bg-game-canvas: #131025;
   --text-primary: #ede9fe;
-  --text-secondary: #a78bfa;
+  --text-secondary: #c4b5fd;
   --accent-primary: #818cf8;
   --accent-game: #fcd34d;
   --slot-blank: #fb923c;

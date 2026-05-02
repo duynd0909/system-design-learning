@@ -95,7 +95,7 @@ const stateClasses: Record<GraphNodeVisualState, string> = {
   'missing-config': 'border-dashed border-[var(--slot-blank)] shadow-sm',
 };
 
-const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(function GraphNodeShell({
+export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(function GraphNodeShell({
   category,
   visualState = 'idle',
   selected = false,
@@ -199,7 +199,7 @@ function PortHandle({
   );
 }
 
-function NodeHandles({ category }: { category: ComponentSemanticCategory }) {
+export function NodeHandles({ category }: { category: ComponentSemanticCategory }) {
   const labels = getPortLabels(category);
   return (
     <>

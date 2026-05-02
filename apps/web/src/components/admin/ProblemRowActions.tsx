@@ -27,29 +27,31 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
 
   if (isDeleted) {
     return (
-      <button
-        type="button"
-        title="Restore"
-        onClick={() => void restore.mutateAsync(problem.slug)}
-        disabled={isPending}
-        className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-[var(--slot-correct)] hover:bg-[var(--slot-correct)]/10 disabled:opacity-50 transition-colors"
-      >
-        <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-        Restore
-      </button>
+      <div className="flex justify-center">
+        <button
+          type="button"
+          title="Restore"
+          onClick={() => void restore.mutateAsync(problem.slug)}
+          disabled={isPending}
+          className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-xs font-medium text-[var(--slot-correct)] hover:bg-[var(--slot-correct)]/10 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+        >
+          <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+          Restore
+        </button>
+      </div>
     );
   }
 
   return (
     <>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1">
         {problem.isPublished ? (
           <button
             type="button"
             title="Hide"
             onClick={() => void hide.mutateAsync(problem.slug)}
             disabled={isPending}
-            className="rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)] disabled:opacity-50 transition-colors"
+            className="cursor-pointer rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
             <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -59,7 +61,7 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
             title="Publish"
             onClick={() => void publish.mutateAsync(problem.slug)}
             disabled={isPending}
-            className="rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--slot-correct)] disabled:opacity-50 transition-colors"
+            className="cursor-pointer rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--slot-correct)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -68,7 +70,7 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
           type="button"
           title="Edit"
           onClick={() => router.push(`/admin/problems/${problem.slug}/edit`)}
-          className="rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)] transition-colors"
+          className="cursor-pointer rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--text-primary)]/8 hover:text-[var(--text-primary)] transition-colors"
         >
           <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
@@ -77,7 +79,7 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
           title="Delete"
           onClick={() => setShowDeleteModal(true)}
           disabled={isPending}
-          className="rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--slot-incorrect)]/10 hover:text-[var(--slot-incorrect)] disabled:opacity-50 transition-colors"
+          className="cursor-pointer rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--slot-incorrect)]/10 hover:text-[var(--slot-incorrect)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
         >
           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>

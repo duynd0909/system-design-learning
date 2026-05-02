@@ -20,8 +20,10 @@ import type {
   AdminStatsResponse,
   AdminProblemListItem,
   AdminProblemDetail,
+  AdminUserListItem,
   ComponentType,
 } from '@stackdify/shared-types';
+import { Role } from '@stackdify/shared-types';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
@@ -351,6 +353,45 @@ export function useReplaceRequirements(token: string) {
       apiFetch(`/admin/problems/${slug}/requirements`, { method: 'PUT', body: JSON.stringify({ requirements }) }, token),
     onSuccess: (_, { slug }) => {
       void qc.invalidateQueries({ queryKey: ['admin', 'problems', slug] });
+    },
+  });
+}
+
+export function useAdminUsers(token: string, role?: Role) {
+  return useQuery<AdminUserListItem[]>({
+    queryKey: ['admin', 'users', role ?? 'all'],
+    queryFn: () => apiFetch(`/admin/users${role ? `?role=${role}` : ''}`, undefined, token),
+    enabled: !!token,
+  });
+}
+
+export function useUpdateUserRole(token: string) {
+  const qc = useQueryClient();
+  return useMutation<AdminUserListItem, Error, { id: string; role: Role }>({
+    mutationFn: ({ id, role }) =>
+      apiFetch(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }, token),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+}
+
+export function useDeactivateUser(token: string) {
+  const qc = useQueryClient();
+  return useMutation<AdminUserListItem, Error, string>({
+    mutationFn: (id) => apiFetch(`/admin/users/${id}/deactivate`, { method: 'PATCH' }, token),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+}
+
+export function useActivateUser(token: string) {
+  const qc = useQueryClient();
+  return useMutation<AdminUserListItem, Error, string>({
+    mutationFn: (id) => apiFetch(`/admin/users/${id}/activate`, { method: 'PATCH' }, token),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
   });
 }

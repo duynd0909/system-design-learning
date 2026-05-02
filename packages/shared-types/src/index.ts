@@ -431,3 +431,21 @@ export interface AdminProblemDetail {
   problem: AdminProblemListItem;
   requirements: AdminRequirementDetail[];
 }
+
+export interface AdminUserListItem {
+  id: string;
+  email: string;
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  role: Role;
+  xp: number;
+  level: number;
+  streak: number;
+  deactivatedAt: string | null;
+  createdAt: string;
+}
+
+export interface UpdateUserRoleRequest {
+  role: Role;
+}

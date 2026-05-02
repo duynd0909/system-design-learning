@@ -71,7 +71,7 @@ export default function AdminProblemsPage() {
               type="button"
               onClick={() => setTab(key)}
               className={cn(
-                'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+                'cursor-pointer rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
                 activeTab === key
                   ? 'bg-[var(--accent-primary)] text-white shadow-sm'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -104,7 +104,7 @@ export default function AdminProblemsPage() {
               <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
               <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] sm:table-cell">Reqs</th>
               <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] md:table-cell">Subs</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Actions</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--text-primary)]/8">
@@ -146,7 +146,7 @@ export default function AdminProblemsPage() {
                 </td>
                 <td className="hidden px-4 py-3 text-center text-xs text-[var(--text-secondary)] sm:table-cell">{problem.requirementCount}</td>
                 <td className="hidden px-4 py-3 text-center text-xs text-[var(--text-secondary)] md:table-cell">{problem.submissionCount}</td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-center">
                   <ProblemRowActions problem={problem} token={token} />
                 </td>
               </tr>

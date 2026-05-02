@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Difficulty, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { GraphEdge, GraphNode } from '@stackdify/shared-types';
+import type { AdminUserListItem, GraphEdge, GraphNode } from '@stackdify/shared-types';
+import { Role } from '@stackdify/shared-types';
 import type {
   AdminProblemDto,
   AdminRequirementDto,
@@ -370,5 +371,89 @@ export class AdminService {
         }
       }
     }
+  }
+
+  private readonly userSelect = {
+    id: true,
+    email: true,
+    username: true,
+    displayName: true,
+    avatarUrl: true,
+    role: true,
+    xp: true,
+    level: true,
+    streak: true,
+    deactivatedAt: true,
+    createdAt: true,
+  } as const;
+
+  private mapUser(u: {
+    id: string;
+    email: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    role: string;
+    xp: number;
+    level: number;
+    streak: number;
+    deactivatedAt: Date | null;
+    createdAt: Date;
+  }): AdminUserListItem {
+    return {
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl ?? undefined,
+      role: u.role as Role,
+      xp: u.xp,
+      level: u.level,
+      streak: u.streak,
+      deactivatedAt: u.deactivatedAt?.toISOString() ?? null,
+      createdAt: u.createdAt.toISOString(),
+    };
+  }
+
+  async listUsers(role?: Role): Promise<AdminUserListItem[]> {
+    const users = await this.prisma.user.findMany({
+      where: role ? { role } : undefined,
+      select: this.userSelect,
+      orderBy: { createdAt: 'desc' },
+    });
+    return users.map((u) => this.mapUser(u));
+  }
+
+  async updateUserRole(id: string, role: Role): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { role },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
+  }
+
+  async deactivateUser(id: string): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { deactivatedAt: new Date() },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
+  }
+
+  async activateUser(id: string): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { deactivatedAt: null },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
   }
 }
