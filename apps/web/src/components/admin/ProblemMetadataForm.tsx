@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 const DIFFICULTY_OPTIONS = [
   { value: 'EASY', label: 'Easy' },
@@ -13,8 +13,14 @@ const DIFFICULTY_OPTIONS = [
 ];
 
 const CATEGORY_SUGGESTIONS = [
-  'Social Media', 'Video Streaming', 'Messaging', 'Real-Time Communication',
-  'Marketplace', 'E-Commerce', 'Financial Services', 'Search',
+  'Social Media',
+  'Video Streaming',
+  'Messaging',
+  'Real-Time Communication',
+  'Marketplace',
+  'E-Commerce',
+  'Financial Services',
+  'Search',
 ];
 
 export interface ProblemMetadata {
@@ -37,7 +43,8 @@ interface ProblemMetadataFormProps {
 
 function validateSlug(slug: string) {
   if (!slug.trim()) return 'Slug is required';
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return 'Slug must be lowercase letters, numbers, and hyphens only';
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
+    return 'Slug must be lowercase letters, numbers, and hyphens only';
   return '';
 }
 
@@ -57,12 +64,20 @@ export function ProblemMetadataForm({
     difficulty: initialValues?.difficulty ?? 'MEDIUM',
     category: initialValues?.category ?? '',
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof ProblemMetadata, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ProblemMetadata, string>>
+  >({});
 
-  const set = (field: keyof ProblemMetadata) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setValues((v) => ({ ...v, [field]: e.target.value }));
-    setErrors((err) => ({ ...err, [field]: '' }));
-  };
+  const set =
+    (field: keyof ProblemMetadata) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      setValues((v) => ({ ...v, [field]: e.target.value }));
+      setErrors((err) => ({ ...err, [field]: '' }));
+    };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +85,8 @@ export function ProblemMetadataForm({
     const slugError = validateSlug(values.slug);
     if (slugError) newErrors.slug = slugError;
     if (!values.title.trim()) newErrors.title = 'Title is required';
-    if (!values.description.trim()) newErrors.description = 'Description is required';
+    if (!values.description.trim())
+      newErrors.description = 'Description is required';
     if (!values.category.trim()) newErrors.category = 'Category is required';
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
@@ -126,13 +142,20 @@ export function ProblemMetadataForm({
             list="category-suggestions"
           />
           <datalist id="category-suggestions">
-            {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
+            {CATEGORY_SUGGESTIONS.map((c) => (
+              <option key={c} value={c} />
+            ))}
           </datalist>
         </div>
       </div>
       {!hideSubmit && (
         <div className="flex justify-end pt-2">
-          <Button type="submit" variant="default" size="sm" disabled={isLoading}>
+          <Button
+            type="submit"
+            variant="default"
+            size="sm"
+            disabled={isLoading}
+          >
             {isLoading ? 'Saving…' : submitLabel}
           </Button>
         </div>

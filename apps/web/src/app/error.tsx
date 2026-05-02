@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export default function AppError({
   error,
@@ -26,7 +26,8 @@ export default function AppError({
           Something broke
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          The page could not recover from an unexpected error. Try again, or return to the previous page.
+          The page could not recover from an unexpected error. Try again, or
+          return to the previous page.
         </p>
         <Button type="button" onClick={reset} className="mt-5">
           <RotateCcw className="h-4 w-4" aria-hidden="true" />

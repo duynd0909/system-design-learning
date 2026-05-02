@@ -4,9 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import type { AdminProblemListItem } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
-import { usePublishProblem, useHideProblem, useSoftDeleteProblem, useRestoreProblem } from '@/lib/api';
+import {
+  usePublishProblem,
+  useHideProblem,
+  useSoftDeleteProblem,
+  useRestoreProblem,
+} from '@/lib/api';
 
 interface ProblemRowActionsProps {
   problem: AdminProblemListItem;
@@ -23,7 +28,11 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
   const restore = useRestoreProblem(token);
 
   const isDeleted = !!problem.deletedAt;
-  const isPending = publish.isPending || hide.isPending || softDelete.isPending || restore.isPending;
+  const isPending =
+    publish.isPending ||
+    hide.isPending ||
+    softDelete.isPending ||
+    restore.isPending;
 
   if (isDeleted) {
     return (
@@ -85,17 +94,34 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
         </button>
       </div>
 
-      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete problem?">
+      <Modal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Delete problem?"
+      >
         <p className="text-sm text-[var(--text-secondary)]">
-          &ldquo;<strong className="text-[var(--text-primary)]">{problem.title}</strong>&rdquo; will be soft-deleted and hidden from players. You can restore it later.
+          &ldquo;
+          <strong className="text-[var(--text-primary)]">
+            {problem.title}
+          </strong>
+          &rdquo; will be soft-deleted and hidden from players. You can restore
+          it later.
         </p>
         <ModalFooter>
-          <Button variant="secondary" size="sm" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            Cancel
+          </Button>
           <Button
             variant="default"
             size="sm"
             onClick={() => {
-              void softDelete.mutateAsync(problem.slug).then(() => setShowDeleteModal(false));
+              void softDelete
+                .mutateAsync(problem.slug)
+                .then(() => setShowDeleteModal(false));
             }}
             disabled={softDelete.isPending}
             className="bg-[var(--slot-incorrect)] hover:bg-[var(--slot-incorrect)]/90"

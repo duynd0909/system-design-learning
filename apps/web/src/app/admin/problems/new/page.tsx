@@ -3,11 +3,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useCreateProblem, useReplaceRequirements, useComponentTypes } from '@/lib/api';
-import { ProblemMetadataForm, type ProblemMetadata } from '@/components/admin/ProblemMetadataForm';
-import { RequirementBuilder, type RequirementData } from '@/components/admin/RequirementBuilder';
+import {
+  useCreateProblem,
+  useReplaceRequirements,
+  useComponentTypes,
+} from '@/lib/api';
+import {
+  ProblemMetadataForm,
+  type ProblemMetadata,
+} from '@/components/admin/ProblemMetadataForm';
+import {
+  RequirementBuilder,
+  type RequirementData,
+} from '@/components/admin/RequirementBuilder';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, FileText, Layers, Save } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -32,7 +42,10 @@ export default function NewProblemPage() {
     setError('');
     try {
       const created = await createProblem.mutateAsync(metadata);
-      await replaceRequirements.mutateAsync({ slug: created.slug, requirements });
+      await replaceRequirements.mutateAsync({
+        slug: created.slug,
+        requirements,
+      });
       router.push('/admin/problems');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create problem');
@@ -54,8 +67,12 @@ export default function NewProblemPage() {
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Problems
           </Link>
-          <span className="text-[var(--text-primary)]/20" aria-hidden="true">/</span>
-          <span className="truncate text-sm font-semibold text-[var(--text-primary)]">New Problem</span>
+          <span className="text-[var(--text-primary)]/20" aria-hidden="true">
+            /
+          </span>
+          <span className="truncate text-sm font-semibold text-[var(--text-primary)]">
+            New Problem
+          </span>
         </div>
 
         {/* Center: tab switcher */}
@@ -130,14 +147,19 @@ export default function NewProblemPage() {
           aria-label="Metadata"
           className={cn(
             'absolute inset-0 overflow-y-auto bg-[var(--bg-primary)] transition-opacity duration-150',
-            tab === 'metadata' ? 'z-10 opacity-100' : 'pointer-events-none opacity-0',
+            tab === 'metadata'
+              ? 'z-10 opacity-100'
+              : 'pointer-events-none opacity-0',
           )}
         >
           <div className="mx-auto max-w-2xl px-6 py-8">
             <div className="mb-6">
-              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">Problem Metadata</h2>
+              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+                Problem Metadata
+              </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                Define the problem&apos;s identity — title, slug, difficulty, and what players need to design.
+                Define the problem&apos;s identity — title, slug, difficulty,
+                and what players need to design.
               </p>
             </div>
             <div className="rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-6">
@@ -157,7 +179,9 @@ export default function NewProblemPage() {
           aria-label="Requirements"
           className={cn(
             'absolute inset-0 transition-opacity duration-150',
-            tab === 'requirements' ? 'z-10 opacity-100' : 'pointer-events-none opacity-0',
+            tab === 'requirements'
+              ? 'z-10 opacity-100'
+              : 'pointer-events-none opacity-0',
           )}
         >
           {ctLoading ? (

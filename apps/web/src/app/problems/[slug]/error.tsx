@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export default function ProblemError({
   error,
@@ -27,7 +27,8 @@ export default function ProblemError({
           Canvas crashed
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          The game canvas hit an unexpected error. Your latest submitted answers are safe on the server.
+          The game canvas hit an unexpected error. Your latest submitted answers
+          are safe on the server.
         </p>
         <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
           <Link href="/problems">

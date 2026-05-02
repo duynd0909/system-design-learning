@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from './button';
+import { Button } from './Button';
 
 interface ModalProps {
   open: boolean;
@@ -12,7 +12,13 @@ interface ModalProps {
   className?: string;
 }
 
-export function Modal({ open, onClose, title, children, className }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  className,
+}: ModalProps) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -30,7 +36,11 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       aria-labelledby={title ? 'modal-title' : undefined}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-      <div className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div
+        className="absolute inset-0 cursor-default bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <div
         className={cn(
           'relative z-10 w-full max-w-lg rounded-xl bg-[var(--bg-secondary)] p-6 shadow-xl',
@@ -38,7 +48,10 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
         )}
       >
         {title && (
-          <h2 id="modal-title" className="mb-4 font-display text-xl font-semibold text-[var(--text-primary)]">
+          <h2
+            id="modal-title"
+            className="mb-4 font-display text-xl font-semibold text-[var(--text-primary)]"
+          >
             {title}
           </h2>
         )}
@@ -48,8 +61,18 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
   );
 }
 
-export function ModalFooter({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('mt-6 flex justify-end gap-3', className)}>{children}</div>;
+export function ModalFooter({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn('mt-6 flex justify-end gap-3', className)}>
+      {children}
+    </div>
+  );
 }
 
 export { Button };
