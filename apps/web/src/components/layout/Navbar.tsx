@@ -78,7 +78,11 @@ export function Navbar({ overlay = false }: NavbarProps) {
                     className="flex max-w-44 items-center gap-2 rounded-full bg-white/45 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-white/75 hover:text-indigo-600 dark:bg-white/5 dark:text-[var(--text-primary)] dark:hover:bg-white/10"
                     aria-label="Go to dashboard"
                   >
-                    <UserRound className="h-4 w-4 text-indigo-600 dark:text-[var(--accent-primary)]" aria-hidden="true" />
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                    ) : (
+                      <UserRound className="h-4 w-4 text-indigo-600 dark:text-[var(--accent-primary)]" aria-hidden="true" />
+                    )}
                     <span className="truncate">{user.displayName}</span>
                     {user.streak >= 1 && <StreakBadge streak={user.streak} />}
                   </Link>
@@ -152,7 +156,11 @@ export function Navbar({ overlay = false }: NavbarProps) {
                         onClick={closeMenu}
                         className="flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm font-medium text-gray-700 dark:bg-white/5 dark:text-[var(--text-primary)]"
                       >
-                        <LayoutDashboard className="h-4 w-4 text-indigo-600 dark:text-[var(--accent-primary)]" aria-hidden="true" />
+                        {user.avatarUrl ? (
+                          <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                        ) : (
+                          <LayoutDashboard className="h-4 w-4 text-indigo-600 dark:text-[var(--accent-primary)]" aria-hidden="true" />
+                        )}
                         <span className="truncate">{user.displayName}</span>
                       </Link>
                       <button
