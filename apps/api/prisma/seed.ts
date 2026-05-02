@@ -1,5 +1,6 @@
 import { PrismaClient, type Difficulty, type Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import bcrypt from 'bcrypt';
 import { config as loadEnv } from 'dotenv';
 import { Pool } from 'pg';
 import path from 'path';
@@ -32,18 +33,18 @@ interface ProblemSeed {
 // ─── Component types ──────────────────────────────────────────────────────────
 
 const componentTypes = [
-  { slug: 'cdn',           label: 'CDN',              description: 'Content Delivery Network — caches static assets at edge locations',            category: 'networking' },
-  { slug: 'dns',           label: 'DNS',              description: 'Domain Name System — translates domain names to IP addresses',                 category: 'networking' },
-  { slug: 'load-balancer', label: 'Load Balancer',    description: 'Distributes incoming traffic across multiple servers',                         category: 'networking' },
-  { slug: 'api-gateway',   label: 'API Gateway',      description: 'Single entry point for client requests, handles routing and auth',             category: 'networking' },
-  { slug: 'app-server',    label: 'Application Server', description: 'Processes business logic and application code',                              category: 'compute'   },
-  { slug: 'cache',         label: 'Cache',            description: 'In-memory data store for fast read access (e.g., Redis)',                      category: 'storage'   },
-  { slug: 'relational-db', label: 'Relational DB',    description: 'Structured data storage with ACID guarantees (e.g., PostgreSQL)',              category: 'storage'   },
-  { slug: 'nosql-db',      label: 'NoSQL DB',         description: 'Document or key-value store for flexible schemas (e.g., MongoDB)',             category: 'storage'   },
-  { slug: 'message-queue', label: 'Message Queue',    description: 'Async message broker for decoupled services (e.g., Kafka)',                    category: 'messaging' },
-  { slug: 'object-storage',label: 'Object Storage',   description: 'Stores unstructured files like images and videos (e.g., S3)',                  category: 'storage'   },
-  { slug: 'search-engine', label: 'Search Engine',    description: 'Full-text search with indexing (e.g., Elasticsearch)',                         category: 'data'      },
-  { slug: 'media-server',  label: 'Media Server',     description: 'Transcodes and streams video or audio content',                                category: 'media'     },
+  { slug: 'cdn', label: 'CDN', description: 'Content Delivery Network — caches static assets at edge locations', category: 'networking' },
+  { slug: 'dns', label: 'DNS', description: 'Domain Name System — translates domain names to IP addresses', category: 'networking' },
+  { slug: 'load-balancer', label: 'Load Balancer', description: 'Distributes incoming traffic across multiple servers', category: 'networking' },
+  { slug: 'api-gateway', label: 'API Gateway', description: 'Single entry point for client requests, handles routing and auth', category: 'networking' },
+  { slug: 'app-server', label: 'Application Server', description: 'Processes business logic and application code', category: 'compute' },
+  { slug: 'cache', label: 'Cache', description: 'In-memory data store for fast read access (e.g., Redis)', category: 'storage' },
+  { slug: 'relational-db', label: 'Relational DB', description: 'Structured data storage with ACID guarantees (e.g., PostgreSQL)', category: 'storage' },
+  { slug: 'nosql-db', label: 'NoSQL DB', description: 'Document or key-value store for flexible schemas (e.g., MongoDB)', category: 'storage' },
+  { slug: 'message-queue', label: 'Message Queue', description: 'Async message broker for decoupled services (e.g., Kafka)', category: 'messaging' },
+  { slug: 'object-storage', label: 'Object Storage', description: 'Stores unstructured files like images and videos (e.g., S3)', category: 'storage' },
+  { slug: 'search-engine', label: 'Search Engine', description: 'Full-text search with indexing (e.g., Elasticsearch)', category: 'data' },
+  { slug: 'media-server', label: 'Media Server', description: 'Transcodes and streams video or audio content', category: 'media' },
 ];
 
 // ─── Instagram — 3 requirements (MEDIUM) ─────────────────────────────────────
@@ -67,15 +68,15 @@ const instagramReq1 = {
   title: 'Handle user traffic',
   description: 'Millions of users are hitting your app simultaneously. How do you get their requests to your servers reliably?',
   nodes: [
-    { id: 'user-1', type: 'actor',     position: { x: 0,   y: 320 }, data: { label: 'User' } },
-    { id: 'dns-1',  type: 'component', position: { x: 280, y: 200 }, data: { componentSlug: 'dns',           label: 'DNS' } },
-    { id: 'lb-1',   type: 'component', position: { x: 560, y: 200 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-    { id: 'app-1',  type: 'component', position: { x: 840, y: 100 }, data: { componentSlug: 'app-server',    label: 'App Server 1' } },
+    { id: 'user-1', type: 'actor', position: { x: 0, y: 320 }, data: { label: 'User' } },
+    { id: 'dns-1', type: 'component', position: { x: 280, y: 200 }, data: { componentSlug: 'dns', label: 'DNS' } },
+    { id: 'lb-1', type: 'component', position: { x: 560, y: 200 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+    { id: 'app-1', type: 'component', position: { x: 840, y: 100 }, data: { componentSlug: 'app-server', label: 'App Server 1' } },
   ],
   edges: [
-    { id: 'e-u-dns',  source: 'user-1', target: 'dns-1',  label: 'DNS lookup' },
-    { id: 'e-dns-lb', source: 'dns-1',  target: 'lb-1' },
-    { id: 'e-lb-a1',  source: 'lb-1',   target: 'app-1' },
+    { id: 'e-u-dns', source: 'user-1', target: 'dns-1', label: 'DNS lookup' },
+    { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+    { id: 'e-lb-a1', source: 'lb-1', target: 'app-1' },
   ],
   answer: { 'dns-1': 'dns', 'lb-1': 'load-balancer' },
 };
@@ -85,16 +86,16 @@ const instagramReq2 = {
   title: 'Serve and cache data',
   description: 'Your single server is struggling under load and reads are slow. What do you add to scale and keep data consistent?',
   nodes: [
-    { id: 'app-2',   type: 'component', position: { x: 840,  y: 340 }, data: { componentSlug: 'app-server',    label: 'App Server 2' } },
-    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
-    { id: 'db-1',    type: 'component', position: { x: 1120, y: 340 }, data: { componentSlug: 'relational-db',  label: 'Primary DB' } },
+    { id: 'app-2', type: 'component', position: { x: 840, y: 340 }, data: { componentSlug: 'app-server', label: 'App Server 2' } },
+    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache', label: 'Cache (Redis)' } },
+    { id: 'db-1', type: 'component', position: { x: 1120, y: 340 }, data: { componentSlug: 'relational-db', label: 'Primary DB' } },
   ],
   edges: [
-    { id: 'e-lb-a2',   source: 'lb-1',   target: 'app-2' },
-    { id: 'e-a1-ca',   source: 'app-1',  target: 'cache-1', label: 'read' },
-    { id: 'e-a1-db',   source: 'app-1',  target: 'db-1',    label: 'write' },
-    { id: 'e-a2-ca',   source: 'app-2',  target: 'cache-1', label: 'read' },
-    { id: 'e-a2-db',   source: 'app-2',  target: 'db-1',    label: 'write' },
+    { id: 'e-lb-a2', source: 'lb-1', target: 'app-2' },
+    { id: 'e-a1-ca', source: 'app-1', target: 'cache-1', label: 'read' },
+    { id: 'e-a1-db', source: 'app-1', target: 'db-1', label: 'write' },
+    { id: 'e-a2-ca', source: 'app-2', target: 'cache-1', label: 'read' },
+    { id: 'e-a2-db', source: 'app-2', target: 'db-1', label: 'write' },
   ],
   answer: { 'app-2': 'app-server', 'cache-1': 'cache', 'db-1': 'relational-db' },
 };
@@ -104,18 +105,18 @@ const instagramReq3 = {
   title: 'Store and deliver media',
   description: 'Users upload millions of photos daily and expect instant delivery worldwide. How do you store and serve media at scale?',
   nodes: [
-    { id: 'cdn-1', type: 'component', position: { x: 280,  y: 60  }, data: { componentSlug: 'cdn',            label: 'CDN (Static)' } },
-    { id: 'cdn-2', type: 'component', position: { x: 280,  y: 500 }, data: { componentSlug: 'cdn',            label: 'CDN (Media)' } },
+    { id: 'cdn-1', type: 'component', position: { x: 280, y: 60 }, data: { componentSlug: 'cdn', label: 'CDN (Static)' } },
+    { id: 'cdn-2', type: 'component', position: { x: 280, y: 500 }, data: { componentSlug: 'cdn', label: 'CDN (Media)' } },
     { id: 'obj-1', type: 'component', position: { x: 1120, y: 560 }, data: { componentSlug: 'object-storage', label: 'Object Storage' } },
-    { id: 'db-2',  type: 'component', position: { x: 1400, y: 340 }, data: { componentSlug: 'relational-db',  label: 'Read Replica' } },
+    { id: 'db-2', type: 'component', position: { x: 1400, y: 340 }, data: { componentSlug: 'relational-db', label: 'Read Replica' } },
   ],
   edges: [
-    { id: 'e-u-cdn1',   source: 'user-1', target: 'cdn-1',  label: 'static assets' },
-    { id: 'e-u-cdn2',   source: 'user-1', target: 'cdn-2',  label: 'media stream' },
-    { id: 'e-a1-obj',   source: 'app-1',  target: 'obj-1',  label: 'upload' },
-    { id: 'e-a2-obj',   source: 'app-2',  target: 'obj-1',  label: 'upload' },
-    { id: 'e-cdn2-obj', source: 'cdn-2',  target: 'obj-1',  label: 'origin pull' },
-    { id: 'e-db-rep',   source: 'db-1',   target: 'db-2',   label: 'replication' },
+    { id: 'e-u-cdn1', source: 'user-1', target: 'cdn-1', label: 'static assets' },
+    { id: 'e-u-cdn2', source: 'user-1', target: 'cdn-2', label: 'media stream' },
+    { id: 'e-a1-obj', source: 'app-1', target: 'obj-1', label: 'upload' },
+    { id: 'e-a2-obj', source: 'app-2', target: 'obj-1', label: 'upload' },
+    { id: 'e-cdn2-obj', source: 'cdn-2', target: 'obj-1', label: 'origin pull' },
+    { id: 'e-db-rep', source: 'db-1', target: 'db-2', label: 'replication' },
   ],
   answer: { 'cdn-1': 'cdn', 'cdn-2': 'cdn', 'obj-1': 'object-storage', 'db-2': 'relational-db' },
 };
@@ -146,16 +147,16 @@ const youtubeReq1 = {
   title: 'Route viewer traffic',
   description: 'Hundreds of millions of viewers stream video simultaneously. How do you route traffic efficiently from the edge to your backend?',
   nodes: [
-    { id: 'viewer-1', type: 'actor',     position: { x: 0,   y: 200 }, data: { label: 'Viewer' } },
-    { id: 'dns-1',    type: 'component', position: { x: 300, y: 100 }, data: { componentSlug: 'dns',           label: 'DNS' } },
-    { id: 'cdn-1',    type: 'component', position: { x: 300, y: 320 }, data: { componentSlug: 'cdn',           label: 'CDN' } },
-    { id: 'lb-1',     type: 'component', position: { x: 600, y: 200 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+    { id: 'viewer-1', type: 'actor', position: { x: 0, y: 200 }, data: { label: 'Viewer' } },
+    { id: 'dns-1', type: 'component', position: { x: 300, y: 100 }, data: { componentSlug: 'dns', label: 'DNS' } },
+    { id: 'cdn-1', type: 'component', position: { x: 300, y: 320 }, data: { componentSlug: 'cdn', label: 'CDN' } },
+    { id: 'lb-1', type: 'component', position: { x: 600, y: 200 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
   ],
   edges: [
-    { id: 'e-v-dns',  source: 'viewer-1', target: 'dns-1',  label: 'lookup' },
-    { id: 'e-v-cdn',  source: 'viewer-1', target: 'cdn-1',  label: 'stream' },
-    { id: 'e-dns-lb', source: 'dns-1',    target: 'lb-1' },
-    { id: 'e-cdn-lb', source: 'cdn-1',    target: 'lb-1' },
+    { id: 'e-v-dns', source: 'viewer-1', target: 'dns-1', label: 'lookup' },
+    { id: 'e-v-cdn', source: 'viewer-1', target: 'cdn-1', label: 'stream' },
+    { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+    { id: 'e-cdn-lb', source: 'cdn-1', target: 'lb-1' },
   ],
   answer: { 'dns-1': 'dns', 'cdn-1': 'cdn' },
 };
@@ -165,11 +166,11 @@ const youtubeReq2 = {
   title: 'Serve API requests',
   description: 'Your backend must handle millions of API calls for search, recommendations, and playback. How do you structure the request path?',
   nodes: [
-    { id: 'api-gw', type: 'component', position: { x: 900, y: 80  }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
-    { id: 'app-1',  type: 'component', position: { x: 900, y: 320 }, data: { componentSlug: 'app-server',  label: 'App Server' } },
+    { id: 'api-gw', type: 'component', position: { x: 900, y: 80 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
+    { id: 'app-1', type: 'component', position: { x: 900, y: 320 }, data: { componentSlug: 'app-server', label: 'App Server' } },
   ],
   edges: [
-    { id: 'e-lb-gw',  source: 'lb-1', target: 'api-gw' },
+    { id: 'e-lb-gw', source: 'lb-1', target: 'api-gw' },
     { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
   ],
   answer: { 'api-gw': 'api-gateway', 'app-1': 'app-server' },
@@ -180,14 +181,14 @@ const youtubeReq3 = {
   title: 'Handle uploads and transcoding',
   description: 'Creators upload large video files around the clock. What infrastructure handles the upload and converts them to multiple formats?',
   nodes: [
-    { id: 'creator-1', type: 'actor',     position: { x: 0,    y: 500 }, data: { label: 'Creator' } },
-    { id: 'mq-1',      type: 'component', position: { x: 1200, y: 320 }, data: { componentSlug: 'message-queue', label: 'Message Queue' } },
-    { id: 'media-1',   type: 'component', position: { x: 1200, y: 520 }, data: { componentSlug: 'media-server',  label: 'Transcoder' } },
+    { id: 'creator-1', type: 'actor', position: { x: 0, y: 500 }, data: { label: 'Creator' } },
+    { id: 'mq-1', type: 'component', position: { x: 1200, y: 320 }, data: { componentSlug: 'message-queue', label: 'Message Queue' } },
+    { id: 'media-1', type: 'component', position: { x: 1200, y: 520 }, data: { componentSlug: 'media-server', label: 'Transcoder' } },
   ],
   edges: [
-    { id: 'e-c-lb',    source: 'creator-1', target: 'lb-1',   label: 'upload' },
-    { id: 'e-app-mq',  source: 'app-1',     target: 'mq-1',   label: 'enqueue job' },
-    { id: 'e-mq-med',  source: 'mq-1',      target: 'media-1', label: 'transcode' },
+    { id: 'e-c-lb', source: 'creator-1', target: 'lb-1', label: 'upload' },
+    { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'enqueue job' },
+    { id: 'e-mq-med', source: 'mq-1', target: 'media-1', label: 'transcode' },
   ],
   answer: { 'mq-1': 'message-queue', 'media-1': 'media-server' },
 };
@@ -197,15 +198,15 @@ const youtubeReq4 = {
   title: 'Store and cache data',
   description: 'You need fast API responses, persistent video metadata, and durable video file storage. How do you architect the data layer?',
   nodes: [
-    { id: 'cache-1', type: 'component', position: { x: 1200, y: 80  }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
-    { id: 'db-1',    type: 'component', position: { x: 1500, y: 320 }, data: { componentSlug: 'relational-db',  label: 'Metadata DB' } },
-    { id: 'obj-1',   type: 'component', position: { x: 1500, y: 520 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
+    { id: 'cache-1', type: 'component', position: { x: 1200, y: 80 }, data: { componentSlug: 'cache', label: 'Cache (Redis)' } },
+    { id: 'db-1', type: 'component', position: { x: 1500, y: 320 }, data: { componentSlug: 'relational-db', label: 'Metadata DB' } },
+    { id: 'obj-1', type: 'component', position: { x: 1500, y: 520 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
   ],
   edges: [
-    { id: 'e-gw-ca',    source: 'api-gw',  target: 'cache-1', label: 'cache read' },
-    { id: 'e-app-db',   source: 'app-1',   target: 'db-1',    label: 'metadata' },
-    { id: 'e-med-obj',  source: 'media-1', target: 'obj-1',   label: 'store video' },
-    { id: 'e-cdn-obj',  source: 'cdn-1',   target: 'obj-1',   label: 'origin pull' },
+    { id: 'e-gw-ca', source: 'api-gw', target: 'cache-1', label: 'cache read' },
+    { id: 'e-app-db', source: 'app-1', target: 'db-1', label: 'metadata' },
+    { id: 'e-med-obj', source: 'media-1', target: 'obj-1', label: 'store video' },
+    { id: 'e-cdn-obj', source: 'cdn-1', target: 'obj-1', label: 'origin pull' },
   ],
   answer: { 'cache-1': 'cache', 'db-1': 'relational-db', 'obj-1': 'object-storage' },
 };
@@ -225,15 +226,15 @@ const whatsappReq1 = {
   title: 'Route messaging traffic',
   description: 'Hundreds of millions of users need persistent, low-latency connections for real-time messaging. How do you handle that traffic?',
   nodes: [
-    { id: 'user-1', type: 'actor',     position: { x: 0,   y: 250 }, data: { label: 'User' } },
-    { id: 'dns-1',  type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns',           label: 'DNS' } },
-    { id: 'lb-1',   type: 'component', position: { x: 560, y: 250 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-    { id: 'app-1',  type: 'component', position: { x: 840, y: 250 }, data: { componentSlug: 'app-server',    label: 'App Server' } },
+    { id: 'user-1', type: 'actor', position: { x: 0, y: 250 }, data: { label: 'User' } },
+    { id: 'dns-1', type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns', label: 'DNS' } },
+    { id: 'lb-1', type: 'component', position: { x: 560, y: 250 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+    { id: 'app-1', type: 'component', position: { x: 840, y: 250 }, data: { componentSlug: 'app-server', label: 'App Server' } },
   ],
   edges: [
-    { id: 'e-u-dns',  source: 'user-1', target: 'dns-1',  label: 'lookup' },
-    { id: 'e-dns-lb', source: 'dns-1',  target: 'lb-1' },
-    { id: 'e-lb-app', source: 'lb-1',   target: 'app-1' },
+    { id: 'e-u-dns', source: 'user-1', target: 'dns-1', label: 'lookup' },
+    { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+    { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
   ],
   answer: { 'dns-1': 'dns', 'lb-1': 'load-balancer' },
 };
@@ -243,14 +244,14 @@ const whatsappReq2 = {
   title: 'Store messages and media',
   description: 'Users exchange billions of messages and media files every day. What\'s your storage strategy for speed and durability?',
   nodes: [
-    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
-    { id: 'db-1',    type: 'component', position: { x: 1120, y: 280 }, data: { componentSlug: 'relational-db',  label: 'Message DB' } },
-    { id: 'obj-1',   type: 'component', position: { x: 1120, y: 460 }, data: { componentSlug: 'object-storage', label: 'Media Storage' } },
+    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache', label: 'Cache (Redis)' } },
+    { id: 'db-1', type: 'component', position: { x: 1120, y: 280 }, data: { componentSlug: 'relational-db', label: 'Message DB' } },
+    { id: 'obj-1', type: 'component', position: { x: 1120, y: 460 }, data: { componentSlug: 'object-storage', label: 'Media Storage' } },
   ],
   edges: [
-    { id: 'e-app-ca',  source: 'app-1', target: 'cache-1', label: 'recent msgs' },
-    { id: 'e-app-db',  source: 'app-1', target: 'db-1',    label: 'persist' },
-    { id: 'e-app-obj', source: 'app-1', target: 'obj-1',   label: 'media upload' },
+    { id: 'e-app-ca', source: 'app-1', target: 'cache-1', label: 'recent msgs' },
+    { id: 'e-app-db', source: 'app-1', target: 'db-1', label: 'persist' },
+    { id: 'e-app-obj', source: 'app-1', target: 'obj-1', label: 'media upload' },
   ],
   answer: { 'cache-1': 'cache', 'db-1': 'relational-db', 'obj-1': 'object-storage' },
 };
@@ -276,16 +277,16 @@ const tiktokReq1 = {
   title: 'Route mobile traffic',
   description: 'Your mobile app needs to serve static assets and stream video to users globally with minimal latency. How do you design the network layer?',
   nodes: [
-    { id: 'user-1', type: 'actor',     position: { x: 0,   y: 300 }, data: { label: 'User' } },
-    { id: 'dns-1',  type: 'component', position: { x: 280, y: 150 }, data: { componentSlug: 'dns',           label: 'DNS' } },
-    { id: 'cdn-1',  type: 'component', position: { x: 280, y: 460 }, data: { componentSlug: 'cdn',           label: 'CDN' } },
-    { id: 'lb-1',   type: 'component', position: { x: 560, y: 300 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+    { id: 'user-1', type: 'actor', position: { x: 0, y: 300 }, data: { label: 'User' } },
+    { id: 'dns-1', type: 'component', position: { x: 280, y: 150 }, data: { componentSlug: 'dns', label: 'DNS' } },
+    { id: 'cdn-1', type: 'component', position: { x: 280, y: 460 }, data: { componentSlug: 'cdn', label: 'CDN' } },
+    { id: 'lb-1', type: 'component', position: { x: 560, y: 300 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
   ],
   edges: [
-    { id: 'e-u-dns',  source: 'user-1', target: 'dns-1',  label: 'lookup' },
-    { id: 'e-u-cdn',  source: 'user-1', target: 'cdn-1',  label: 'stream' },
-    { id: 'e-dns-lb', source: 'dns-1',  target: 'lb-1' },
-    { id: 'e-cdn-lb', source: 'cdn-1',  target: 'lb-1' },
+    { id: 'e-u-dns', source: 'user-1', target: 'dns-1', label: 'lookup' },
+    { id: 'e-u-cdn', source: 'user-1', target: 'cdn-1', label: 'stream' },
+    { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+    { id: 'e-cdn-lb', source: 'cdn-1', target: 'lb-1' },
   ],
   answer: { 'dns-1': 'dns', 'cdn-1': 'cdn' },
 };
@@ -295,14 +296,14 @@ const tiktokReq2 = {
   title: 'Serve the feed',
   description: 'Every user sees a personalised video feed. What powers the API layer and stores the feed data?',
   nodes: [
-    { id: 'api-gw',  type: 'component', position: { x: 840,  y: 150 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
-    { id: 'app-1',   type: 'component', position: { x: 840,  y: 380 }, data: { componentSlug: 'app-server',  label: 'App Server' } },
-    { id: 'nosql-1', type: 'component', position: { x: 1120, y: 380 }, data: { componentSlug: 'nosql-db',    label: 'Feed Store (NoSQL)' } },
+    { id: 'api-gw', type: 'component', position: { x: 840, y: 150 }, data: { componentSlug: 'api-gateway', label: 'API Gateway' } },
+    { id: 'app-1', type: 'component', position: { x: 840, y: 380 }, data: { componentSlug: 'app-server', label: 'App Server' } },
+    { id: 'nosql-1', type: 'component', position: { x: 1120, y: 380 }, data: { componentSlug: 'nosql-db', label: 'Feed Store (NoSQL)' } },
   ],
   edges: [
-    { id: 'e-lb-gw',    source: 'lb-1',   target: 'api-gw',  label: 'API calls' },
-    { id: 'e-lb-app',   source: 'lb-1',   target: 'app-1' },
-    { id: 'e-app-ns',   source: 'app-1',  target: 'nosql-1', label: 'feed read/write' },
+    { id: 'e-lb-gw', source: 'lb-1', target: 'api-gw', label: 'API calls' },
+    { id: 'e-lb-app', source: 'lb-1', target: 'app-1' },
+    { id: 'e-app-ns', source: 'app-1', target: 'nosql-1', label: 'feed read/write' },
   ],
   answer: { 'api-gw': 'api-gateway', 'app-1': 'app-server', 'nosql-1': 'nosql-db' },
 };
@@ -312,15 +313,15 @@ const tiktokReq3 = {
   title: 'Deliver short videos',
   description: 'Creator videos need to reach viewers in seconds, transcoded for any device and streamed from the nearest edge. How?',
   nodes: [
-    { id: 'obj-1',   type: 'component', position: { x: 1400, y: 380 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
-    { id: 'media-1', type: 'component', position: { x: 1120, y: 560 }, data: { componentSlug: 'media-server',   label: 'Transcoder' } },
-    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache',          label: 'Cache (Redis)' } },
+    { id: 'obj-1', type: 'component', position: { x: 1400, y: 380 }, data: { componentSlug: 'object-storage', label: 'Video Storage' } },
+    { id: 'media-1', type: 'component', position: { x: 1120, y: 560 }, data: { componentSlug: 'media-server', label: 'Transcoder' } },
+    { id: 'cache-1', type: 'component', position: { x: 1120, y: 100 }, data: { componentSlug: 'cache', label: 'Cache (Redis)' } },
   ],
   edges: [
-    { id: 'e-app-obj',  source: 'app-1',   target: 'obj-1',   label: 'upload' },
-    { id: 'e-obj-med',  source: 'obj-1',   target: 'media-1', label: 'transcode' },
-    { id: 'e-med-cdn',  source: 'media-1', target: 'cdn-1',   label: 'push' },
-    { id: 'e-gw-ca',    source: 'api-gw',  target: 'cache-1', label: 'hot metadata' },
+    { id: 'e-app-obj', source: 'app-1', target: 'obj-1', label: 'upload' },
+    { id: 'e-obj-med', source: 'obj-1', target: 'media-1', label: 'transcode' },
+    { id: 'e-med-cdn', source: 'media-1', target: 'cdn-1', label: 'push' },
+    { id: 'e-gw-ca', source: 'api-gw', target: 'cache-1', label: 'hot metadata' },
   ],
   answer: { 'obj-1': 'object-storage', 'media-1': 'media-server', 'cache-1': 'cache' },
 };
@@ -346,15 +347,15 @@ const zoomReq1 = {
   title: 'Connect users',
   description: 'A user clicks a meeting link and expects to be connected instantly. How does the infrastructure resolve and route them to the right session?',
   nodes: [
-    { id: 'user-1', type: 'actor',     position: { x: 0,   y: 250 }, data: { label: 'User' } },
-    { id: 'dns-1',  type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns',           label: 'DNS' } },
-    { id: 'lb-1',   type: 'component', position: { x: 560, y: 250 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
-    { id: 'app-1',  type: 'component', position: { x: 840, y: 250 }, data: { componentSlug: 'app-server',    label: 'Signalling Server' } },
+    { id: 'user-1', type: 'actor', position: { x: 0, y: 250 }, data: { label: 'User' } },
+    { id: 'dns-1', type: 'component', position: { x: 280, y: 250 }, data: { componentSlug: 'dns', label: 'DNS' } },
+    { id: 'lb-1', type: 'component', position: { x: 560, y: 250 }, data: { componentSlug: 'load-balancer', label: 'Load Balancer' } },
+    { id: 'app-1', type: 'component', position: { x: 840, y: 250 }, data: { componentSlug: 'app-server', label: 'Signalling Server' } },
   ],
   edges: [
-    { id: 'e-u-dns',  source: 'user-1', target: 'dns-1',  label: 'lookup' },
-    { id: 'e-dns-lb', source: 'dns-1',  target: 'lb-1' },
-    { id: 'e-lb-app', source: 'lb-1',   target: 'app-1',  label: 'signalling' },
+    { id: 'e-u-dns', source: 'user-1', target: 'dns-1', label: 'lookup' },
+    { id: 'e-dns-lb', source: 'dns-1', target: 'lb-1' },
+    { id: 'e-lb-app', source: 'lb-1', target: 'app-1', label: 'signalling' },
   ],
   answer: { 'dns-1': 'dns', 'lb-1': 'load-balancer' },
 };
@@ -364,14 +365,14 @@ const zoomReq2 = {
   title: 'Handle real-time media',
   description: 'A meeting has 100 participants — all sending and receiving audio and video in real time. What handles the media?',
   nodes: [
-    { id: 'cdn-1',   type: 'component', position: { x: 280,  y: 500 }, data: { componentSlug: 'cdn',           label: 'CDN' } },
-    { id: 'media-1', type: 'component', position: { x: 1120, y: 250 }, data: { componentSlug: 'media-server',  label: 'Media Server' } },
-    { id: 'mq-1',    type: 'component', position: { x: 1120, y: 500 }, data: { componentSlug: 'message-queue', label: 'Event Queue' } },
+    { id: 'cdn-1', type: 'component', position: { x: 280, y: 500 }, data: { componentSlug: 'cdn', label: 'CDN' } },
+    { id: 'media-1', type: 'component', position: { x: 1120, y: 250 }, data: { componentSlug: 'media-server', label: 'Media Server' } },
+    { id: 'mq-1', type: 'component', position: { x: 1120, y: 500 }, data: { componentSlug: 'message-queue', label: 'Event Queue' } },
   ],
   edges: [
-    { id: 'e-u-cdn',   source: 'user-1', target: 'cdn-1',   label: 'static' },
-    { id: 'e-lb-med',  source: 'lb-1',   target: 'media-1', label: 'WebRTC relay' },
-    { id: 'e-app-mq',  source: 'app-1',  target: 'mq-1',    label: 'events' },
+    { id: 'e-u-cdn', source: 'user-1', target: 'cdn-1', label: 'static' },
+    { id: 'e-lb-med', source: 'lb-1', target: 'media-1', label: 'WebRTC relay' },
+    { id: 'e-app-mq', source: 'app-1', target: 'mq-1', label: 'events' },
   ],
   answer: { 'cdn-1': 'cdn', 'media-1': 'media-server', 'mq-1': 'message-queue' },
 };
@@ -381,14 +382,14 @@ const zoomReq3 = {
   title: 'Persist sessions and recordings',
   description: 'Meeting state, participant metadata, and cloud recordings all need to persist. How do you design the storage layer?',
   nodes: [
-    { id: 'cache-1', type: 'component', position: { x: 1400, y: 100 }, data: { componentSlug: 'cache',          label: 'Session Cache' } },
-    { id: 'db-1',    type: 'component', position: { x: 1400, y: 300 }, data: { componentSlug: 'relational-db',  label: 'Meeting DB' } },
-    { id: 'obj-1',   type: 'component', position: { x: 1400, y: 500 }, data: { componentSlug: 'object-storage', label: 'Recording Storage' } },
+    { id: 'cache-1', type: 'component', position: { x: 1400, y: 100 }, data: { componentSlug: 'cache', label: 'Session Cache' } },
+    { id: 'db-1', type: 'component', position: { x: 1400, y: 300 }, data: { componentSlug: 'relational-db', label: 'Meeting DB' } },
+    { id: 'obj-1', type: 'component', position: { x: 1400, y: 500 }, data: { componentSlug: 'object-storage', label: 'Recording Storage' } },
   ],
   edges: [
-    { id: 'e-app-ca',  source: 'app-1',   target: 'cache-1', label: 'session state' },
-    { id: 'e-app-db',  source: 'app-1',   target: 'db-1',    label: 'meeting data' },
-    { id: 'e-med-obj', source: 'media-1', target: 'obj-1',   label: 'save recording' },
+    { id: 'e-app-ca', source: 'app-1', target: 'cache-1', label: 'session state' },
+    { id: 'e-app-db', source: 'app-1', target: 'db-1', label: 'meeting data' },
+    { id: 'e-med-obj', source: 'media-1', target: 'obj-1', label: 'save recording' },
   ],
   answer: { 'cache-1': 'cache', 'db-1': 'relational-db', 'obj-1': 'object-storage' },
 };
@@ -871,6 +872,25 @@ async function main() {
         },
       });
     }
+  }
+
+  // Env-driven admin user (idempotent)
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    const hashed = await bcrypt.hash(adminPassword, 12);
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: { role: 'ADMIN', username: process.env.ADMIN_USERNAME ?? 'admin', password: hashed },
+      create: {
+        email: adminEmail,
+        password: hashed,
+        username: process.env.ADMIN_USERNAME ?? 'admin',
+        displayName: process.env.ADMIN_DISPLAY_NAME ?? 'Admin',
+        role: 'ADMIN',
+      },
+    });
+    console.log(`Admin user seeded: ${adminEmail}`);
   }
 
   console.log('Seed complete.');

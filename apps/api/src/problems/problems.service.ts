@@ -50,6 +50,7 @@ export class ProblemsService {
     const category = rawCategory?.trim();
     const where: Prisma.ProblemWhereInput = {
       isPublished: true,
+      deletedAt: null,
       ...(difficulty ? { difficulty } : {}),
       ...(category && category !== 'All' ? { category } : {}),
     };
@@ -142,7 +143,7 @@ export class ProblemsService {
 
   async findCategories() {
     const categories = await this.prisma.problem.findMany({
-      where: { isPublished: true },
+      where: { isPublished: true, deletedAt: null },
       select: { category: true },
       distinct: ['category'],
       orderBy: { category: 'asc' },
@@ -153,7 +154,7 @@ export class ProblemsService {
 
   async findBySlug(slug: string, userId?: string) {
     const problem = await this.prisma.problem.findFirst({
-      where: { slug, isPublished: true },
+      where: { slug, isPublished: true, deletedAt: null },
       include: {
         requirements: { orderBy: { order: 'asc' } },
       },
@@ -199,7 +200,7 @@ export class ProblemsService {
 
   async getSolution(slug: string, userId: string) {
     const problem = await this.prisma.problem.findFirst({
-      where: { slug, isPublished: true },
+      where: { slug, isPublished: true, deletedAt: null },
       include: { requirements: { orderBy: { order: 'asc' } } },
     });
 
@@ -257,7 +258,7 @@ export class ProblemsService {
 
   async getRequirementGraph(slug: string, order: number) {
     const problem = await this.prisma.problem.findFirst({
-      where: { slug, isPublished: true },
+      where: { slug, isPublished: true, deletedAt: null },
       include: {
         requirements: { orderBy: { order: 'asc' } },
       },

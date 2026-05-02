@@ -50,6 +50,8 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
+    if (user.deactivatedAt) throw new UnauthorizedException('Account has been deactivated');
+
     return this.issueToken(user);
   }
 
@@ -101,8 +103,10 @@ export class AuthService {
         username: user.username,
         displayName: user.displayName,
         avatarUrl: user.avatarUrl ?? undefined,
+        role: user.role,
         xp: user.xp,
         level: user.level,
+        streak: user.streak,
         createdAt: user.createdAt.toISOString(),
       },
     };

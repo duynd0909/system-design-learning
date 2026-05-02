@@ -12,6 +12,12 @@ enum Difficulty {
   HARD
 }
 
+enum Role {
+  USER
+  CONTENT_EDITOR
+  ADMIN
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -21,12 +27,14 @@ model User {
   password     String?  // null for OAuth-only users
   githubId     String?  @unique
   googleId     String?  @unique
-  xp           Int      @default(0)
-  level        Int      @default(1)
-  streak       Int      @default(0)
-  lastActiveAt DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role          Role      @default(USER)
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  streak        Int       @default(0)
+  lastActiveAt  DateTime  @default(now())
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   submissions Submission[]
 
@@ -53,6 +61,7 @@ model Problem {
   difficulty  Difficulty
   category    String
   isPublished Boolean    @default(false)
+  deletedAt   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Difficulty, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { GraphEdge, GraphNode } from '@stackdify/shared-types';
+import type { AdminUserListItem, GraphEdge, GraphNode } from '@stackdify/shared-types';
+import { Role } from '@stackdify/shared-types';
 import type {
   AdminProblemDto,
   AdminRequirementDto,
@@ -23,23 +24,45 @@ function toAnswer(raw: unknown): Record<string, string> {
     : {};
 }
 
+function fillDailyGaps(
+  rows: Array<{ date: string; count: bigint }>,
+  days: number,
+): Array<{ date: string; count: number }> {
+  const map = new Map(rows.map((r) => [r.date, Number(r.count)]));
+  const result: Array<{ date: string; count: number }> = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    result.push({ date: key, count: map.get(key) ?? 0 });
+  }
+  return result;
+}
+
 @Injectable()
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getStats() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     const [
       totalProblems,
       publishedProblems,
+      deletedProblems,
       totalRequirements,
       totalUsers,
       totalSubmissions,
       passedSubmissions,
       recentSubmissions,
       problems,
+      rawSubsPerDay,
+      rawUsersPerDay,
     ] = await Promise.all([
-      this.prisma.problem.count(),
-      this.prisma.problem.count({ where: { isPublished: true } }),
+      this.prisma.problem.count({ where: { deletedAt: null } }),
+      this.prisma.problem.count({ where: { isPublished: true, deletedAt: null } }),
+      this.prisma.problem.count({ where: { deletedAt: { not: null } } }),
       this.prisma.requirement.count(),
       this.prisma.user.count(),
       this.prisma.submission.count(),
@@ -57,27 +80,79 @@ export class AdminService {
         },
       }),
       this.prisma.problem.findMany({
+        where: { deletedAt: null },
         orderBy: { updatedAt: 'desc' },
         select: {
           id: true,
           slug: true,
           title: true,
           isPublished: true,
+          deletedAt: true,
           _count: { select: { requirements: true, submissions: true } },
         },
       }),
+      this.prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
+        SELECT DATE_TRUNC('day', "createdAt")::date::text AS date, COUNT(*) AS count
+        FROM submissions
+        WHERE "createdAt" >= ${thirtyDaysAgo}
+        GROUP BY 1 ORDER BY 1
+      `,
+      this.prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
+        SELECT DATE_TRUNC('day', "createdAt")::date::text AS date, COUNT(*) AS count
+        FROM users
+        WHERE "createdAt" >= ${thirtyDaysAgo}
+        GROUP BY 1 ORDER BY 1
+      `,
     ]);
+
+    // Per-problem pass rate
+    const allSubmissions = await this.prisma.submission.findMany({
+      select: { problemId: true, passed: true, problem: { select: { slug: true, title: true } } },
+    });
+
+    const problemMap = new Map<string, { slug: string; title: string; total: number; passed: number }>();
+    for (const sub of allSubmissions) {
+      const entry = problemMap.get(sub.problemId) ?? {
+        slug: sub.problem.slug,
+        title: sub.problem.title,
+        total: 0,
+        passed: 0,
+      };
+      entry.total++;
+      if (sub.passed) entry.passed++;
+      problemMap.set(sub.problemId, entry);
+    }
+
+    // Difficulty distribution from submissions
+    const subsWithDifficulty = await this.prisma.submission.findMany({
+      select: { problem: { select: { difficulty: true } } },
+    });
+    const difficultyDistribution: Record<'EASY' | 'MEDIUM' | 'HARD', number> = { EASY: 0, MEDIUM: 0, HARD: 0 };
+    for (const sub of subsWithDifficulty) {
+      const d = sub.problem.difficulty as 'EASY' | 'MEDIUM' | 'HARD';
+      difficultyDistribution[d]++;
+    }
 
     return {
       totals: {
         problems: totalProblems,
         publishedProblems,
         hiddenProblems: totalProblems - publishedProblems,
+        deletedProblems,
         requirements: totalRequirements,
         users: totalUsers,
         submissions: totalSubmissions,
         passRate: totalSubmissions > 0 ? Math.round((passedSubmissions / totalSubmissions) * 100) : 0,
       },
+      submissionsPerDay: fillDailyGaps(rawSubsPerDay, 30),
+      newUsersPerDay: fillDailyGaps(rawUsersPerDay, 30),
+      passRateByProblem: Array.from(problemMap.values()).map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        totalSubmissions: p.total,
+        passRate: p.total > 0 ? Math.round((p.passed / p.total) * 100) : 0,
+      })),
+      difficultyDistribution,
       recentSubmissions: recentSubmissions.map((submission) => ({
         id: submission.id,
         score: submission.score,
@@ -86,24 +161,28 @@ export class AdminService {
         user: submission.user,
         problem: submission.problem,
       })),
-      problemQuality: problems.map((problem) => ({
-        id: problem.id,
-        slug: problem.slug,
-        title: problem.title,
-        isPublished: problem.isPublished,
-        requirementCount: problem._count.requirements,
-        submissionCount: problem._count.submissions,
-      })),
+      problemQuality: problems.map((problem) => {
+        const stats = problemMap.get(problem.id);
+        return {
+          id: problem.id,
+          slug: problem.slug,
+          title: problem.title,
+          isPublished: problem.isPublished,
+          deletedAt: problem.deletedAt?.toISOString() ?? null,
+          requirementCount: problem._count.requirements,
+          submissionCount: problem._count.submissions,
+          passRate: stats && stats.total > 0 ? Math.round((stats.passed / stats.total) * 100) : 0,
+        };
+      }),
     };
   }
 
   async listProblems(status?: string) {
-    const where =
-      status === 'published'
-        ? { isPublished: true }
-        : status === 'hidden'
-          ? { isPublished: false }
-          : {};
+    const where: Prisma.ProblemWhereInput =
+      status === 'published' ? { isPublished: true, deletedAt: null } :
+      status === 'hidden'    ? { isPublished: false, deletedAt: null } :
+      status === 'deleted'   ? { deletedAt: { not: null } } :
+                               { deletedAt: null };
 
     const problems = await this.prisma.problem.findMany({
       where,
@@ -121,6 +200,7 @@ export class AdminService {
       difficulty: problem.difficulty,
       category: problem.category,
       isPublished: problem.isPublished,
+      deletedAt: problem.deletedAt?.toISOString() ?? null,
       requirementCount: problem._count.requirements,
       submissionCount: problem._count.submissions,
       createdAt: problem.createdAt.toISOString(),
@@ -160,6 +240,7 @@ export class AdminService {
         difficulty: problem.difficulty,
         category: problem.category,
         isPublished: problem.isPublished,
+        deletedAt: problem.deletedAt?.toISOString() ?? null,
         createdAt: problem.createdAt.toISOString(),
         updatedAt: problem.updatedAt.toISOString(),
       },
@@ -226,13 +307,27 @@ export class AdminService {
 
   async deleteProblem(slug: string) {
     await this.ensureProblem(slug);
-    await this.prisma.problem.delete({ where: { slug } });
+    await this.prisma.problem.update({
+      where: { slug },
+      data: { deletedAt: new Date(), isPublished: false },
+    });
     return { deleted: true };
+  }
+
+  async restoreProblem(slug: string) {
+    const problem = await this.prisma.problem.findUnique({ where: { slug } });
+    if (!problem) throw new NotFoundException(`Problem "${slug}" not found`);
+    if (!problem.deletedAt) throw new BadRequestException('Problem is not deleted');
+    return this.prisma.problem.update({
+      where: { slug },
+      data: { deletedAt: null },
+    });
   }
 
   private async ensureProblem(slug: string) {
     const problem = await this.prisma.problem.findUnique({ where: { slug } });
     if (!problem) throw new NotFoundException(`Problem "${slug}" not found`);
+    if (problem.deletedAt) throw new NotFoundException(`Problem "${slug}" is deleted`);
     return problem;
   }
 
@@ -276,5 +371,89 @@ export class AdminService {
         }
       }
     }
+  }
+
+  private readonly userSelect = {
+    id: true,
+    email: true,
+    username: true,
+    displayName: true,
+    avatarUrl: true,
+    role: true,
+    xp: true,
+    level: true,
+    streak: true,
+    deactivatedAt: true,
+    createdAt: true,
+  } as const;
+
+  private mapUser(u: {
+    id: string;
+    email: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    role: string;
+    xp: number;
+    level: number;
+    streak: number;
+    deactivatedAt: Date | null;
+    createdAt: Date;
+  }): AdminUserListItem {
+    return {
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl ?? undefined,
+      role: u.role as Role,
+      xp: u.xp,
+      level: u.level,
+      streak: u.streak,
+      deactivatedAt: u.deactivatedAt?.toISOString() ?? null,
+      createdAt: u.createdAt.toISOString(),
+    };
+  }
+
+  async listUsers(role?: Role): Promise<AdminUserListItem[]> {
+    const users = await this.prisma.user.findMany({
+      where: role ? { role } : undefined,
+      select: this.userSelect,
+      orderBy: { createdAt: 'desc' },
+    });
+    return users.map((u) => this.mapUser(u));
+  }
+
+  async updateUserRole(id: string, role: Role): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { role },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
+  }
+
+  async deactivateUser(id: string): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { deactivatedAt: new Date() },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
+  }
+
+  async activateUser(id: string): Promise<AdminUserListItem> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { deactivatedAt: null },
+      select: this.userSelect,
+    });
+    return this.mapUser(updated);
   }
 }
