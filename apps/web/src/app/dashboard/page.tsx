@@ -16,7 +16,7 @@ import {
 import type { Difficulty } from '@stackdify/shared-types';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -28,7 +28,20 @@ import { fadeUp, spring } from '@/lib/animations';
 
 // ─── Activity Heatmap ────────────────────────────────────────────────────────
 
-const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_LABELS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function heatColor(count: number) {
@@ -57,7 +70,8 @@ function ActivityHeatmap({ data, year }: ActivityHeatmapProps) {
   const gridEnd = new Date(dec31);
   gridEnd.setDate(dec31.getDate() + (6 - dec31.getDay()));
 
-  const totalDays = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  const totalDays =
+    Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
   const numWeeks = totalDays / 7;
 
   // Build week columns
@@ -105,7 +119,9 @@ function ActivityHeatmap({ data, year }: ActivityHeatmapProps) {
           <span
             key={label}
             className="absolute whitespace-nowrap text-[10px] text-[var(--text-secondary)]"
-            style={{ left: `calc(${DAY_COL_W}px + ${(col / numWeeks) * 100}%)` }}
+            style={{
+              left: `calc(${DAY_COL_W}px + ${(col / numWeeks) * 100}%)`,
+            }}
           >
             {label}
           </span>
@@ -121,7 +137,10 @@ function ActivityHeatmap({ data, year }: ActivityHeatmapProps) {
           {DAY_ABBR.map((label, i) => (
             <span
               key={label}
-              className={cn('text-[9px] leading-none text-[var(--text-secondary)]', i % 2 === 0 ? 'invisible' : '')}
+              className={cn(
+                'text-[9px] leading-none text-[var(--text-secondary)]',
+                i % 2 === 0 ? 'invisible' : '',
+              )}
             >
               {label}
             </span>
@@ -144,14 +163,22 @@ function ActivityHeatmap({ data, year }: ActivityHeatmapProps) {
             week.map((cell, di) => (
               <div
                 key={`${wi}-${di}`}
-                title={cell.count >= 0 ? `${cell.date}: ${cell.count} submission${cell.count !== 1 ? 's' : ''}` : undefined}
+                title={
+                  cell.count >= 0
+                    ? `${cell.date}: ${cell.count} submission${cell.count !== 1 ? 's' : ''}`
+                    : undefined
+                }
                 className={cn(
                   'rounded-[2px] transition-colors',
                   cell.count < 0 ? 'opacity-0' : heatColor(cell.count),
                 )}
-                aria-label={cell.date && cell.count >= 0 ? `${cell.date}: ${cell.count} submissions` : undefined}
+                aria-label={
+                  cell.date && cell.count >= 0
+                    ? `${cell.date}: ${cell.count} submissions`
+                    : undefined
+                }
               />
-            ))
+            )),
           )}
         </div>
       </div>
@@ -182,8 +209,12 @@ function StatCard({ icon, label, value, sub, accent }: StatCardProps) {
         <span style={{ color: accent }}>{icon}</span>
         {label}
       </div>
-      <div className="font-display text-3xl font-bold text-[var(--text-primary)]">{value}</div>
-      {sub && <div className="mt-0.5 text-xs text-[var(--text-secondary)]">{sub}</div>}
+      <div className="font-display text-3xl font-bold text-[var(--text-primary)]">
+        {value}
+      </div>
+      {sub && (
+        <div className="mt-0.5 text-xs text-[var(--text-secondary)]">{sub}</div>
+      )}
     </motion.div>
   );
 }
@@ -191,10 +222,10 @@ function StatCard({ icon, label, value, sub, accent }: StatCardProps) {
 // ─── Category Ring ───────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Social Media':              'var(--accent-primary)',
-  'Video Streaming':           '#f59e0b',
-  'Messaging':                 '#10b981',
-  'Real-Time Communication':   '#06b6d4',
+  'Social Media': 'var(--accent-primary)',
+  'Video Streaming': '#f59e0b',
+  Messaging: '#10b981',
+  'Real-Time Communication': '#06b6d4',
 };
 
 function categoryColor(cat: string) {
@@ -207,7 +238,11 @@ export default function DashboardPage() {
   const { token, isAuthenticated, isReady } = useAuth();
   const { data: user, isLoading: userLoading } = useMe(token);
   const { data: stats, isLoading: statsLoading } = useMyStats(token);
-  const { data: submissionsPage, isLoading: subsLoading } = useMySubmissions(token, 1, 10);
+  const { data: submissionsPage, isLoading: subsLoading } = useMySubmissions(
+    token,
+    1,
+    10,
+  );
 
   const [copied, setCopied] = useState(false);
 
@@ -226,9 +261,13 @@ export default function DashboardPage() {
   const currentYear = new Date().getFullYear();
   const [activityYear, setActivityYear] = useState(currentYear);
   const availableYears = [currentYear - 1, currentYear];
-  const { data: activity, isLoading: activityLoading } = useMyActivity(token, activityYear);
+  const { data: activity, isLoading: activityLoading } = useMyActivity(
+    token,
+    activityYear,
+  );
 
-  const isLoading = userLoading || statsLoading || activityLoading || subsLoading;
+  const isLoading =
+    userLoading || statsLoading || activityLoading || subsLoading;
 
   if (!isReady) return null;
 
@@ -237,8 +276,12 @@ export default function DashboardPage() {
       <div className="flex min-h-screen flex-col bg-[var(--bg-primary)]">
         <Navbar />
         <main className="mx-auto max-w-3xl flex-1 px-4 py-16 text-center sm:px-6">
-          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Sign in to view your dashboard</h1>
-          <p className="mt-3 text-[var(--text-secondary)]">Track your progress, activity, and solved problems.</p>
+          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
+            Sign in to view your dashboard
+          </h1>
+          <p className="mt-3 text-[var(--text-secondary)]">
+            Track your progress, activity, and solved problems.
+          </p>
           <Link
             href="/login"
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[var(--accent-primary)] px-5 py-2.5 text-sm font-semibold text-white"
@@ -265,10 +308,13 @@ export default function DashboardPage() {
               <Skeleton className="h-9 w-56" />
             ) : (
               <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
-                Welcome back, {user?.displayName ?? user?.username ?? 'engineer'}
+                Welcome back,{' '}
+                {user?.displayName ?? user?.username ?? 'engineer'}
               </h1>
             )}
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">Here's your practice progress at a glance.</p>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Here's your practice progress at a glance.
+            </p>
           </div>
           {user && (
             <Button
@@ -288,7 +334,9 @@ export default function DashboardPage() {
         {/* Stats row */}
         {isLoading ? (
           <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
           </div>
         ) : stats ? (
           <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -338,7 +386,10 @@ export default function DashboardPage() {
               <CardHeader className="mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-[var(--text-secondary)]" aria-hidden="true" />
+                    <Activity
+                      className="h-4 w-4 text-[var(--text-secondary)]"
+                      aria-hidden="true"
+                    />
                     <CardTitle className="text-base">Activity</CardTitle>
                   </div>
                   <div className="flex gap-1">
@@ -372,8 +423,13 @@ export default function DashboardPage() {
               <CardHeader className="mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-[var(--text-secondary)]" aria-hidden="true" />
-                    <CardTitle className="text-base">Recent Submissions</CardTitle>
+                    <Award
+                      className="h-4 w-4 text-[var(--text-secondary)]"
+                      aria-hidden="true"
+                    />
+                    <CardTitle className="text-base">
+                      Recent Submissions
+                    </CardTitle>
                   </div>
                   <Link
                     href="/problems"
@@ -386,20 +442,33 @@ export default function DashboardPage() {
 
               {subsLoading ? (
                 <div className="space-y-2">
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 rounded-lg" />
+                  ))}
                 </div>
               ) : recentSubmissions.length === 0 ? (
                 <p className="py-6 text-center text-sm text-[var(--text-secondary)]">
-                  No submissions yet. <Link href="/problems" className="font-semibold text-[var(--accent-primary)] hover:underline">Start a problem!</Link>
+                  No submissions yet.{' '}
+                  <Link
+                    href="/problems"
+                    className="font-semibold text-[var(--accent-primary)] hover:underline"
+                  >
+                    Start a problem!
+                  </Link>
                 </p>
               ) : (
                 <div className="divide-y divide-[var(--text-primary)]/8">
                   {recentSubmissions.map((sub) => (
-                    <div key={sub.id} className="flex items-center gap-3 py-2.5">
+                    <div
+                      key={sub.id}
+                      className="flex items-center gap-3 py-2.5"
+                    >
                       <div
                         className={cn(
                           'grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold',
-                          sub.passed ? 'bg-[var(--slot-correct)]/15 text-[var(--slot-correct)]' : 'bg-[var(--slot-incorrect)]/15 text-[var(--slot-incorrect)]',
+                          sub.passed
+                            ? 'bg-[var(--slot-correct)]/15 text-[var(--slot-correct)]'
+                            : 'bg-[var(--slot-incorrect)]/15 text-[var(--slot-incorrect)]',
                         )}
                         aria-label={sub.passed ? 'Passed' : 'Failed'}
                       >
@@ -411,14 +480,18 @@ export default function DashboardPage() {
                           className="block truncate text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)]"
                         >
                           {sub.problem.title}
-                          {sub.requirementOrder ? ` · Req ${sub.requirementOrder}` : ''}
+                          {sub.requirementOrder
+                            ? ` · Req ${sub.requirementOrder}`
+                            : ''}
                         </Link>
                         <div className="text-xs text-[var(--text-secondary)]">
                           {new Date(sub.createdAt).toLocaleDateString()}
                           {sub.xpEarned > 0 ? ` · +${sub.xpEarned} XP` : ''}
                         </div>
                       </div>
-                      <DifficultyBadge difficulty={sub.problem.difficulty as Difficulty} />
+                      <DifficultyBadge
+                        difficulty={sub.problem.difficulty as Difficulty}
+                      />
                     </div>
                   ))}
                 </div>
@@ -430,19 +503,26 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <Card className="p-5">
               <CardHeader className="mb-5">
-                <CardTitle className="text-base">Progress by Category</CardTitle>
+                <CardTitle className="text-base">
+                  Progress by Category
+                </CardTitle>
               </CardHeader>
 
               {statsLoading ? (
                 <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)}
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-14 rounded-lg" />
+                  ))}
                 </div>
               ) : categories.length === 0 ? (
-                <p className="text-center text-sm text-[var(--text-secondary)]">Play some problems to see your progress.</p>
+                <p className="text-center text-sm text-[var(--text-secondary)]">
+                  Play some problems to see your progress.
+                </p>
               ) : (
                 <div className="space-y-5">
                   {categories.map(([cat, { solved, total }]) => {
-                    const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+                    const pct =
+                      total > 0 ? Math.round((solved / total) * 100) : 0;
                     const color = categoryColor(cat);
                     return (
                       <div key={cat} className="flex items-center gap-3">
@@ -454,7 +534,9 @@ export default function DashboardPage() {
                           aria-label={`${cat}: ${pct}%`}
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{cat}</div>
+                          <div className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                            {cat}
+                          </div>
                           <div className="text-xs text-[var(--text-secondary)]">
                             {solved}/{total} solved · {pct}%
                           </div>

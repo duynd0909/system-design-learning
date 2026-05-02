@@ -4,10 +4,14 @@ import { useState } from 'react';
 import { ShieldCheck, UserX, UserCheck } from 'lucide-react';
 import type { AdminUserListItem } from '@stackdify/shared-types';
 import { Role } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
-import { useUpdateUserRole, useDeactivateUser, useActivateUser } from '@/lib/api';
+import {
+  useUpdateUserRole,
+  useDeactivateUser,
+  useActivateUser,
+} from '@/lib/api';
 
 const ROLE_OPTIONS = [
   { value: Role.USER, label: 'User' },
@@ -21,7 +25,11 @@ interface UserRowActionsProps {
   currentUserId: string;
 }
 
-export function UserRowActions({ user, token, currentUserId }: UserRowActionsProps) {
+export function UserRowActions({
+  user,
+  token,
+  currentUserId,
+}: UserRowActionsProps) {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role>(user.role);
@@ -40,13 +48,15 @@ export function UserRowActions({ user, token, currentUserId }: UserRowActionsPro
   };
 
   const handleSaveRole = () => {
-    void updateRole.mutateAsync({ id: user.id, role: selectedRole }).then(() =>
-      setShowRoleModal(false),
-    );
+    void updateRole
+      .mutateAsync({ id: user.id, role: selectedRole })
+      .then(() => setShowRoleModal(false));
   };
 
   const handleDeactivate = () => {
-    void deactivate.mutateAsync(user.id).then(() => setShowDeactivateModal(false));
+    void deactivate
+      .mutateAsync(user.id)
+      .then(() => setShowDeactivateModal(false));
   };
 
   const handleActivate = () => {
@@ -108,7 +118,11 @@ export function UserRowActions({ user, token, currentUserId }: UserRowActionsPro
           onChange={(e) => setSelectedRole(e.target.value as Role)}
         />
         <ModalFooter>
-          <Button variant="secondary" size="sm" onClick={() => setShowRoleModal(false)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowRoleModal(false)}
+          >
             Cancel
           </Button>
           <Button
@@ -129,12 +143,18 @@ export function UserRowActions({ user, token, currentUserId }: UserRowActionsPro
         title="Deactivate user?"
       >
         <p className="text-sm text-[var(--text-secondary)]">
-          <strong className="text-[var(--text-primary)]">@{user.username}</strong> will lose
-          access immediately. Their existing data is preserved and you can reactivate them at any
-          time.
+          <strong className="text-[var(--text-primary)]">
+            @{user.username}
+          </strong>{' '}
+          will lose access immediately. Their existing data is preserved and you
+          can reactivate them at any time.
         </p>
         <ModalFooter>
-          <Button variant="secondary" size="sm" onClick={() => setShowDeactivateModal(false)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowDeactivateModal(false)}
+          >
             Cancel
           </Button>
           <Button

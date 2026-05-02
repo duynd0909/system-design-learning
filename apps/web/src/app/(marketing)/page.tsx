@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Gamepad2, Network, TrendingUp, Trophy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { BentoGrid, type BentoItem } from '@/components/ui/bento-grid';
 import { SocialProofSection } from '@/components/marketing/SocialProofSection';
 import { LandingHero } from '@/components/marketing/LandingHero';
@@ -59,7 +59,10 @@ export default function LandingPage() {
       <LandingHero />
 
       {/* How it works */}
-      <section id="how-it-works" className="bg-[var(--bg-secondary)] px-4 py-20">
+      <section
+        id="how-it-works"
+        className="bg-[var(--bg-secondary)] px-4 py-20"
+      >
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
             <h2 className="font-display mb-3 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
@@ -93,8 +96,12 @@ export default function LandingPage() {
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">{item.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)]">{item.desc}</p>
+                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {item.desc}
+                  </p>
                 </div>
               </div>
             ))}

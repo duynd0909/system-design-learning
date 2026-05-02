@@ -53,13 +53,19 @@ import type {
   Requirement,
   SubmissionResponse,
 } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useProblemDetail, useRequirementGraph, useProblems, useSubmit, useShareProblem } from '@/lib/api';
+import {
+  useProblemDetail,
+  useRequirementGraph,
+  useProblems,
+  useSubmit,
+  useShareProblem,
+} from '@/lib/api';
 import {
   ActorNode,
   BlankSlotNode,
@@ -78,7 +84,12 @@ import {
   inferEdgeKind,
   type SystemEdgeStatus,
 } from '@/components/game/graph-config';
-import { autoLayoutGraph, emptyConnectedPath, getConnectedPath, getDirectEdgeNodes } from '@/components/game/graph-utils';
+import {
+  autoLayoutGraph,
+  emptyConnectedPath,
+  getConnectedPath,
+  getDirectEdgeNodes,
+} from '@/components/game/graph-utils';
 import { cn } from '@/lib/utils';
 import { scaleIn, spring } from '@/lib/animations';
 import { useQueryClient } from '@tanstack/react-query';
@@ -111,7 +122,9 @@ function isActorData(data: MaskedNode['data']): data is ActorNodeData {
 }
 
 function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
   const s = (seconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
@@ -177,7 +190,12 @@ function GameHeader({
           </span>
         </button>
 
-        <span className="select-none text-[var(--text-primary)]/20" aria-hidden="true">/</span>
+        <span
+          className="select-none text-[var(--text-primary)]/20"
+          aria-hidden="true"
+        >
+          /
+        </span>
 
         <button
           type="button"
@@ -190,7 +208,12 @@ function GameHeader({
 
         {problem && (
           <>
-            <span className="hidden select-none text-[var(--text-primary)]/20 sm:block" aria-hidden="true">/</span>
+            <span
+              className="hidden select-none text-[var(--text-primary)]/20 sm:block"
+              aria-hidden="true"
+            >
+              /
+            </span>
             <span className="hidden max-w-[180px] truncate text-sm font-semibold text-[var(--text-primary)] sm:block">
               {problem.title}
             </span>
@@ -274,12 +297,19 @@ function GameHeader({
         <ThemeToggle className="h-8 w-8 rounded-lg bg-[var(--text-primary)]/5 hover:bg-[var(--text-primary)]/10" />
 
         {submitError && (
-          <p className="hidden max-w-[160px] truncate text-xs text-red-500 md:block" role="alert">
+          <p
+            className="hidden max-w-[160px] truncate text-xs text-red-500 md:block"
+            role="alert"
+          >
             {submitError}
           </p>
         )}
 
-        <div className={cn(isReadyToSubmit && !prefersReduced && 'animate-submit-pulse')}>
+        <div
+          className={cn(
+            isReadyToSubmit && !prefersReduced && 'animate-submit-pulse',
+          )}
+        >
           <Button
             type="button"
             size="sm"
@@ -289,7 +319,8 @@ function GameHeader({
             title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
             className={cn(
               'h-8 rounded-lg px-3 text-xs',
-              isReadyToSubmit && 'bg-gradient-to-r from-[var(--accent-primary)] to-[#6366f1] shadow-sm shadow-indigo-500/20',
+              isReadyToSubmit &&
+                'bg-gradient-to-r from-[var(--accent-primary)] to-[#6366f1] shadow-sm shadow-indigo-500/20',
             )}
           >
             {!isSubmitting && <Send className="h-3 w-3" aria-hidden="true" />}
@@ -303,19 +334,35 @@ function GameHeader({
 
 // ─── Palette Drag Overlay ────────────────────────────────────────────────────
 
-function PaletteOverlay({ component }: { component: ComponentType | undefined }) {
+function PaletteOverlay({
+  component,
+}: {
+  component: ComponentType | undefined;
+}) {
   if (!component) return null;
   const Icon = iconForComponent(component.slug);
   const categoryStyle = getCategoryStyle(categoryForComponent(component));
   return (
     <div
       className="flex items-center gap-3 rounded-lg border bg-[var(--bg-primary)] px-3 py-2 shadow-xl"
-      style={{ borderColor: categoryStyle.border, boxShadow: `0 14px 34px ${categoryStyle.glow}` }}
+      style={{
+        borderColor: categoryStyle.border,
+        boxShadow: `0 14px 34px ${categoryStyle.glow}`,
+      }}
     >
-      <span className={cn('grid h-10 w-10 place-items-center rounded-md border', categoryStyle.bgClass, categoryStyle.borderClass, categoryStyle.textClass)}>
+      <span
+        className={cn(
+          'grid h-10 w-10 place-items-center rounded-md border',
+          categoryStyle.bgClass,
+          categoryStyle.borderClass,
+          categoryStyle.textClass,
+        )}
+      >
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
-      <span className="text-sm font-semibold text-[var(--text-primary)]">{component.label}</span>
+      <span className="text-sm font-semibold text-[var(--text-primary)]">
+        {component.label}
+      </span>
     </div>
   );
 }
@@ -345,9 +392,14 @@ function MobileReadOnlyNotice({ title }: { title?: string }) {
           {title ?? 'System design canvas'}
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          The interactive graph editor needs more room for dragging, panning, and comparing components. Open this problem on a tablet or desktop to play.
+          The interactive graph editor needs more room for dragging, panning,
+          and comparing components. Open this problem on a tablet or desktop to
+          play.
         </p>
-        <Link href="/problems" className="mt-5 inline-flex text-sm font-semibold text-[var(--accent-primary)]">
+        <Link
+          href="/problems"
+          className="mt-5 inline-flex text-sm font-semibold text-[var(--accent-primary)]"
+        >
           Browse problems
         </Link>
       </section>
@@ -365,7 +417,13 @@ interface CompactResultProps {
   requirementTitle: string;
 }
 
-function CompactResult({ result, onNext, onDismiss, onReset, requirementTitle }: CompactResultProps) {
+function CompactResult({
+  result,
+  onNext,
+  onDismiss,
+  onReset,
+  requirementTitle,
+}: CompactResultProps) {
   const prefersReduced = useReducedMotion();
   return (
     <motion.div
@@ -378,16 +436,25 @@ function CompactResult({ result, onNext, onDismiss, onReset, requirementTitle }:
     >
       <div className="flex items-center gap-3">
         {result.passed ? (
-          <CheckCircle2 className="h-8 w-8 shrink-0 text-[var(--slot-correct)]" aria-hidden="true" />
+          <CheckCircle2
+            className="h-8 w-8 shrink-0 text-[var(--slot-correct)]"
+            aria-hidden="true"
+          />
         ) : (
-          <XCircle className="h-8 w-8 shrink-0 text-[var(--slot-incorrect)]" aria-hidden="true" />
+          <XCircle
+            className="h-8 w-8 shrink-0 text-[var(--slot-incorrect)]"
+            aria-hidden="true"
+          />
         )}
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[var(--text-primary)]">
-            {result.passed ? `${requirementTitle} — done!` : 'Not quite — fix the highlighted slots'}
+            {result.passed
+              ? `${requirementTitle} — done!`
+              : 'Not quite — fix the highlighted slots'}
           </div>
           <div className="text-xs text-[var(--text-secondary)]">
-            Score: {result.score}%{result.passed ? ` · +${result.xpEarned} XP` : ''}
+            Score: {result.score}%
+            {result.passed ? ` · +${result.xpEarned} XP` : ''}
           </div>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -401,7 +468,12 @@ function CompactResult({ result, onNext, onDismiss, onReset, requirementTitle }:
               <Button type="button" size="sm" onClick={onDismiss}>
                 Edit
               </Button>
-              <Button type="button" size="sm" variant="secondary" onClick={onReset}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={onReset}
+              >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                 Reset
               </Button>
@@ -421,7 +493,13 @@ interface CanvasToolButtonProps {
   children: ReactNode;
 }
 
-function CanvasToolButton({ label, active = false, disabled = false, onClick, children }: CanvasToolButtonProps) {
+function CanvasToolButton({
+  label,
+  active = false,
+  disabled = false,
+  onClick,
+  children,
+}: CanvasToolButtonProps) {
   return (
     <button
       type="button"
@@ -435,7 +513,8 @@ function CanvasToolButton({ label, active = false, disabled = false, onClick, ch
         'transition-colors duration-150 hover:border-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30',
         'disabled:cursor-not-allowed disabled:opacity-40',
-        active && 'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/12 text-[var(--accent-primary)]',
+        active &&
+          'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/12 text-[var(--accent-primary)]',
       )}
     >
       {children}
@@ -468,19 +547,40 @@ function CanvasToolbar({
 }: CanvasToolbarProps) {
   return (
     <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/95 p-1 shadow-lg backdrop-blur">
-      <CanvasToolButton label="Auto layout" disabled={!hasNodes} onClick={onAutoLayout}>
+      <CanvasToolButton
+        label="Auto layout"
+        disabled={!hasNodes}
+        onClick={onAutoLayout}
+      >
         <Sparkles className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
-      <CanvasToolButton label="Fit to view" disabled={!hasNodes} onClick={onFitView}>
+      <CanvasToolButton
+        label="Fit to view"
+        disabled={!hasNodes}
+        onClick={onFitView}
+      >
         <Maximize2 className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
-      <CanvasToolButton label="Toggle minimap" active={minimapVisible} onClick={onToggleMinimap}>
+      <CanvasToolButton
+        label="Toggle minimap"
+        active={minimapVisible}
+        onClick={onToggleMinimap}
+      >
         <MapIcon className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
-      <CanvasToolButton label="Toggle snap to grid" active={snapToGrid} onClick={onToggleSnap}>
+      <CanvasToolButton
+        label="Toggle snap to grid"
+        active={snapToGrid}
+        onClick={onToggleSnap}
+      >
         <LayoutGrid className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
-      <CanvasToolButton label={simulationEnabled ? 'Pause simulation' : 'Start simulation'} active={simulationEnabled} disabled={!hasNodes} onClick={onToggleSimulation}>
+      <CanvasToolButton
+        label={simulationEnabled ? 'Pause simulation' : 'Start simulation'}
+        active={simulationEnabled}
+        disabled={!hasNodes}
+        onClick={onToggleSimulation}
+      >
         {simulationEnabled ? (
           <Pause className="h-4 w-4" aria-hidden="true" />
         ) : (
@@ -499,7 +599,11 @@ interface LeaveConfirmModalProps {
   onCancel: () => void;
 }
 
-function LeaveConfirmModal({ open, onConfirm, onCancel }: LeaveConfirmModalProps) {
+function LeaveConfirmModal({
+  open,
+  onConfirm,
+  onCancel,
+}: LeaveConfirmModalProps) {
   const prefersReduced = useReducedMotion();
   if (!open) return null;
   return (
@@ -515,12 +619,20 @@ function LeaveConfirmModal({ open, onConfirm, onCancel }: LeaveConfirmModalProps
         transition={spring}
         className="w-full max-w-sm rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] p-6 shadow-xl"
       >
-        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">Leave this problem?</h2>
+        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+          Leave this problem?
+        </h2>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          Your current placements will be lost. Progress from completed requirements is saved.
+          Your current placements will be lost. Progress from completed
+          requirements is saved.
         </p>
         <div className="mt-5 flex gap-3">
-          <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="secondary"
+            className="flex-1"
+            onClick={onCancel}
+          >
             Stay
           </Button>
           <Button type="button" className="flex-1" onClick={onConfirm}>
@@ -541,14 +653,23 @@ export default function ProblemGamePage() {
   const queryClient = useQueryClient();
   const { token, isAuthenticated, isReady } = useAuth();
   const prefersReduced = useReducedMotion();
-  const flowInstanceRef = useRef<ReactFlowInstance<GameFlowNode, Edge<SystemEdgeData>> | null>(null);
+  const flowInstanceRef = useRef<ReactFlowInstance<
+    GameFlowNode,
+    Edge<SystemEdgeData>
+  > | null>(null);
   const hasRestoredRef = useRef(false);
 
-  const { data: problemDetail, isLoading: isProblemLoading, isError: isProblemError } = useProblemDetail(slug, token || undefined);
+  const {
+    data: problemDetail,
+    isLoading: isProblemLoading,
+    isError: isProblemError,
+  } = useProblemDetail(slug, token || undefined);
   const { data: problems } = useProblems();
 
   const [currentOrder, setCurrentOrder] = useState(1);
-  const [completedOrders, setCompletedOrders] = useState<Set<number>>(new Set());
+  const [completedOrders, setCompletedOrders] = useState<Set<number>>(
+    new Set(),
+  );
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [activeSlug, setActiveSlug] = useState('');
   const [startedAt, setStartedAt] = useState(() => Date.now());
@@ -556,7 +677,9 @@ export default function ProblemGamePage() {
   const [result, setResult] = useState<SubmissionResponse | null>(null);
   const [submitError, setSubmitError] = useState('');
   const [selectedSlotId, setSelectedSlotId] = useState('');
-  const [layoutOverrides, setLayoutOverrides] = useState<Record<string, { x: number; y: number }>>({});
+  const [layoutOverrides, setLayoutOverrides] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
   const [hoveredEdgeId, setHoveredEdgeId] = useState('');
   const [simulationEnabled, setSimulationEnabled] = useState(false);
   const [activeSimulationEdgeId, setActiveSimulationEdgeId] = useState('');
@@ -564,11 +687,17 @@ export default function ProblemGamePage() {
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [slotFeedback, setSlotFeedback] = useState<Record<string, boolean>>({});
 
-  const { data: reqGraph, isLoading: isGraphLoading, isFetching } = useRequirementGraph(slug, currentOrder);
+  const {
+    data: reqGraph,
+    isLoading: isGraphLoading,
+    isFetching,
+  } = useRequirementGraph(slug, currentOrder);
   const submit = useSubmit(token);
   const shareProblem = useShareProblem(token || undefined);
   const toastCtx = useToast();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
 
   // Reset when moving to a new requirement
   useEffect(() => {
@@ -598,8 +727,9 @@ export default function ProblemGamePage() {
     setCompletedOrders(passedOrders);
     const totalReqs = problemDetail.requirements.length;
     const nextOrder =
-      Array.from({ length: totalReqs }, (_, i) => i + 1).find((o) => !passedOrders.has(o)) ??
-      totalReqs;
+      Array.from({ length: totalReqs }, (_, i) => i + 1).find(
+        (o) => !passedOrders.has(o),
+      ) ?? totalReqs;
     setCurrentOrder(nextOrder);
   }, [problemDetail, token]);
 
@@ -629,7 +759,10 @@ export default function ProblemGamePage() {
     let inner = 0;
     outer = window.requestAnimationFrame(() => {
       inner = window.requestAnimationFrame(() => {
-        flowInstanceRef.current?.fitView({ padding: 0.2, duration: prefersReduced ? 0 : 400 });
+        flowInstanceRef.current?.fitView({
+          padding: 0.2,
+          duration: prefersReduced ? 0 : 400,
+        });
       });
     });
     return () => {
@@ -639,12 +772,14 @@ export default function ProblemGamePage() {
   }, [reqGraph, currentOrder, prefersReduced]);
 
   const componentBySlug = useMemo(
-    () => new Map((problemDetail?.componentTypes ?? []).map((c) => [c.slug, c])),
+    () =>
+      new Map((problemDetail?.componentTypes ?? []).map((c) => [c.slug, c])),
     [problemDetail?.componentTypes],
   );
 
   const slotIds = useMemo(
-    () => reqGraph?.nodes.filter((n) => n.type === 'blank').map((n) => n.id) ?? [],
+    () =>
+      reqGraph?.nodes.filter((n) => n.type === 'blank').map((n) => n.id) ?? [],
     [reqGraph?.nodes],
   );
 
@@ -669,19 +804,29 @@ export default function ProblemGamePage() {
   }, [answers, reqGraph?.nodes]);
 
   const hoveredPath = useMemo(
-    () => (hoveredEdgeId ? getConnectedPath(hoveredEdgeId, reqGraph?.edges ?? []) : emptyConnectedPath()),
+    () =>
+      hoveredEdgeId
+        ? getConnectedPath(hoveredEdgeId, reqGraph?.edges ?? [])
+        : emptyConnectedPath(),
     [hoveredEdgeId, reqGraph?.edges],
   );
   const activeSimulationNodes = useMemo(
-    () => (activeSimulationEdgeId ? getDirectEdgeNodes(activeSimulationEdgeId, reqGraph?.edges ?? []) : new Set<string>()),
+    () =>
+      activeSimulationEdgeId
+        ? getDirectEdgeNodes(activeSimulationEdgeId, reqGraph?.edges ?? [])
+        : new Set<string>(),
     [activeSimulationEdgeId, reqGraph?.edges],
   );
   const hasHoveredPath = hoveredPath.edgeIds.size > 0;
 
   const nextProblemSlug = useMemo(() => {
     if (!problems || !problemDetail) return null;
-    const idx = problems.findIndex((p) => p.slug === problemDetail.problem.slug);
-    return idx >= 0 && idx < problems.length - 1 ? problems[idx + 1].slug : null;
+    const idx = problems.findIndex(
+      (p) => p.slug === problemDetail.problem.slug,
+    );
+    return idx >= 0 && idx < problems.length - 1
+      ? problems[idx + 1].slug
+      : null;
   }, [problems, problemDetail]);
 
   const clearSlot = useCallback((slotId: string) => {
@@ -712,7 +857,8 @@ export default function ProblemGamePage() {
         const selected = componentBySlug.get(answers[node.id]);
         if (selected) {
           const fb = slotFeedback[node.id];
-          const feedbackState = fb === false ? 'error' : fb === true ? 'valid' : undefined;
+          const feedbackState =
+            fb === false ? 'error' : fb === true ? 'valid' : undefined;
           return {
             id: node.id,
             type: 'filledSlot',
@@ -808,7 +954,8 @@ export default function ProblemGamePage() {
           sourceSlug: nodeSlugById.get(edge.source),
           targetSlug: nodeSlugById.get(edge.target),
         });
-        const isActive = simulationEnabled && activeSimulationEdgeId === edge.id;
+        const isActive =
+          simulationEnabled && activeSimulationEdgeId === edge.id;
         const isHighlighted = hoveredPath.edgeIds.has(edge.id);
         const isDimmed = hasHoveredPath && !isHighlighted;
         const status: SystemEdgeStatus = isActive ? 'active' : 'normal';
@@ -846,7 +993,10 @@ export default function ProblemGamePage() {
   );
 
   const showMinimap = isMinimapVisible && flowNodes.length > 0;
-  const simulationEdgeIds = useMemo(() => reqGraph?.edges.map((edge) => edge.id) ?? [], [reqGraph?.edges]);
+  const simulationEdgeIds = useMemo(
+    () => reqGraph?.edges.map((edge) => edge.id) ?? [],
+    [reqGraph?.edges],
+  );
 
   useEffect(() => {
     if (!simulationEnabled || simulationEdgeIds.length === 0) {
@@ -890,45 +1040,61 @@ export default function ProblemGamePage() {
     setActiveSlug('');
   }, []);
 
-  const handleComponentClick = useCallback((componentSlug: string) => {
-    const targetSlotId =
-      (selectedSlotId && slotIds.includes(selectedSlotId) ? selectedSlotId : '') ||
-      slotIds.find((slotId) => !answers[slotId]) ||
-      '';
+  const handleComponentClick = useCallback(
+    (componentSlug: string) => {
+      const targetSlotId =
+        (selectedSlotId && slotIds.includes(selectedSlotId)
+          ? selectedSlotId
+          : '') ||
+        slotIds.find((slotId) => !answers[slotId]) ||
+        '';
 
-    if (!targetSlotId) return;
+      if (!targetSlotId) return;
 
-    setAnswers((current) => ({ ...current, [targetSlotId]: componentSlug }));
-    setSelectedSlotId(targetSlotId);
-    setSubmitError('');
-    setSlotFeedback((prev) => {
-      if (!(targetSlotId in prev)) return prev;
-      const next = { ...prev };
-      delete next[targetSlotId];
-      return next;
-    });
-  }, [answers, selectedSlotId, slotIds]);
+      setAnswers((current) => ({ ...current, [targetSlotId]: componentSlug }));
+      setSelectedSlotId(targetSlotId);
+      setSubmitError('');
+      setSlotFeedback((prev) => {
+        if (!(targetSlotId in prev)) return prev;
+        const next = { ...prev };
+        delete next[targetSlotId];
+        return next;
+      });
+    },
+    [answers, selectedSlotId, slotIds],
+  );
 
   const handleFitView = useCallback(() => {
-    flowInstanceRef.current?.fitView({ padding: 0.24, duration: prefersReduced ? 0 : 280 });
+    flowInstanceRef.current?.fitView({
+      padding: 0.24,
+      duration: prefersReduced ? 0 : 280,
+    });
   }, [prefersReduced]);
 
   const handleAutoLayout = useCallback(() => {
     if (flowNodes.length === 0 || !reqGraph) return;
 
-    setLayoutOverrides(autoLayoutGraph(flowNodes, reqGraph.edges, {
-      originX: 40,
-      originY: 260,
-      columnGap: 290,
-      rowGap: 170,
-    }));
+    setLayoutOverrides(
+      autoLayoutGraph(flowNodes, reqGraph.edges, {
+        originX: 40,
+        originY: 260,
+        columnGap: 290,
+        rowGap: 170,
+      }),
+    );
     window.requestAnimationFrame(() => {
-      flowInstanceRef.current?.fitView({ padding: 0.24, duration: prefersReduced ? 0 : 280 });
+      flowInstanceRef.current?.fitView({
+        padding: 0.24,
+        duration: prefersReduced ? 0 : 280,
+      });
     });
   }, [flowNodes, prefersReduced, reqGraph]);
 
   const handleSubmit = useCallback(async () => {
-    if (!isAuthenticated) { router.push('/login'); return; }
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (!problemDetail || !isReadyToSubmit) return;
 
     setSubmitError('');
@@ -948,14 +1114,30 @@ export default function ProblemGamePage() {
         setCompletedOrders((prev) => new Set(prev).add(currentOrder));
       }
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['problems', slug] }),   // refresh completedRequirementOrders + isSolved
-        queryClient.invalidateQueries({ queryKey: ['problems', token || null] }), // refresh problems list isSolved badge
+        queryClient.invalidateQueries({ queryKey: ['problems', slug] }), // refresh completedRequirementOrders + isSolved
+        queryClient.invalidateQueries({
+          queryKey: ['problems', token || null],
+        }), // refresh problems list isSolved badge
         queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
       ]);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Could not submit your answer.');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Could not submit your answer.',
+      );
     }
-  }, [answers, currentOrder, isAuthenticated, isReadyToSubmit, problemDetail, queryClient, router, startedAt, submit]);
+  }, [
+    answers,
+    currentOrder,
+    isAuthenticated,
+    isReadyToSubmit,
+    problemDetail,
+    queryClient,
+    router,
+    startedAt,
+    submit,
+  ]);
 
   const handleNextRequirement = useCallback(() => {
     if (!reqGraph) return;
@@ -1009,13 +1191,17 @@ export default function ProblemGamePage() {
     setElapsedSeconds(0);
   }, []);
 
-  const handleSelectRequirement = useCallback((order: number) => {
-    const highestAccessible = completedOrders.size > 0 ? Math.max(...completedOrders) + 1 : 1;
-    if (completedOrders.has(order) || order === highestAccessible) {
-      setCurrentOrder(order);
-      setResult(null);
-    }
-  }, [completedOrders]);
+  const handleSelectRequirement = useCallback(
+    (order: number) => {
+      const highestAccessible =
+        completedOrders.size > 0 ? Math.max(...completedOrders) + 1 : 1;
+      if (completedOrders.has(order) || order === highestAccessible) {
+        setCurrentOrder(order);
+        setResult(null);
+      }
+    },
+    [completedOrders],
+  );
 
   // ── Sidebar resize ────────────────────────────────────────────────────────
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
@@ -1061,22 +1247,28 @@ export default function ProblemGamePage() {
   const showCompactResult = result !== null && !isLastRequirement;
 
   // ── Leave modal ──────────────────────────────────────────────────────────
-  const [leaveModal, setLeaveModal] = useState<{ open: boolean; href: string }>({ open: false, href: '' });
+  const [leaveModal, setLeaveModal] = useState<{ open: boolean; href: string }>(
+    { open: false, href: '' },
+  );
   const leaveHrefRef = useRef('');
 
   // Keep a ref in sync so event handlers always read the latest value without
   // needing to be re-registered. Avoids stale closure bugs entirely.
   const shouldWarnOnLeaveRef = useRef(false);
-  shouldWarnOnLeaveRef.current = Object.keys(answers).length > 0 && !showFullResult;
+  shouldWarnOnLeaveRef.current =
+    Object.keys(answers).length > 0 && !showFullResult;
 
-  const handleNavigateAway = useCallback((href: string) => {
-    if (shouldWarnOnLeaveRef.current) {
-      leaveHrefRef.current = href;
-      setLeaveModal({ open: true, href });
-    } else {
-      router.push(href);
-    }
-  }, [router]);
+  const handleNavigateAway = useCallback(
+    (href: string) => {
+      if (shouldWarnOnLeaveRef.current) {
+        leaveHrefRef.current = href;
+        setLeaveModal({ open: true, href });
+      } else {
+        router.push(href);
+      }
+    },
+    [router],
+  );
 
   const handleLeaveConfirm = useCallback(() => {
     const href = leaveHrefRef.current;
@@ -1113,7 +1305,8 @@ export default function ProblemGamePage() {
   }, []);
 
   const isLoading = isProblemLoading || isGraphLoading;
-  const isError = isProblemError || (!isGraphLoading && !!problemDetail && !reqGraph);
+  const isError =
+    isProblemError || (!isGraphLoading && !!problemDetail && !reqGraph);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--bg-primary)]">
@@ -1151,14 +1344,25 @@ export default function ProblemGamePage() {
           </div>
         ) : isError || !problemDetail ? (
           <main className="mx-auto max-w-3xl flex-1 px-4 py-16 text-center sm:px-6">
-            <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Problem unavailable</h1>
-            <p className="mt-3 text-[var(--text-secondary)]">The API could not load this system design problem.</p>
-            <Link href="/problems" className="mt-6 inline-flex text-sm font-semibold text-[var(--accent-primary)]">
+            <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
+              Problem unavailable
+            </h1>
+            <p className="mt-3 text-[var(--text-secondary)]">
+              The API could not load this system design problem.
+            </p>
+            <Link
+              href="/problems"
+              className="mt-6 inline-flex text-sm font-semibold text-[var(--accent-primary)]"
+            >
               Back to problems
             </Link>
           </main>
         ) : (
-          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
             <div className="flex flex-1 overflow-hidden">
               {/* Left sidebar — resizable */}
               <div
@@ -1179,130 +1383,148 @@ export default function ProblemGamePage() {
                 />
               </div>
 
-            {/* Drag splitter */}
-            <div
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Resize sidebar"
-              onMouseDown={handleResizerMouseDown}
-              className="group relative flex w-2 shrink-0 cursor-col-resize select-none items-center justify-center"
-            >
-              <div className="pointer-events-none h-full w-px bg-[var(--text-primary)]/10 transition-colors group-hover:bg-[var(--accent-primary)]/40 group-active:bg-[var(--accent-primary)]/60" />
-              <div className="pointer-events-none absolute flex flex-col gap-[3px]">
-                {[0, 1, 2].map((i) => (
-                  <span key={i} className="h-1 w-1 rounded-full bg-[var(--text-primary)]/25 transition-colors group-hover:bg-[var(--accent-primary)]/60" />
-                ))}
-              </div>
-            </div>
-
-            {/* Right: canvas */}
-            <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
-              <div className="pointer-events-none absolute left-4 top-4 z-20 max-w-sm rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/92 px-3 py-2.5 shadow-lg backdrop-blur">
-                <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
-                  <LocateFixed className="h-3 w-3" aria-hidden="true" />
-                  Requirement {currentOrder}
-                </div>
-                <div className="text-sm font-semibold leading-tight text-[var(--text-primary)]">
-                  {currentRequirement?.title ?? problemDetail.problem.title}
-                </div>
-                <div className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
-                  {slotIds.length === 0
-                    ? 'Explore the revealed architecture path.'
-                    : selectedSlotId
-                      ? `Slot selected. ${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`
-                      : `${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`}
+              {/* Drag splitter */}
+              <div
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize sidebar"
+                onMouseDown={handleResizerMouseDown}
+                className="group relative flex w-2 shrink-0 cursor-col-resize select-none items-center justify-center"
+              >
+                <div className="pointer-events-none h-full w-px bg-[var(--text-primary)]/10 transition-colors group-hover:bg-[var(--accent-primary)]/40 group-active:bg-[var(--accent-primary)]/60" />
+                <div className="pointer-events-none absolute flex flex-col gap-[3px]">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="h-1 w-1 rounded-full bg-[var(--text-primary)]/25 transition-colors group-hover:bg-[var(--accent-primary)]/60"
+                    />
+                  ))}
                 </div>
               </div>
 
-              <CanvasToolbar
-                hasNodes={flowNodes.length > 0}
-                minimapVisible={isMinimapVisible}
-                snapToGrid={snapToGrid}
-                simulationEnabled={simulationEnabled}
-                onAutoLayout={handleAutoLayout}
-                onFitView={handleFitView}
-                onToggleMinimap={() => setIsMinimapVisible((current) => !current)}
-                onToggleSnap={() => setSnapToGrid((current) => !current)}
-                onToggleSimulation={() => setSimulationEnabled((current) => !current)}
-              />
-
-              <ReactFlowProvider>
-                <div className="absolute inset-0">
-                  <ReactFlow
-                    nodes={flowNodes}
-                    edges={flowEdges}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    nodesDraggable={false}
-                    snapToGrid={snapToGrid}
-                    snapGrid={[24, 24]}
-                    onInit={(instance) => {
-                      flowInstanceRef.current = instance;
-                    }}
-                    fitView
-                    fitViewOptions={{ padding: 0.2 }}
-                    minZoom={0.5}
-                    maxZoom={1.5}
-                    proOptions={{ hideAttribution: true }}
-                  >
-                    <Background variant={BackgroundVariant.Dots} color="var(--text-secondary)" gap={24} size={1} />
-                    {showMinimap && (
-                      <MiniMap
-                        pannable
-                        zoomable
-                        nodeColor={(node) => {
-                          if (node.type === 'blankSlot') return 'var(--slot-blank)';
-                          if (node.type === 'filledSlot') return 'var(--slot-correct)';
-                          return 'var(--accent-primary)';
-                        }}
-                        maskColor="rgba(0,0,0,0.08)"
-                      />
-                    )}
-                  </ReactFlow>
-                </div>
-              </ReactFlowProvider>
-
-              {flowNodes.length === 0 && (
-                <div className="absolute inset-0 z-10 grid place-items-center p-8 text-center">
-                  <div className="rounded-lg border border-dashed border-[var(--text-primary)]/15 bg-[var(--bg-primary)]/80 px-5 py-4 text-sm text-[var(--text-secondary)] shadow-sm">
-                    Canvas is ready.
+              {/* Right: canvas */}
+              <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
+                <div className="pointer-events-none absolute left-4 top-4 z-20 max-w-sm rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/92 px-3 py-2.5 shadow-lg backdrop-blur">
+                  <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+                    <LocateFixed className="h-3 w-3" aria-hidden="true" />
+                    Requirement {currentOrder}
+                  </div>
+                  <div className="text-sm font-semibold leading-tight text-[var(--text-primary)]">
+                    {currentRequirement?.title ?? problemDetail.problem.title}
+                  </div>
+                  <div className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
+                    {slotIds.length === 0
+                      ? 'Explore the revealed architecture path.'
+                      : selectedSlotId
+                        ? `Slot selected. ${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`
+                        : `${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`}
                   </div>
                 </div>
-              )}
 
-              <AnimatePresence>
-                {activeSlug ? (
-                  <motion.div
-                    key="drop-state"
-                    initial={prefersReduced ? undefined : { opacity: 0, y: 8 }}
-                    animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
-                    exit={prefersReduced ? undefined : { opacity: 0, y: 8 }}
-                    className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-[var(--slot-blank)]/30 bg-[var(--bg-primary)]/95 px-4 py-2 text-xs font-semibold text-[var(--slot-blank)] shadow-lg backdrop-blur"
-                  >
-                    Drop on an open slot
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+                <CanvasToolbar
+                  hasNodes={flowNodes.length > 0}
+                  minimapVisible={isMinimapVisible}
+                  snapToGrid={snapToGrid}
+                  simulationEnabled={simulationEnabled}
+                  onAutoLayout={handleAutoLayout}
+                  onFitView={handleFitView}
+                  onToggleMinimap={() =>
+                    setIsMinimapVisible((current) => !current)
+                  }
+                  onToggleSnap={() => setSnapToGrid((current) => !current)}
+                  onToggleSimulation={() =>
+                    setSimulationEnabled((current) => !current)
+                  }
+                />
 
-              {/* Compact result overlay (mid-requirement pass or fail) */}
-              <AnimatePresence>
-                {showCompactResult && currentRequirement ? (
-                  <CompactResult
-                    key={`compact-${currentOrder}`}
-                    result={result}
-                    onNext={handleNextRequirement}
-                    onDismiss={handleDismissResult}
-                    onReset={handleReset}
-                    requirementTitle={currentRequirement.title}
-                  />
-                ) : null}
-              </AnimatePresence>
-            </section>
-          </div>
+                <ReactFlowProvider>
+                  <div className="absolute inset-0">
+                    <ReactFlow
+                      nodes={flowNodes}
+                      edges={flowEdges}
+                      nodeTypes={nodeTypes}
+                      edgeTypes={edgeTypes}
+                      nodesDraggable={false}
+                      snapToGrid={snapToGrid}
+                      snapGrid={[24, 24]}
+                      onInit={(instance) => {
+                        flowInstanceRef.current = instance;
+                      }}
+                      fitView
+                      fitViewOptions={{ padding: 0.2 }}
+                      minZoom={0.5}
+                      maxZoom={1.5}
+                      proOptions={{ hideAttribution: true }}
+                    >
+                      <Background
+                        variant={BackgroundVariant.Dots}
+                        color="var(--text-secondary)"
+                        gap={24}
+                        size={1}
+                      />
+                      {showMinimap && (
+                        <MiniMap
+                          pannable
+                          zoomable
+                          nodeColor={(node) => {
+                            if (node.type === 'blankSlot')
+                              return 'var(--slot-blank)';
+                            if (node.type === 'filledSlot')
+                              return 'var(--slot-correct)';
+                            return 'var(--accent-primary)';
+                          }}
+                          maskColor="rgba(0,0,0,0.08)"
+                        />
+                      )}
+                    </ReactFlow>
+                  </div>
+                </ReactFlowProvider>
 
-          <DragOverlay>
-            <PaletteOverlay component={activeComponent} />
-          </DragOverlay>
+                {flowNodes.length === 0 && (
+                  <div className="absolute inset-0 z-10 grid place-items-center p-8 text-center">
+                    <div className="rounded-lg border border-dashed border-[var(--text-primary)]/15 bg-[var(--bg-primary)]/80 px-5 py-4 text-sm text-[var(--text-secondary)] shadow-sm">
+                      Canvas is ready.
+                    </div>
+                  </div>
+                )}
+
+                <AnimatePresence>
+                  {activeSlug ? (
+                    <motion.div
+                      key="drop-state"
+                      initial={
+                        prefersReduced ? undefined : { opacity: 0, y: 8 }
+                      }
+                      animate={
+                        prefersReduced ? undefined : { opacity: 1, y: 0 }
+                      }
+                      exit={prefersReduced ? undefined : { opacity: 0, y: 8 }}
+                      className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-[var(--slot-blank)]/30 bg-[var(--bg-primary)]/95 px-4 py-2 text-xs font-semibold text-[var(--slot-blank)] shadow-lg backdrop-blur"
+                    >
+                      Drop on an open slot
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                {/* Compact result overlay (mid-requirement pass or fail) */}
+                <AnimatePresence>
+                  {showCompactResult && currentRequirement ? (
+                    <CompactResult
+                      key={`compact-${currentOrder}`}
+                      result={result}
+                      onNext={handleNextRequirement}
+                      onDismiss={handleDismissResult}
+                      onReset={handleReset}
+                      requirementTitle={currentRequirement.title}
+                    />
+                  ) : null}
+                </AnimatePresence>
+              </section>
+            </div>
+
+            <DragOverlay>
+              <PaletteOverlay component={activeComponent} />
+            </DragOverlay>
           </DndContext>
         )}
       </div>

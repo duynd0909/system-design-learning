@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export interface IconProps {
   id: number;
@@ -72,7 +72,11 @@ export const Icon = ({
       style={{ x: springX, y: springY }}
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        delay: index * 0.08,
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       className={cn('absolute', iconData.className)}
     >
       <motion.div
@@ -135,9 +139,15 @@ const FloatingIconsHero = React.forwardRef<
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-b from-foreground to-foreground/70 text-transparent bg-clip-text">
           {title}
         </h1>
-        <p className="mt-6 max-w-xl mx-auto text-lg text-muted-foreground">{subtitle}</p>
+        <p className="mt-6 max-w-xl mx-auto text-lg text-muted-foreground">
+          {subtitle}
+        </p>
         <div className="mt-10">
-          <Button asChild size="lg" className="px-8 py-6 text-base font-semibold cursor-pointer">
+          <Button
+            asChild
+            size="lg"
+            className="px-8 py-6 text-base font-semibold cursor-pointer"
+          >
             <a href={ctaHref}>{ctaText}</a>
           </Button>
         </div>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, LogOut, UserRound } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/Button';
 import { StreakBadge } from '@/components/ui/StreakBadge';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
@@ -56,10 +56,10 @@ export function Navbar({ overlay = false }: NavbarProps) {
       className={cn(
         'z-50 mx-auto w-full transition-all ease-out border-b border-transparent md:border-none',
         overlay ? 'fixed left-0 right-0 top-0' : 'sticky top-0',
-        scrolled && !open 
-          ? 'bg-white/80 supports-[backdrop-filter]:bg-white/60 dark:bg-[#141414]/80 backdrop-blur-xl border-border md:top-4 md:max-w-7xl md:rounded-full md:border md:border-black/8 dark:md:border-white/6 md:shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:md:shadow-[0_8px_32px_rgba(0,255,163,0.06)]' 
+        scrolled && !open
+          ? 'bg-white/80 supports-[backdrop-filter]:bg-white/60 dark:bg-[#141414]/80 backdrop-blur-xl border-border md:top-4 md:max-w-7xl md:rounded-full md:border md:border-black/8 dark:md:border-white/6 md:shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:md:shadow-[0_8px_32px_rgba(0,255,163,0.06)]'
           : 'bg-transparent md:max-w-7xl md:top-4',
-        open && 'bg-white/95 dark:bg-[#141414]/95 backdrop-blur-xl'
+        open && 'bg-white/95 dark:bg-[#141414]/95 backdrop-blur-xl',
       )}
     >
       <nav
@@ -95,15 +95,15 @@ export function Navbar({ overlay = false }: NavbarProps) {
                 buttonVariants({ variant: 'ghost' }),
                 'rounded-full px-4 text-sm font-medium transition-colors duration-200 hover:text-[#00b37a] dark:text-[var(--text-secondary)] dark:hover:text-[#00ffa3]',
                 isActive(link.href) &&
-                  'bg-black/6 text-[#00b37a] dark:bg-[#00ffa3]/8 dark:text-[#00ffa3] dark:hover:bg-[#00ffa3]/12'
+                  'bg-black/6 text-[#00b37a] dark:bg-[#00ffa3]/8 dark:text-[#00ffa3] dark:hover:bg-[#00ffa3]/12',
               )}
             >
               {link.label}
             </Link>
           ))}
-          
+
           <div className="mx-2 h-4 w-[1px] bg-border" />
-          
+
           <ThemeToggle className="rounded-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/8 mr-1" />
           {isReady && isAuthenticated && user ? (
             <>
@@ -149,9 +149,7 @@ export function Navbar({ overlay = false }: NavbarProps) {
                 </Button>
               </Link>
               <Link href="/register" tabIndex={-1}>
-                <Button
-                  className="rounded-full bg-[#00ffa3] px-5 ml-1 text-black font-bold hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.3)] transition-all duration-200 hover:scale-105"
-                >
+                <Button className="rounded-full bg-[#00ffa3] px-5 ml-1 text-black font-bold hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.3)] transition-all duration-200 hover:scale-105">
                   Get started
                 </Button>
               </Link>
@@ -176,14 +174,14 @@ export function Navbar({ overlay = false }: NavbarProps) {
         className={cn(
           'fixed right-0 bottom-0 left-0 z-50 flex flex-col overflow-hidden border-t border-black/8 dark:border-white/8 bg-white/95 dark:bg-[#141414]/95 supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-[#141414]/80 backdrop-blur-xl md:hidden',
           overlay ? 'top-16' : 'top-16',
-          open ? 'block' : 'hidden'
+          open ? 'block' : 'hidden',
         )}
       >
         <div
           data-slot={open ? 'open' : 'closed'}
           className={cn(
             'data-[slot=open]:animate-in data-[slot=open]:zoom-in-95 data-[slot=closed]:animate-out data-[slot=closed]:zoom-out-95 data-[slot=open]:fade-in-0 data-[slot=closed]:fade-out-0 ease-out duration-300',
-            'flex h-full w-full flex-col justify-between gap-y-2 p-6 overflow-y-auto'
+            'flex h-full w-full flex-col justify-between gap-y-2 p-6 overflow-y-auto',
           )}
         >
           <div className="flex flex-col gap-y-3">
@@ -195,14 +193,14 @@ export function Navbar({ overlay = false }: NavbarProps) {
                 className={cn(
                   'flex items-center rounded-xl px-4 py-4 text-base font-semibold text-gray-600 transition-colors hover:bg-black/5 hover:text-[#00b37a] dark:text-[var(--text-secondary)] dark:hover:bg-white/6 dark:hover:text-[#00ffa3]',
                   isActive(link.href) &&
-                    'bg-black/6 text-[#00b37a] dark:bg-[#00ffa3]/8 dark:text-[#00ffa3]'
+                    'bg-black/6 text-[#00b37a] dark:bg-[#00ffa3]/8 dark:text-[#00ffa3]',
                 )}
               >
                 {link.label}
               </Link>
             ))}
           </div>
-          
+
           <div className="flex flex-col gap-3 mt-auto pb-[env(safe-area-inset-bottom)]">
             {isReady && isAuthenticated && user ? (
               <>
@@ -235,12 +233,25 @@ export function Navbar({ overlay = false }: NavbarProps) {
               </>
             ) : (
               <>
-                <Link href="/login" tabIndex={-1} className="w-full" onClick={closeMenu}>
-                  <Button variant="outline" className="w-full py-6 text-base font-bold rounded-xl border-border">
+                <Link
+                  href="/login"
+                  tabIndex={-1}
+                  className="w-full"
+                  onClick={closeMenu}
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full py-6 text-base font-bold rounded-xl border-border"
+                  >
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/register" tabIndex={-1} className="w-full" onClick={closeMenu}>
+                <Link
+                  href="/register"
+                  tabIndex={-1}
+                  className="w-full"
+                  onClick={closeMenu}
+                >
                   <Button className="w-full py-6 text-base font-bold rounded-xl bg-[#00ffa3] text-black hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.3)]">
                     Get Started
                   </Button>

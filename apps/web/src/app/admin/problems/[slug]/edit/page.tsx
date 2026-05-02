@@ -11,10 +11,16 @@ import {
   useHideProblem,
   useComponentTypes,
 } from '@/lib/api';
-import { ProblemMetadataForm, type ProblemMetadata } from '@/components/admin/ProblemMetadataForm';
-import { RequirementBuilder, type RequirementData } from '@/components/admin/RequirementBuilder';
+import {
+  ProblemMetadataForm,
+  type ProblemMetadata,
+} from '@/components/admin/ProblemMetadataForm';
+import {
+  RequirementBuilder,
+  type RequirementData,
+} from '@/components/admin/RequirementBuilder';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Eye, EyeOff, FileText, Layers, Save } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -39,7 +45,10 @@ export default function EditProblemPage() {
   const { slug } = useParams<{ slug: string }>();
   const { token } = useAuth();
 
-  const { data, isLoading: problemLoading } = useAdminProblem(token ?? '', slug);
+  const { data, isLoading: problemLoading } = useAdminProblem(
+    token ?? '',
+    slug,
+  );
   const { data: componentTypes, isLoading: ctLoading } = useComponentTypes();
 
   const updateProblem = useUpdateProblem(token ?? '');
@@ -49,7 +58,9 @@ export default function EditProblemPage() {
 
   const [tab, setTab] = useState<Tab>('metadata');
   // null = not yet initialized from API; [] = loaded but empty
-  const [requirements, setRequirements] = useState<RequirementData[] | null>(null);
+  const [requirements, setRequirements] = useState<RequirementData[] | null>(
+    null,
+  );
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -64,7 +75,10 @@ export default function EditProblemPage() {
     setSuccess('');
     try {
       await updateProblem.mutateAsync({ slug, data: metadata });
-      await replaceRequirements.mutateAsync({ slug, requirements: requirements ?? [] });
+      await replaceRequirements.mutateAsync({
+        slug,
+        requirements: requirements ?? [],
+      });
       setSuccess('Saved successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save problem');
@@ -107,7 +121,9 @@ export default function EditProblemPage() {
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Problems
           </Link>
-          <span className="text-[var(--text-primary)]/20" aria-hidden="true">/</span>
+          <span className="text-[var(--text-primary)]/20" aria-hidden="true">
+            /
+          </span>
           {isLoading ? (
             <Skeleton className="h-5 w-32 rounded" />
           ) : (
@@ -116,14 +132,16 @@ export default function EditProblemPage() {
             </span>
           )}
           {!isLoading && (
-            <span className={cn(
-              'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold',
-              isDeleted
-                ? 'bg-[var(--slot-incorrect)]/12 text-[var(--slot-incorrect)]'
-                : isPublished
-                  ? 'bg-[var(--slot-correct)]/12 text-[var(--slot-correct)]'
-                  : 'bg-[var(--text-secondary)]/12 text-[var(--text-secondary)]',
-            )}>
+            <span
+              className={cn(
+                'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                isDeleted
+                  ? 'bg-[var(--slot-incorrect)]/12 text-[var(--slot-incorrect)]'
+                  : isPublished
+                    ? 'bg-[var(--slot-correct)]/12 text-[var(--slot-correct)]'
+                    : 'bg-[var(--text-secondary)]/12 text-[var(--text-secondary)]',
+              )}
+            >
               {isDeleted ? 'Deleted' : isPublished ? 'Published' : 'Hidden'}
             </span>
           )}
@@ -182,9 +200,13 @@ export default function EditProblemPage() {
               disabled={publishProblem.isPending || hideProblem.isPending}
             >
               {isPublished ? (
-                <><EyeOff className="h-3.5 w-3.5" aria-hidden="true" /> Hide</>
+                <>
+                  <EyeOff className="h-3.5 w-3.5" aria-hidden="true" /> Hide
+                </>
               ) : (
-                <><Eye className="h-3.5 w-3.5" aria-hidden="true" /> Publish</>
+                <>
+                  <Eye className="h-3.5 w-3.5" aria-hidden="true" /> Publish
+                </>
               )}
             </Button>
           )}
@@ -215,7 +237,8 @@ export default function EditProblemPage() {
       )}
       {isDeleted && (
         <div className="shrink-0 border-b border-amber-500/20 bg-amber-500/8 px-4 py-2.5 text-xs text-amber-600 dark:text-amber-400">
-          This problem has been soft-deleted. Restore it from the problems list before editing.
+          This problem has been soft-deleted. Restore it from the problems list
+          before editing.
         </div>
       )}
 
@@ -227,14 +250,19 @@ export default function EditProblemPage() {
           aria-label="Metadata"
           className={cn(
             'absolute inset-0 overflow-y-auto bg-[var(--bg-primary)] transition-opacity duration-150',
-            tab === 'metadata' ? 'z-10 opacity-100' : 'pointer-events-none opacity-0',
+            tab === 'metadata'
+              ? 'z-10 opacity-100'
+              : 'pointer-events-none opacity-0',
           )}
         >
           <div className="mx-auto max-w-2xl px-6 py-8">
             <div className="mb-6">
-              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">Problem Metadata</h2>
+              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+                Problem Metadata
+              </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                Edit the problem&apos;s title, description, difficulty, and category.
+                Edit the problem&apos;s title, description, difficulty, and
+                category.
               </p>
             </div>
             <div className="rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-6">
@@ -268,7 +296,9 @@ export default function EditProblemPage() {
           aria-label="Requirements"
           className={cn(
             'absolute inset-0 transition-opacity duration-150',
-            tab === 'requirements' ? 'z-10 opacity-100' : 'pointer-events-none opacity-0',
+            tab === 'requirements'
+              ? 'z-10 opacity-100'
+              : 'pointer-events-none opacity-0',
           )}
         >
           {!isBuilderReady ? (
