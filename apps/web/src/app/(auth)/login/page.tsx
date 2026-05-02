@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';

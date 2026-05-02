@@ -131,8 +131,8 @@ export function RequirementsSidebar({
                           animate={prefersReduced ? undefined : fadeIn.animate}
                           transition={{ delay: (req.order - 1) * 0.06 }}
                           className={cn(
-                            'group w-full rounded-lg px-3 py-2.5 text-left transition-colors',
-                            isActive && 'border border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/8 shadow-sm',
+                            'group w-full rounded-lg px-3 py-2.5 text-left transition-colors duration-200',
+                            isActive && 'border border-[#00ffa3]/30 bg-[#00ffa3]/6 shadow-sm dark:shadow-[0_0_16px_rgba(0,255,163,0.04)]',
                             isCompleted && !isActive && 'cursor-pointer hover:bg-[var(--bg-primary)]/60',
                             isLocked && 'cursor-default opacity-40',
                             !isActive && !isCompleted && !isLocked && 'hover:bg-[var(--bg-primary)]/40',
@@ -150,8 +150,8 @@ export function RequirementsSidebar({
                             <span
                               className={cn(
                                 'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-xs font-bold',
-                                isCompleted && 'bg-[var(--slot-correct)] text-white',
-                                isActive && !isCompleted && 'bg-[var(--accent-primary)] text-white',
+                                isCompleted && 'bg-[#00ffa3] text-black',
+                                isActive && !isCompleted && 'bg-[#00ffa3] text-black',
                                 isLocked && 'bg-[var(--text-primary)]/15 text-[var(--text-secondary)]',
                               )}
                               aria-hidden="true"
@@ -180,7 +180,7 @@ export function RequirementsSidebar({
                             </div>
 
                             {isActive && (
-                              <span className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--accent-primary)]" aria-hidden="true" />
+                              <span className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full bg-[#00ffa3]" aria-hidden="true" />
                             )}
                           </div>
                         </motion.button>
@@ -193,7 +193,7 @@ export function RequirementsSidebar({
           ) : (
             <div>
               <div className="mb-3 flex items-center gap-2 px-1">
-                <Network className="h-3.5 w-3.5 text-[var(--accent-primary)]" aria-hidden="true" />
+                <Network className="h-3.5 w-3.5 text-[#00ffa3]" aria-hidden="true" />
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
                   Components
                 </h2>

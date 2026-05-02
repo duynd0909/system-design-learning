@@ -12,7 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { ShareModule } from './share/share.module';
 import { AdminModule } from './admin/admin.module';
-
+import { StatsModule } from './stats/stats.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.local' }),
@@ -28,6 +28,7 @@ import { AdminModule } from './admin/admin.module';
     HealthModule,
     ShareModule,
     AdminModule,
+    StatsModule,
   ],
 })
 export class AppModule {}

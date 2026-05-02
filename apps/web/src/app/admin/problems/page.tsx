@@ -10,7 +10,7 @@ import { useAdminProblems } from '@/lib/api';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ProblemRowActions } from '@/components/admin/ProblemRowActions';
 import { cn } from '@/lib/utils';
 import type { Difficulty } from '@stackdify/shared-types';
@@ -56,7 +56,7 @@ export default function AdminProblemsPage() {
           <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">Problems</h1>
           <p className="mt-0.5 text-sm text-[var(--text-secondary)]">Manage all system design problems.</p>
         </div>
-        <Button variant="primary" size="sm" onClick={() => router.push('/admin/problems/new')}>
+        <Button variant="default" size="sm" onClick={() => router.push('/admin/problems/new')}>
           <Plus className="h-4 w-4" aria-hidden="true" />
           New Problem
         </Button>

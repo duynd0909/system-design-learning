@@ -7,7 +7,7 @@ import { useCreateProblem, useReplaceRequirements, useComponentTypes } from '@/l
 import { ProblemMetadataForm, type ProblemMetadata } from '@/components/admin/ProblemMetadataForm';
 import { RequirementBuilder, type RequirementData } from '@/components/admin/RequirementBuilder';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText, Layers, Save } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -105,7 +105,7 @@ export default function NewProblemPage() {
         <Button
           type="submit"
           form={FORM_ID}
-          variant="primary"
+          variant="default"
           size="sm"
           disabled={isSubmitting}
           className="shrink-0"

@@ -21,7 +21,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Plus, Trash2, Eye, EyeOff, X, Target } from 'lucide-react';
 import type { ComponentType, GraphEdge, GraphNode } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
 import { categoryForComponent, getCategoryStyle, normalizeComponentCategory } from '@/components/game/graph-config';
@@ -425,7 +425,7 @@ function SingleRequirementCanvas({ requirement, allPreviousNodes, componentTypes
                     className="w-full rounded border border-[var(--text-primary)]/20 bg-[var(--bg-primary)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
                     autoFocus
                   />
-                  <Button type="button" variant="primary" size="sm" className="w-full text-[10px] py-1" onClick={() => addActorNode(actorName)}>
+                  <Button type="button" variant="default" size="sm" className="w-full text-[10px] py-1" onClick={() => addActorNode(actorName)}>
                     Add
                   </Button>
                 </div>

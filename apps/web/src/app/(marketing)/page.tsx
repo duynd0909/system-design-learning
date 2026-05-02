@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Gamepad2, Network, TrendingUp, Trophy } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { BentoGrid, type BentoItem } from '@/components/ui/bento-grid';
-import AuroraBackground from '@/components/ui/AuroraBackground';
 import { SocialProofSection } from '@/components/marketing/SocialProofSection';
+import { LandingHero } from '@/components/marketing/LandingHero';
 
 const features: BentoItem[] = [
   {
@@ -15,7 +15,7 @@ const features: BentoItem[] = [
     status: 'Core',
     tags: ['Systems', 'Scale'],
     cta: 'Explore drills ->',
-    colSpan: 2,
+    colSpan: 3,
     hasPersistentHover: true,
   },
   {
@@ -27,6 +27,7 @@ const features: BentoItem[] = [
     status: 'Game loop',
     tags: ['Drag-drop', 'Practice'],
     cta: 'Play now ->',
+    colSpan: 2,
   },
   {
     icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
@@ -48,61 +49,17 @@ const features: BentoItem[] = [
     status: 'Live',
     tags: ['Ranking', 'Peers'],
     cta: 'Compare ->',
+    colSpan: 3,
   },
 ];
 
 export default function LandingPage() {
   return (
     <>
-      {/* Hero — aurora background, adapts to light/dark via CSS vars */}
-      <AuroraBackground
-        className="min-h-[92vh] px-4 py-24 sm:py-32"
-        starCount={70}
-        pulseDuration={10}
-        ariaLabel="Stackdify hero section with animated aurora background"
-      >
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
-          {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent-primary)]/25 bg-[var(--accent-primary)]/8 px-4 py-1.5 text-sm text-[var(--accent-primary)]">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent-primary)] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
-            </span>
-            Sprint 1 — Foundation Release
-          </div> */}
-
-          {/* Headline — gradient adapts: deep in light, bright in dark */}
-          <h1 className="font-display mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-            <span className="bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-500 bg-clip-text text-transparent dark:from-indigo-300 dark:via-purple-300 dark:to-fuchsia-300">
-              Stackdify
-            </span>
-          </h1>
-
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-[var(--text-secondary)] sm:text-xl">
-            Stop reading. Start building. Practice real-world system
-            architectures through an interactive drag-and-drop game that gives
-            you instant, scored feedback.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/problems">
-              <Button size="lg">Start Practicing →</Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="secondary" size="lg">
-                Create Account
-              </Button>
-            </Link>
-          </div>
-
-          <p className="mt-4 text-sm text-[var(--text-secondary)]/70">
-            Free to play. No credit card required.
-          </p>
-        </div>
-      </AuroraBackground>
+      <LandingHero />
 
       {/* How it works */}
-      <section className="bg-[var(--bg-secondary)] px-4 py-20">
+      <section id="how-it-works" className="bg-[var(--bg-secondary)] px-4 py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
             <h2 className="font-display mb-3 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
@@ -136,12 +93,8 @@ export default function LandingPage() {
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {item.desc}
-                  </p>
+                  <h3 className="mb-1 font-semibold text-[var(--text-primary)]">{item.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)]">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -160,7 +113,7 @@ export default function LandingPage() {
               Built for engineers
             </h2>
           </div>
-          <BentoGrid items={features} />
+          <BentoGrid items={features} className="md:grid-cols-5" />
         </div>
       </section>
 

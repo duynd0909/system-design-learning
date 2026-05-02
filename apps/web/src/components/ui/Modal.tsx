@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from './Button';
+import { Button } from './button';
 
 interface ModalProps {
   open: boolean;

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GitFork, Network } from 'lucide-react';
+import { GitFork } from 'lucide-react';
 import { Boxes } from '@/components/ui/background-boxes';
 
 const PLATFORM_LINKS = [
@@ -16,7 +16,7 @@ export function Footer() {
       {/* Animated grid background */}
       <Boxes />
 
-      {/* Radial gradient mask — fades boxes toward center so content stays readable */}
+      {/* Radial gradient mask */}
       <div
         className="pointer-events-none absolute inset-0 z-10"
         style={{
@@ -31,11 +31,16 @@ export function Footer() {
 
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="group inline-flex items-center gap-2">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
-                <Network className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span className="font-display text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-300 dark:to-purple-300">
+            <Link href="/" className="group inline-flex items-center gap-3">
+              <div
+                className="w-9 h-9 shrink-0 transition-opacity duration-200 group-hover:opacity-80"
+                style={{
+                  background: '#00ffa3',
+                  clipPath:
+                    'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                }}
+              />
+              <span className="text-xl font-black text-foreground tracking-tight">
                 Stackdify
               </span>
             </Link>
@@ -48,7 +53,7 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)]"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:text-[#00ffa3] dark:hover:text-[#00ffa3]"
             >
               <GitFork className="h-4 w-4" aria-hidden="true" />
               Open source
@@ -65,7 +70,7 @@ export function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)]"
+                    className="text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:text-[#00b37a] dark:hover:text-[#00ffa3]"
                   >
                     {label}
                   </Link>
@@ -83,7 +88,7 @@ export function Footer() {
               {COMING_SOON.map((label) => (
                 <li key={label} className="flex items-center gap-1.5">
                   <span className="text-sm text-[var(--text-secondary)]/50">{label}</span>
-                  <span className="rounded-full bg-[var(--accent-primary)]/12 px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent-primary)]">
+                  <span className="rounded-full bg-[#00ffa3]/12 px-1.5 py-0.5 text-[10px] font-semibold text-[#00b37a] dark:text-[#00ffa3]">
                     Soon
                   </span>
                 </li>

@@ -50,7 +50,7 @@ function DraggableChip({ component, isPlaced, layout = 'rail', onClick }: ChipPr
       className={cn(
         'group cursor-grab rounded-lg border bg-[var(--bg-primary)] shadow-sm outline-none',
         'transition-[border-color,box-shadow,opacity,background-color] duration-200 active:cursor-grabbing',
-        'focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30',
+        'focus-visible:ring-2 focus-visible:ring-[#00ffa3]/30',
         categoryStyle.borderClass,
         isRail
           ? 'flex min-h-[68px] w-[92px] shrink-0 flex-col items-center justify-center gap-1.5 px-2 py-2'
@@ -135,7 +135,7 @@ export function ComponentPalette({ components, placedSlugs, variant = 'rail', on
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search components"
-            className="h-10 w-full rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] pl-9 pr-3 text-sm text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-secondary)]/70 focus:border-[var(--accent-primary)]/50 focus:ring-2 focus:ring-[var(--accent-primary)]/15"
+            className="h-10 w-full rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] pl-9 pr-3 text-sm text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-secondary)]/70 focus:border-[#00ffa3]/50 focus:ring-2 focus:ring-[#00ffa3]/15"
           />
         </label>
 

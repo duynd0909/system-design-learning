@@ -14,6 +14,29 @@
   --animate-float: float 3s ease-in-out infinite;
 }
 
+/* ─── shadcn semantic color tokens (CSS-variable-backed, supports opacity modifiers) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
 @keyframes slot-pulse {
 
   0%,
@@ -30,11 +53,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 
   50% {
-    box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.3);
   }
 }
 
@@ -87,37 +110,83 @@
 /* ─── Design tokens (light mode) ─────────────────────────────────────────── */
 :root {
   --bg-primary: #ffffff;
-  --bg-secondary: #f8f7ff;
-  --bg-game-canvas: #f1f0ff;
-  --text-primary: #1e1b4b;
-  --text-secondary: #6d28d9;
-  --accent-primary: #4f46e5;
+  --bg-secondary: #f4f4f5;
+  --bg-game-canvas: #e4e4e7;
+  --text-primary: #09090b;
+  --text-secondary: #71717a;
+  --accent-primary: #00b37a;   /* neon green toned down for light mode contrast */
+  --accent-neon: #00ffa3;      /* full neon — use for dark-mode decoratives */
+  --accent-neon-text: #000000; /* text on neon backgrounds */
   --accent-game: #f59e0b;
   --slot-blank: #f97316;
   --slot-filled: #ffffff;
   --slot-correct: #10b981;
   --slot-incorrect: #ef4444;
-  --aurora-color1: rgba(168, 85, 247, 0.25);
-  --aurora-color2: rgba(79, 70, 229, 0.25);
+  --aurora-color1: rgba(0, 255, 163, 0.06);
+  --aurora-color2: rgba(0, 180, 120, 0.04);
   --aurora-overlay-opacity: 0.6;
+
+  /* Semantic tokens */
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #00b37a;
+  --primary-foreground: #000000;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #00b37a;
 }
 
 /* ─── Design tokens (dark mode) ──────────────────────────────────────────── */
 .dark {
-  --bg-primary: #0f0d1a;
-  --bg-secondary: #1a1730;
-  --bg-game-canvas: #131025;
-  --text-primary: #a78bfa;
-  --text-secondary: #fff;
-  --accent-primary: #818cf8;
+  --bg-primary: #09090b;
+  --bg-secondary: #141414;
+  --bg-game-canvas: #1c1c1e;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --accent-primary: #00ffa3;   /* full neon in dark mode */
+  --accent-neon: #00ffa3;
+  --accent-neon-text: #000000;
   --accent-game: #fcd34d;
   --slot-blank: #fb923c;
-  --slot-filled: #2d2650;
-  --slot-correct: #34d399;
+  --slot-filled: #27272a;
+  --slot-correct: #00ffa3;
   --slot-incorrect: #f87171;
-  --aurora-color1: rgba(192, 132, 252, 0.3);
-  --aurora-color2: rgba(129, 140, 248, 0.3);
+  --aurora-color1: rgba(0, 255, 163, 0.10);
+  --aurora-color2: rgba(0, 180, 120, 0.06);
   --aurora-overlay-opacity: 0.85;
+
+  /* Semantic tokens — dark */
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #141414;
+  --card-foreground: #fafafa;
+  --popover: #141414;
+  --popover-foreground: #fafafa;
+  --primary: #00ffa3;
+  --primary-foreground: #000000;
+  --secondary: #1c1c1e;
+  --secondary-foreground: #fafafa;
+  --muted: #1c1c1e;
+  --muted-foreground: #a1a1aa;
+  --accent: #1c1c1e;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #2a2a2a;
+  --input: #1c1c1e;
+  --ring: #00ffa3;
 }
 
 /* ─── Base ────────────────────────────────────────────────────────────────── */
