@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { CheckCircle2, LayoutGrid, List, Search } from 'lucide-react';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import Fuse from 'fuse.js';
 import { Difficulty } from '@stackdify/shared-types';
 import type { ProblemSummary } from '@stackdify/shared-types';
@@ -25,7 +32,13 @@ const DIFFICULTIES = [
 
 // ─── Requirement progress bar ─────────────────────────────────────────────────
 
-function RequirementProgress({ completed, total }: { completed: number; total: number }) {
+function RequirementProgress({
+  completed,
+  total,
+}: {
+  completed: number;
+  total: number;
+}) {
   if (total === 0) return null;
   return (
     <div className="flex items-center gap-1.5">
@@ -35,7 +48,9 @@ function RequirementProgress({ completed, total }: { completed: number; total: n
             key={i}
             className={cn(
               'h-1 flex-1 rounded-full transition-colors duration-300',
-              i < completed ? 'bg-[var(--slot-correct)]' : 'bg-[var(--text-primary)]/15',
+              i < completed
+                ? 'bg-[var(--slot-correct)]'
+                : 'bg-[var(--text-primary)]/15',
             )}
           />
         ))}
@@ -49,7 +64,13 @@ function RequirementProgress({ completed, total }: { completed: number; total: n
 
 // ─── Card view item ───────────────────────────────────────────────────────────
 
-function ProblemCard({ problem, isAuthenticated }: { problem: ProblemSummary; isAuthenticated: boolean }) {
+function ProblemCard({
+  problem,
+  isAuthenticated,
+}: {
+  problem: ProblemSummary;
+  isAuthenticated: boolean;
+}) {
   const completedCount = problem.completedRequirementOrders?.length ?? 0;
   return (
     <Link href={`/problems/${problem.slug}`} className="group block">
@@ -66,21 +87,30 @@ function ProblemCard({ problem, isAuthenticated }: { problem: ProblemSummary; is
                 Solved
               </Badge>
             ) : null}
-            <span className="text-xs text-[var(--text-secondary)]">{problem.nodeCount} nodes</span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {problem.nodeCount} nodes
+            </span>
           </div>
         </div>
 
         <CardTitle className="mb-2">{problem.title}</CardTitle>
-        <CardDescription className="line-clamp-2 flex-1">{problem.description}</CardDescription>
+        <CardDescription className="line-clamp-2 flex-1">
+          {problem.description}
+        </CardDescription>
 
         {isAuthenticated && problem.requirementCount > 0 && (
           <div className="mt-3">
-            <RequirementProgress completed={completedCount} total={problem.requirementCount} />
+            <RequirementProgress
+              completed={completedCount}
+              total={problem.requirementCount}
+            />
           </div>
         )}
 
         <div className="mt-4 flex items-center justify-between">
-          <span className="text-xs text-[var(--text-secondary)]">{problem.category}</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            {problem.category}
+          </span>
           <span className="text-xs font-medium text-[var(--accent-primary)] transition-all group-hover:translate-x-0.5">
             Practice →
           </span>
@@ -92,30 +122,48 @@ function ProblemCard({ problem, isAuthenticated }: { problem: ProblemSummary; is
 
 // ─── List view item ───────────────────────────────────────────────────────────
 
-function ProblemListRow({ problem, isAuthenticated }: { problem: ProblemSummary; isAuthenticated: boolean }) {
+function ProblemListRow({
+  problem,
+  isAuthenticated,
+}: {
+  problem: ProblemSummary;
+  isAuthenticated: boolean;
+}) {
   const completedCount = problem.completedRequirementOrders?.length ?? 0;
   return (
     <Link href={`/problems/${problem.slug}`} className="group block">
       <div className="flex items-center gap-3 rounded-xl border border-[var(--text-primary)]/8 bg-[var(--bg-secondary)] px-4 py-3.5 transition-all duration-200 hover:border-[var(--accent-primary)]/30 hover:shadow-[0_4px_24px_rgba(79,70,229,0.1)]">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate font-semibold text-[var(--text-primary)]">{problem.title}</span>
+            <span className="truncate font-semibold text-[var(--text-primary)]">
+              {problem.title}
+            </span>
             {isAuthenticated && problem.isSolved && (
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--slot-correct)]" aria-label="Solved" />
+              <CheckCircle2
+                className="h-3.5 w-3.5 shrink-0 text-[var(--slot-correct)]"
+                aria-label="Solved"
+              />
             )}
           </div>
-          <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">{problem.description}</p>
+          <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">
+            {problem.description}
+          </p>
         </div>
 
         <div className="flex w-[76px] shrink-0 justify-start">
           <DifficultyBadge difficulty={problem.difficulty} />
         </div>
 
-        <span className="hidden shrink-0 text-xs text-[var(--text-secondary)] sm:block">{problem.category}</span>
+        <span className="hidden shrink-0 text-xs text-[var(--text-secondary)] sm:block">
+          {problem.category}
+        </span>
 
         {isAuthenticated && problem.requirementCount > 0 ? (
           <div className="hidden w-32 shrink-0 lg:block">
-            <RequirementProgress completed={completedCount} total={problem.requirementCount} />
+            <RequirementProgress
+              completed={completedCount}
+              total={problem.requirementCount}
+            />
           </div>
         ) : (
           <span className="hidden shrink-0 text-xs text-[var(--text-secondary)] lg:block">
@@ -171,8 +219,13 @@ function ProblemsPageContent() {
 
   const selectedDifficulty = searchParams.get('difficulty') ?? '';
   const selectedCategory = searchParams.get('category') ?? '';
-  const selectedSolved = (searchParams.get('solved') ?? '') as 'true' | 'false' | '';
-  const difficultyFilter = DIFFICULTIES.some(({ value }) => value === selectedDifficulty)
+  const selectedSolved = (searchParams.get('solved') ?? '') as
+    | 'true'
+    | 'false'
+    | '';
+  const difficultyFilter = DIFFICULTIES.some(
+    ({ value }) => value === selectedDifficulty,
+  )
     ? (selectedDifficulty as Difficulty)
     : '';
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,22 +261,36 @@ function ProblemsPageContent() {
     () =>
       problemPages?.pages
         .flatMap((page) => page.data ?? [])
-        .filter((problem): problem is ProblemSummary => Boolean(problem?.id)) ?? [],
+        .filter((problem): problem is ProblemSummary => Boolean(problem?.id)) ??
+      [],
     [problemPages],
   );
   const totalProblems = problemPages?.pages[0]?.total ?? 0;
 
   const fuse = useMemo(
-    () => new Fuse(problems, { keys: ['title', 'description', 'category'], threshold: 0.35, includeScore: true }),
+    () =>
+      new Fuse(problems, {
+        keys: ['title', 'description', 'category'],
+        threshold: 0.35,
+        includeScore: true,
+      }),
     [problems],
   );
   const filteredProblems = useMemo(
-    () => (searchQuery.trim() ? fuse.search(searchQuery).map((r) => r.item) : problems),
+    () =>
+      searchQuery.trim()
+        ? fuse.search(searchQuery).map((r) => r.item)
+        : problems,
     [fuse, problems, searchQuery],
   );
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set([...(categoryData ?? []), ...(selectedCategory ? [selectedCategory] : [])])).sort();
+    const cats = Array.from(
+      new Set([
+        ...(categoryData ?? []),
+        ...(selectedCategory ? [selectedCategory] : []),
+      ]),
+    ).sort();
     return ['All', ...cats];
   }, [categoryData, selectedCategory]);
 
@@ -270,7 +337,9 @@ function ProblemsPageContent() {
             backgroundColor: 'var(--bg-secondary)',
           }}
         >
-          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Problems</h1>
+          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
+            Problems
+          </h1>
           <p className="mt-2 text-[var(--text-secondary)]">
             Practice real-world system architectures. Fill in the blanks.
           </p>
@@ -279,19 +348,25 @@ function ProblemsPageContent() {
         {/* Filter bar */}
         <div className="mb-8 flex flex-wrap items-center gap-3">
           {/* Difficulty pills */}
-          <div className="flex items-center gap-2" role="group" aria-label="Filter by difficulty">
+          <div
+            className="flex items-center gap-2"
+            role="group"
+            aria-label="Filter by difficulty"
+          >
             {DIFFICULTIES.map(({ label, value }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => setFilter('difficulty', value)}
                 className={cn(
-                  'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+                  'rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
                   difficultyFilter === value || (!difficultyFilter && !value)
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm dark:from-indigo-500 dark:to-purple-500'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                    ? 'bg-[#00ffa3] text-black shadow-[0_4px_16px_rgba(0,255,163,0.2)] font-bold'
+                    : 'bg-black/5 text-[var(--text-secondary)] hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-[#00ffa3]',
                 )}
-                aria-pressed={difficultyFilter === value || (!difficultyFilter && !value)}
+                aria-pressed={
+                  difficultyFilter === value || (!difficultyFilter && !value)
+                }
               >
                 {label}
               </button>
@@ -302,9 +377,14 @@ function ProblemsPageContent() {
           {categories.length > 1 && (
             <select
               value={selectedCategory || 'All'}
-              onChange={(e) => setFilter('category', e.target.value === 'All' ? '' : e.target.value)}
+              onChange={(e) =>
+                setFilter(
+                  'category',
+                  e.target.value === 'All' ? '' : e.target.value,
+                )
+              }
               aria-label="Filter by category"
-              className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
+              className="rounded-full border border-[var(--text-primary)]/10 bg-black/5 dark:bg-white/5 px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-black dark:hover:text-[#00ffa3] focus:outline-none focus:ring-2 focus:ring-[#00ffa3]/40"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -320,7 +400,7 @@ function ProblemsPageContent() {
               value={selectedSolved}
               onChange={(e) => setFilter('solved', e.target.value)}
               aria-label="Filter by solved status"
-              className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
+              className="rounded-full border border-[var(--text-primary)]/10 bg-black/5 dark:bg-white/5 px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-black dark:hover:text-[#00ffa3] focus:outline-none focus:ring-2 focus:ring-[#00ffa3]/40"
             >
               <option value="">All</option>
               <option value="true">Solved</option>
@@ -330,14 +410,17 @@ function ProblemsPageContent() {
 
           {/* Search input */}
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" aria-hidden="true" />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]"
+              aria-hidden="true"
+            />
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search problems…"
               aria-label="Search problems"
-              className="rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] py-1.5 pl-8 pr-3.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40"
+              className="rounded-full border border-[var(--text-primary)]/10 bg-black/5 dark:bg-white/5 py-1.5 pl-8 pr-3.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[#00ffa3]/40"
             />
           </div>
 
@@ -346,12 +429,14 @@ function ProblemsPageContent() {
             {!isLoading && (
               <span className="text-sm text-[var(--text-secondary)]">
                 {filteredProblems.length}
-                {totalProblems > filteredProblems.length && !searchQuery ? ` of ${totalProblems}` : ''}{' '}
+                {totalProblems > filteredProblems.length && !searchQuery
+                  ? ` of ${totalProblems}`
+                  : ''}{' '}
                 {filteredProblems.length === 1 ? 'problem' : 'problems'}
               </span>
             )}
             <div
-              className="flex items-center rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] p-0.5"
+              className="flex items-center rounded-[10px] border border-black/8 dark:border-white/8 bg-black/5 dark:bg-white/5 p-1"
               role="group"
               aria-label="Toggle view mode"
             >
@@ -363,8 +448,8 @@ function ProblemsPageContent() {
                 className={cn(
                   'rounded-md p-1.5 transition-colors duration-150',
                   viewMode === 'card'
-                    ? 'bg-[var(--accent-primary)] text-white shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                    ? 'bg-[#00ffa3] text-black shadow-sm font-semibold'
+                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]',
                 )}
               >
                 <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
@@ -377,8 +462,8 @@ function ProblemsPageContent() {
                 className={cn(
                   'rounded-md p-1.5 transition-colors duration-150',
                   viewMode === 'list'
-                    ? 'bg-[var(--accent-primary)] text-white shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+                    ? 'bg-[#00ffa3] text-black shadow-sm font-semibold'
+                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]',
                 )}
               >
                 <List className="h-3.5 w-3.5" aria-hidden="true" />
@@ -397,11 +482,20 @@ function ProblemsPageContent() {
         {viewMode === 'card' && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {isLoading
-              ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))
               : filteredProblems.map((problem) => (
-                  <ProblemCard key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
+                  <ProblemCard
+                    key={problem.id}
+                    problem={problem}
+                    isAuthenticated={isAuthenticated}
+                  />
                 ))}
-            {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={`next-${i}`} />)}
+            {isFetchingNextPage &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={`next-${i}`} />
+              ))}
           </div>
         )}
 
@@ -409,20 +503,33 @@ function ProblemsPageContent() {
         {viewMode === 'list' && (
           <div className="flex flex-col gap-2">
             {isLoading
-              ? Array.from({ length: 5 }).map((_, i) => <SkeletonListRow key={i} />)
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonListRow key={i} />
+                ))
               : filteredProblems.map((problem) => (
-                  <ProblemListRow key={problem.id} problem={problem} isAuthenticated={isAuthenticated} />
+                  <ProblemListRow
+                    key={problem.id}
+                    problem={problem}
+                    isAuthenticated={isAuthenticated}
+                  />
                 ))}
-            {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <SkeletonListRow key={`next-${i}`} />)}
+            {isFetchingNextPage &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonListRow key={`next-${i}`} />
+              ))}
           </div>
         )}
 
         {/* Infinite scroll sentinel — hide when search is active (all results already loaded) */}
-        {!searchQuery && <div ref={sentinelRef} className="h-8" aria-hidden="true" />}
+        {!searchQuery && (
+          <div ref={sentinelRef} className="h-8" aria-hidden="true" />
+        )}
 
         {!isLoading && filteredProblems.length === 0 && !isError && (
           <div className="py-16 text-center text-[var(--text-secondary)]">
-            {searchQuery ? `No problems match "${searchQuery}".` : 'No problems match the selected filters.'}
+            {searchQuery
+              ? `No problems match "${searchQuery}".`
+              : 'No problems match the selected filters.'}
           </div>
         )}
       </main>
