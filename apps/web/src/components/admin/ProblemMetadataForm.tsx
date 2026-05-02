@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 const DIFFICULTY_OPTIONS = [
   { value: 'EASY', label: 'Easy' },
@@ -132,7 +132,7 @@ export function ProblemMetadataForm({
       </div>
       {!hideSubmit && (
         <div className="flex justify-end pt-2">
-          <Button type="submit" variant="primary" size="sm" disabled={isLoading}>
+          <Button type="submit" variant="default" size="sm" disabled={isLoading}>
             {isLoading ? 'Saving…' : submitLabel}
           </Button>
         </div>

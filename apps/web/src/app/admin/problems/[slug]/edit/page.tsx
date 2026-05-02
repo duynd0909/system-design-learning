@@ -14,7 +14,7 @@ import {
 import { ProblemMetadataForm, type ProblemMetadata } from '@/components/admin/ProblemMetadataForm';
 import { RequirementBuilder, type RequirementData } from '@/components/admin/RequirementBuilder';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, EyeOff, FileText, Layers, Save } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -191,7 +191,7 @@ export default function EditProblemPage() {
           <Button
             type="submit"
             form={FORM_ID}
-            variant="primary"
+            variant="default"
             size="sm"
             disabled={isSubmitting || isLoading}
             className="shrink-0"

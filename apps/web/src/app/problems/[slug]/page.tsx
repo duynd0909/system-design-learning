@@ -53,7 +53,7 @@ import type {
   Requirement,
   SubmissionResponse,
 } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';

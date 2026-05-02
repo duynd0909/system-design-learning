@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import type { AdminProblemListItem } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { usePublishProblem, useHideProblem, useSoftDeleteProblem, useRestoreProblem } from '@/lib/api';
 
@@ -92,7 +92,7 @@ export function ProblemRowActions({ problem, token }: ProblemRowActionsProps) {
         <ModalFooter>
           <Button variant="secondary" size="sm" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
           <Button
-            variant="primary"
+            variant="default"
             size="sm"
             onClick={() => {
               void softDelete.mutateAsync(problem.slug).then(() => setShowDeleteModal(false));

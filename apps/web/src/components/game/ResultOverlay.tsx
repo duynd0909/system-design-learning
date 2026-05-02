@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { CheckCircle2, XCircle, ChevronDown, Share2, RotateCcw, ArrowRight } from 'lucide-react';
 import type { SubmissionResponse, ComponentType } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { XpCounter } from '@/components/ui/XpCounter';
 import { StreakBadge } from '@/components/ui/StreakBadge';
 import { cn } from '@/lib/utils';
@@ -92,7 +92,7 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
         animate={prefersReduced ? undefined : scaleIn.animate}
         transition={spring}
         aria-live="polite"
-        className="w-full max-w-md rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] p-6 text-center shadow-xl"
+        className="w-full max-w-md rounded-xl border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] p-6 text-center shadow-xl dark:shadow-[0_32px_80px_rgba(0,255,163,0.07)]"
       >
         {/* Score ring */}
         <div className="relative mx-auto my-4 grid h-36 w-36 place-items-center">
@@ -170,7 +170,7 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
               {nextProblemSlug ? (
                 <Link
                   href={`/problems/${nextProblemSlug}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#00ffa3] px-4 py-2 text-sm font-bold text-black transition-all duration-200 hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.25)]"
                 >
                   Next Problem
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -178,7 +178,7 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
               ) : (
                 <Link
                   href="/problems"
-                  className="inline-flex items-center justify-center rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#00ffa3] px-4 py-2 text-sm font-bold text-black transition-all duration-200 hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.25)]"
                 >
                   Back to Problems
                 </Link>
@@ -187,7 +187,7 @@ export function ResultOverlay({ result, componentTypes, onRetry, onDismiss, next
           ) : (
             <>
               {onDismiss && (
-                <Button type="button" onClick={onDismiss}>
+                <Button type="button" onClick={onDismiss} className="bg-[#00ffa3] text-black font-bold hover:bg-[#00ffa3]/90 shadow-[0_4px_16px_rgba(0,255,163,0.25)]">
                   Edit Answers
                 </Button>
               )}

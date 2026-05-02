@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ShieldCheck, UserX, UserCheck } from 'lucide-react';
 import type { AdminUserListItem } from '@stackdify/shared-types';
 import { Role } from '@stackdify/shared-types';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { useUpdateUserRole, useDeactivateUser, useActivateUser } from '@/lib/api';
@@ -112,7 +112,7 @@ export function UserRowActions({ user, token, currentUserId }: UserRowActionsPro
             Cancel
           </Button>
           <Button
-            variant="primary"
+            variant="default"
             size="sm"
             disabled={updateRole.isPending || selectedRole === user.role}
             onClick={handleSaveRole}
@@ -138,7 +138,7 @@ export function UserRowActions({ user, token, currentUserId }: UserRowActionsPro
             Cancel
           </Button>
           <Button
-            variant="primary"
+            variant="default"
             size="sm"
             disabled={deactivate.isPending}
             onClick={handleDeactivate}

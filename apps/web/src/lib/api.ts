@@ -200,6 +200,57 @@ export function useLeaderboard() {
   });
 }
 
+// ─── Hero Stats (public, cached) ──────────────────────────────────────────────
+
+export interface HeroStats {
+  problemCount: string | null;
+  engineerCount: string | null;
+  topScore: string | null;
+}
+
+export interface PublicStats {
+  problemCount: number;
+  engineerCount: number;
+  topXp: number;
+  totalSubmissions: number;
+  totalPassed: number;
+}
+
+export function useHeroStats() {
+  const statsQuery = useQuery<PublicStats>({
+    queryKey: ['hero-stats', 'global'],
+    queryFn: () => apiFetch<PublicStats>('/stats'),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  const totalProblems = (() => {
+    if (!statsQuery.data) return null;
+    const total = statsQuery.data.problemCount;
+    return total >= 50 ? `${Math.floor(total / 10) * 10}+` : String(total);
+  })();
+
+  const engineerCount = (() => {
+    if (!statsQuery.data) return null;
+    const n = statsQuery.data.engineerCount;
+    if (n === 0) return null;
+    return n >= 1000 ? `${Math.floor(n / 100) / 10}K+` : `${n}+`;
+  })();
+
+  const topXp = (() => {
+    if (!statsQuery.data || statsQuery.data.topXp === 0) return null;
+    const xp = statsQuery.data.topXp;
+    return xp >= 1000 ? `${(xp / 1000).toFixed(1).replace(/\.0$/, '')}K` : String(xp);
+  })();
+
+  return {
+    isLoading: statsQuery.isLoading,
+    problemCount: totalProblems,
+    engineerCount: engineerCount,
+    topXp: topXp,
+  };
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export function useMe(token: string) {

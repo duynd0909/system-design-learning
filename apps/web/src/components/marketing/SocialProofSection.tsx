@@ -22,9 +22,12 @@ export function SocialProofSection() {
     <section className="bg-[var(--bg-secondary)] px-4 py-16">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
-            Community
-          </p>
+          <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-[#00ffa3]/10 border border-[#00ffa3]/30">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3]" />
+            <p className="text-xs font-bold uppercase tracking-widest text-[#00b37a] dark:text-[#00ffa3]">
+              Community
+            </p>
+          </div>
           <h2 className="mt-2 font-display text-3xl font-bold text-[var(--text-primary)]">
             Top Engineers
           </h2>
@@ -48,7 +51,7 @@ export function SocialProofSection() {
             : top5.map((entry) => (
                 <div
                   key={entry.userId}
-                  className="flex items-center gap-4 border-b border-[var(--text-primary)]/6 px-5 py-3.5 last:border-0"
+                  className={`flex items-center gap-4 border-b border-[var(--text-primary)]/6 px-5 py-3.5 last:border-0 transition-colors duration-200 hover:bg-[var(--bg-secondary)]/60 ${entry.rank === 1 ? 'border-l-2 border-l-[#00ffa3]' : ''}`}
                 >
                   <span className="w-6 shrink-0 text-center text-sm font-semibold">
                     <RankBadge rank={entry.rank} />
@@ -61,7 +64,7 @@ export function SocialProofSection() {
                     <p className="truncate text-xs text-[var(--text-secondary)]">@{entry.username}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-sm font-bold" style={{ color: 'var(--accent-primary)' }}>
+                    <p className="text-sm font-bold text-[#00b37a] dark:text-[#00ffa3]">
                       {entry.xp.toLocaleString()} XP
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]">
