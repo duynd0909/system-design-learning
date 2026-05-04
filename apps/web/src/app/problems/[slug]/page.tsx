@@ -310,28 +310,21 @@ function GameHeader({
           </p>
         )}
 
-        <div
+        <Button
+          type="button"
+          size="sm"
+          onClick={onSubmit}
+          loading={isSubmitting}
+          disabled={!isReadyToSubmit || isSubmitting || isFetching}
+          title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
           className={cn(
+            'h-8 rounded-lg px-3 text-xs',
             isReadyToSubmit && !prefersReduced && 'animate-submit-pulse',
           )}
         >
-          <Button
-            type="button"
-            size="sm"
-            onClick={onSubmit}
-            loading={isSubmitting}
-            disabled={!isReadyToSubmit || isSubmitting || isFetching}
-            title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
-            className={cn(
-              'h-8 rounded-lg px-3 text-xs',
-              isReadyToSubmit &&
-                'bg-gradient-to-r from-[var(--accent-primary)] to-[#6366f1] shadow-sm shadow-indigo-500/20',
-            )}
-          >
-            {!isSubmitting && <Send className="h-3 w-3" aria-hidden="true" />}
-            {isReadyToSubmit ? 'Submit' : 'Fill slots'}
-          </Button>
-        </div>
+          {!isSubmitting && <Send className="h-3 w-3" aria-hidden="true" />}
+          {isReadyToSubmit ? 'Submit' : 'Fill slots'}
+        </Button>
       </div>
     </header>
   );

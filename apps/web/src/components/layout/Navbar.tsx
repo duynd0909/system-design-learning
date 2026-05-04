@@ -21,6 +21,7 @@ export function Navbar({ overlay = false }: NavbarProps) {
   const { user, isAuthenticated, isReady, logout } = useAuth();
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const [avatarError, setAvatarError] = React.useState(false);
   const scrolled = useScroll(10);
 
   const navLinks = [
@@ -112,11 +113,12 @@ export function Navbar({ overlay = false }: NavbarProps) {
                 className="flex max-w-44 items-center gap-2 rounded-full bg-black/5 px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-black/8 hover:text-[#00b37a] dark:bg-white/5 dark:text-[var(--text-primary)] dark:hover:bg-white/8 dark:hover:text-[#00ffa3]"
                 aria-label="Go to dashboard"
               >
-                {user.avatarUrl ? (
+                {user.avatarUrl && !avatarError ? (
                   <img
                     src={user.avatarUrl}
                     alt=""
                     className="h-6 w-6 rounded-full object-cover"
+                    onError={() => setAvatarError(true)}
                   />
                 ) : (
                   <UserRound
@@ -209,11 +211,12 @@ export function Navbar({ overlay = false }: NavbarProps) {
                   onClick={closeMenu}
                   className="flex items-center gap-3 rounded-xl bg-black/5 px-4 py-4 text-base font-semibold text-gray-700 dark:bg-white/5 dark:text-[var(--text-primary)]"
                 >
-                  {user.avatarUrl ? (
+                  {user.avatarUrl && !avatarError ? (
                     <img
                       src={user.avatarUrl}
                       alt=""
                       className="h-8 w-8 rounded-full object-cover"
+                      onError={() => setAvatarError(true)}
                     />
                   ) : (
                     <LayoutDashboard
