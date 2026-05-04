@@ -140,14 +140,12 @@ export default function RegisterPage() {
             label="Username"
             type="text"
             autoComplete="username"
-            placeholder="e.g. jsmith99"
             {...field('username')}
           />
           <Input
             label="Display name"
             type="text"
             autoComplete="name"
-            placeholder="e.g. John Smith"
             {...field('displayName')}
           />
           <Input

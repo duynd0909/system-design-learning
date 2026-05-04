@@ -27,23 +27,44 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
+  function validateField(name: keyof FormState, value: string): string | undefined {
+    if (name === 'email') {
+      if (!value) return 'Email is required';
+      if (!/\S+@\S+\.\S+/.test(value)) return 'Enter a valid email';
+    }
+    if (name === 'password') {
+      if (!value) return 'Password is required';
+      if (value.length < 8) return 'Password must be at least 8 characters';
+    }
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setForm((p) => ({ ...p, [name]: value }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors((p) => ({ ...p, [name]: validateField(name as keyof FormState, value) }));
+    }
+  }
+
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setErrors((p) => ({ ...p, [name]: validateField(name as keyof FormState, value) }));
+  }
+
   function validate(): boolean {
-    const next: FormErrors = {};
-    if (!form.email) next.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(form.email))
-      next.email = 'Enter a valid email';
-    if (!form.password) next.password = 'Password is required';
-    else if (form.password.length < 8)
-      next.password = 'Password must be at least 8 characters';
+    const next: FormErrors = {
+      email: validateField('email', form.email),
+      password: validateField('password', form.password),
+    };
     setErrors(next);
-    return Object.keys(next).length === 0;
+    return !next.email && !next.password;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    setErrors({});
+    setErrors((p) => ({ ...p, general: undefined }));
 
     try {
       await login(form);
@@ -90,20 +111,22 @@ export default function LoginPage() {
           )}
           <Input
             label="Email"
+            name="email"
             type="email"
             autoComplete="email"
             value={form.email}
-            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+            onChange={handleChange}
+            onBlur={handleBlur}
             error={errors.email}
           />
           <Input
             label="Password"
+            name="password"
             type="password"
             autoComplete="current-password"
             value={form.password}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, password: e.target.value }))
-            }
+            onChange={handleChange}
+            onBlur={handleBlur}
             error={errors.password}
           />
           <Button type="submit" className="w-full" loading={loading}>
