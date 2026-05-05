@@ -63,7 +63,10 @@ export function buildAccumulatedGraph(
             id: node.id,
             type: 'blank' as const,
             position: node.position,
-            data: { isBlank: true as const },
+            data: {
+              isBlank: true as const,
+              hint: (node.data as { hint?: string }).hint,
+            },
           });
         } else {
           accumulatedNodes.push({

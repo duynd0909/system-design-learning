@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Difficulty, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ComponentsService } from '../components/components.service';
 import { buildAccumulatedGraph } from '@stackdify/game-engine';
 import type { GraphNode, GraphEdge, PaginatedResponse, ProblemSummary, SolutionNode } from '@stackdify/shared-types';
 
@@ -33,7 +34,10 @@ function toAnswer(raw: unknown): Record<string, string> {
 
 @Injectable()
 export class ProblemsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly componentsService: ComponentsService,
+  ) {}
 
   async findAll(
     userId?: string,
@@ -164,8 +168,8 @@ export class ProblemsService {
       throw new NotFoundException(`Problem "${slug}" not found`);
     }
 
-    const [componentTypes, passedSubs] = await Promise.all([
-      this.prisma.componentType.findMany({ orderBy: { label: 'asc' } }),
+    const [allComponents, passedSubs] = await Promise.all([
+      this.componentsService.findAll(),
       userId
         ? this.prisma.submission.findMany({
             where: { userId, problemId: problem.id, passed: true },
@@ -173,6 +177,11 @@ export class ProblemsService {
           })
         : Promise.resolve([]),
     ]);
+
+    const optionSlugs = problem.componentOptions as string[];
+    const componentTypes = optionSlugs.length > 0
+      ? allComponents.filter((c) => optionSlugs.includes(c.slug))
+      : allComponents;
 
     const completedRequirementOrders = Array.from(
       new Set(passedSubs.filter((s) => s.requirementOrder != null).map((s) => s.requirementOrder as number)),
@@ -215,7 +224,7 @@ export class ProblemsService {
       throw new ForbiddenException('Complete at least one attempt before viewing the solution');
     }
 
-    const componentTypes = await this.prisma.componentType.findMany();
+    const componentTypes = await this.componentsService.findAll();
     const componentBySlug = new Map(componentTypes.map((ct) => [ct.slug, ct]));
 
     const nodes: SolutionNode[] = [];
