@@ -1,0 +1,951 @@
+[
+  {
+    "id": "55c3d916-5a6e-4aa5-8652-fdc5221881a6",
+    "type": "NOSQL_DATABASE",
+    "name": "NoSQL database",
+    "description": "Databases that use non-relational data structures to store and query data. ",
+    "URL": "https://interviewready.io/learn/system-design-course/no_sql_databases/difference_between_sql_and_no_sql",
+    "meta_data": {
+      "backgroundColor": "#DCC123",
+      "borderColor": "#9a8719"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/NoSqlDatabase.png",
+    "category": ""
+  },
+  {
+    "id": "1c7f7e4b-bba3-4f9a-88f0-4cef77cd0503",
+    "type": "DNS",
+    "name": "DNS",
+    "description": "Maps domain name requests to IP addresses",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/single_point_of_failure",
+    "meta_data": {
+      "backgroundColor": "#048577",
+      "borderColor": "#035d53"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/DNS.png",
+    "category": ""
+  },
+  {
+    "id": "27461467-3f40-439f-9c7b-cd4a1eb2ca11",
+    "type": "DATABASE",
+    "name": "Database",
+    "description": "Manages the organization and storage of data.",
+    "URL": "https://interviewready.io/learn/system-design-course/no_sql_databases/difference_between_sql_and_no_sql",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Database.png",
+    "category": ""
+  },
+  {
+    "id": "4c4f7f46-2538-4da9-a453-210abebdc419",
+    "type": "ANOMALY_DETECTION_SERVICE",
+    "name": "Anomaly Detector",
+    "description": "Analyses business and server metrics to detect and report anomalies.",
+    "URL": "https://interviewready.io/learn/system-design-course/anomaly-detection/anomaly-detection",
+    "meta_data": {
+      "backgroundColor": "#A56FDC",
+      "borderColor": "#734e9a"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/AnomalyDetector.png",
+    "category": ""
+  },
+  {
+    "id": "798f66d9-0dc9-4868-a5f8-b29f33b5dc63",
+    "type": "VIDEO_CAMERA",
+    "name": "Video Camera",
+    "description": "Records and transmits video",
+    "URL": "https://interviewready.io/learn/system-design-course/hotstar-live-video-streaming-design/video_ingestion_and_transformation",
+    "meta_data": {
+      "backgroundColor": "#B97AF8",
+      "borderColor": "#8255ae"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/VideoCamera.png",
+    "category": ""
+  },
+  {
+    "id": "0c36e050-7409-4df7-a27f-2992750c7dd0",
+    "type": "HEALTH_CHECKER",
+    "name": "Health Checker",
+    "description": "Periodically checks and maintains state of all services health using heartbeats.",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/service_discovery_and_heartbeats",
+    "meta_data": {
+      "backgroundColor": "#65C001",
+      "borderColor": "#478601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/HealthChecker.png",
+    "category": ""
+  },
+  {
+    "id": "9fcaf0d1-2762-445b-a342-5e4fca53a72f",
+    "type": "CDN",
+    "name": "CDN",
+    "description": "Hosts static data close to requesting clients",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/content-delivery-networks",
+    "meta_data": {
+      "backgroundColor": "#0189AC",
+      "borderColor": "#016078"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/CDN.png",
+    "category": ""
+  },
+  {
+    "id": "972d9386-aad8-4407-ae40-daa4b6706371",
+    "type": "MESSAGE_QUEUE",
+    "name": "Message Queue",
+    "description": "Intermediate queue data structure to send and receive messages",
+    "URL": "https://interviewready.io/learn/system-design-course/messaging_and_event_handling/the_message_queue",
+    "meta_data": {
+      "backgroundColor": "#DB6060",
+      "borderColor": "#994343"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/MessageQueue.png",
+    "category": ""
+  },
+  {
+    "id": "7ec62dc5-c6c3-445a-adb7-36a3add6c138",
+    "type": "ANALYTICS_ENGINE",
+    "name": "Analytics Engine",
+    "description": "An engine that ingests, aggregates, transforms and stores data.",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/converting_data_sources_to_a_lake",
+    "meta_data": {
+      "backgroundColor": "#63B934",
+      "borderColor": "#458224"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/AnalyticsEngine.png",
+    "category": ""
+  },
+  {
+    "id": "63422ff8-aebb-4734-9215-9e715cf4bdb9",
+    "type": "LOAD_BALANCER",
+    "name": "Load Balancer",
+    "description": "Efficiently distributes incoming traffic across backend servers",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/load_balancing",
+    "meta_data": {
+      "backgroundColor": "#9F4FE3",
+      "borderColor": "#6f379f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/LoadBalencer.png",
+    "category": ""
+  },
+  {
+    "id": "7364badd-85e0-4d69-af5a-ee4d33ab3354",
+    "type": "PROFILE_SERVICE",
+    "name": "Profile Service",
+    "description": "Stores and retrieves profile information of users",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/chapter_2_authentication__global_caching",
+    "meta_data": {
+      "backgroundColor": "#E8B719",
+      "borderColor": "#a28012"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ProfileService.png",
+    "category": ""
+  },
+  {
+    "id": "8d6d5af5-af65-4cce-8040-da4ea081754f",
+    "type": "NETWORK_TOWER",
+    "name": "Network Tower",
+    "description": "Network towers providing internet facilities to client devices.",
+    "URL": "https://interviewready.io/learn/system-design-course/whatsapp-calling-app/calling_app_design",
+    "meta_data": {
+      "backgroundColor": "#DE6262",
+      "borderColor": "#9b4545"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/NetworkTower.png",
+    "category": ""
+  },
+  {
+    "id": "33eb6412-b462-45c2-9a39-a27a4021252d",
+    "type": "METRICS_ENGINE",
+    "name": "Metrics Engine",
+    "description": "Service that exposes APIs to consume metrics, detect anomalies and send alerts and reports.",
+    "URL": "https://interviewready.io/learn/system-design-course/anomaly-detection/anomaly-detection",
+    "meta_data": {
+      "backgroundColor": "#005F95",
+      "borderColor": "#004368"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/MetricsEngine.png",
+    "category": ""
+  },
+  {
+    "id": "627ce6c7-a192-4de4-a3ba-700ea14e309c",
+    "type": "CONNECTION_GATEWAY",
+    "name": "Connection Gateway",
+    "description": "A gateway establishes and manages connections with external clients over network protocols like TCP, HTTP and WebSockets.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/service_registration_and_proxies",
+    "meta_data": {
+      "backgroundColor": "#8DADCE",
+      "borderColor": "#637990"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ConnectionGateway.png",
+    "category": ""
+  },
+  {
+    "id": "6cba294d-fe51-47a8-b448-e0cfc09ddd81",
+    "type": "SWITCH",
+    "name": "Switch",
+    "description": "A switch accepts and maintains connections between clients to enable calls and video conferences.",
+    "URL": "https://interviewready.io/learn/system-design-course/whatsapp-calling-app/calling_app_design",
+    "meta_data": {
+      "backgroundColor": "#4CDAFE",
+      "borderColor": "#3599b2"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Switch.png",
+    "category": ""
+  },
+  {
+    "id": "7ee95ce2-229a-47bb-a1cc-8b38113dd54d",
+    "type": "VERSIONING_SERVICE",
+    "name": "Versioning Service",
+    "description": "Stores multiple versions of a document through history.",
+    "URL": "https://interviewready.io/learn/system-design-course/google-docs-collaborative-editor-design/Version-History",
+    "meta_data": {
+      "backgroundColor": "#DCC123",
+      "borderColor": "#9a8719"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/VersioningService.png",
+    "category": ""
+  },
+  {
+    "id": "5639da2f-0467-47ba-a927-3c7eefc4651c",
+    "type": "CLIENT",
+    "name": "Mobile Client",
+    "description": "Mobile client that connects with backend servers",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/horizontal_vs_vertical_scaling",
+    "meta_data": {
+      "backgroundColor": "#4CDAFE",
+      "borderColor": "#3599b2"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/MobileClient.png",
+    "category": ""
+  },
+  {
+    "id": "bcc99b71-e7f7-4404-ba3a-c1c19e032c18",
+    "type": "GRAPH_SERVICE",
+    "name": "Graph Service",
+    "description": "Service that exposes APIs to find fastest routes, nearest neighbors, and other graph centric operations.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-a-cab-aggregator-app-like-uber/calculating-estimated-time-of-arrival",
+    "meta_data": {
+      "backgroundColor": "#E177E3",
+      "borderColor": "#9e539f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/GraphService.png",
+    "category": ""
+  },
+  {
+    "id": "587551f2-a69b-4fe0-924b-7adf038795af",
+    "type": "GRAPH_DATABASE",
+    "name": "Graph Database",
+    "description": "Data structure that stores represents objects and their relationships using nodes and edges.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-a-cab-aggregator-app-like-uber/calculating-estimated-time-of-arrival",
+    "meta_data": {
+      "backgroundColor": "#A56FDC",
+      "borderColor": "#734e9a"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/graph-database.png",
+    "category": ""
+  },
+  {
+    "id": "4622c997-699d-40dc-87eb-3c511b85b132",
+    "type": "DESKTOP",
+    "name": "Desktop Client",
+    "description": "A client app running on desktop device.",
+    "URL": "https://en.wikipedia.org/wiki/Desktop_computer",
+    "meta_data": {
+      "backgroundColor": "#9001D8",
+      "borderColor": "#650197"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/DesktopClient.png",
+    "category": ""
+  },
+  {
+    "id": "b7e16393-fc73-42fb-a333-de0f9f543d39",
+    "type": "TIME_SERIES_DATABASE",
+    "name": "Time Series Database",
+    "description": "Stores, aggregates and retrieves a time series made of data points and timestamps.",
+    "URL": "https://interviewready.io/learn/system-design-course/anomaly-detection/anomaly-detection",
+    "meta_data": {
+      "backgroundColor": "#B97AF8",
+      "borderColor": "#8255ae"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/TimeSeriesDatabase.png",
+    "category": ""
+  },
+  {
+    "id": "740d8f9a-30cf-424b-8d32-44ed3c682fec",
+    "type": "AUTH_SERVER",
+    "name": "Auth Server",
+    "description": "Processes authentication and authorization requests",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/chapter_2_authentication__global_caching",
+    "meta_data": {
+      "backgroundColor": "#65C001",
+      "borderColor": "#478601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/AuthServer.png",
+    "category": ""
+  },
+  {
+    "id": "ea0ab5c6-c0ef-4a65-81d6-15f81f80556b",
+    "type": "SERVER",
+    "name": "Server",
+    "description": "Backend Server used for accepting and responding to requests",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/horizontal_vs_vertical_scaling",
+    "meta_data": {
+      "backgroundColor": "#DC4141",
+      "borderColor": "#9a2e2e"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Server.png",
+    "category": ""
+  },
+  {
+    "id": "cdd5ad7b-07ca-4790-9b6a-1195666b8c22",
+    "type": "EMAIL_SERVICE",
+    "name": "Email Service",
+    "description": "Stores email templates and exposes APIs to send emails to users",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/sending_tagging_searching_emails",
+    "meta_data": {
+      "backgroundColor": "#DB6060",
+      "borderColor": "#994343"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/EmailService.png",
+    "category": ""
+  },
+  {
+    "id": "ad12a0d9-4751-4fb7-b91a-64c2316da153",
+    "type": "CACHE",
+    "name": "Cache",
+    "description": "In-memory data structure for high-speed retrieval of frequently accessed items.",
+    "URL": "https://interviewready.io/learn/system-design-course/cache-basics/caching-basics",
+    "meta_data": {
+      "backgroundColor": "#9F4FE3",
+      "borderColor": "#6f379f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Cache.png",
+    "category": ""
+  },
+  {
+    "id": "f7517008-7271-4a82-a48b-871086c07cec",
+    "type": "CHANGE_DATA_CAPTURE",
+    "name": "Change Data Capture",
+    "description": "Exposes API to note data changes and distribute them to interested services.",
+    "URL": "https://interviewready.io/learn/system-design-course/database-migrations/database-migrations",
+    "meta_data": {
+      "backgroundColor": "#E8B719",
+      "borderColor": "#a28012"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ChangeDataCapture.png",
+    "category": ""
+  },
+  {
+    "id": "d4f3575d-484d-4597-b8d6-7e78755829ac",
+    "type": "TOWERS",
+    "name": "Towers",
+    "description": "Signal Towers spread geographically that transmit call data.",
+    "URL": "https://interviewready.io/learn/system-design-course/calling_app_design/complete-the-design-calling-app",
+    "meta_data": {
+      "backgroundColor": "#DA9F27",
+      "borderColor": "#996f1b"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/NetworkTower.png",
+    "category": ""
+  },
+  {
+    "id": "c87b649d-a5ef-4e75-8f21-7d84fe84dc01",
+    "type": "CHESS_SERVER",
+    "name": "Chess Game Server",
+    "description": "Holds Chess games in memory to read and manipulate the game board. ",
+    "URL": "https://interviewready.io/learn/system-design-course/chess-design-building-a-highly-scalable-turn-based-gaming-website/requirements_of_a_chess_website",
+    "meta_data": {
+      "backgroundColor": "#E0A24B",
+      "borderColor": "#9d7135"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ChessGameServer.png",
+    "category": ""
+  },
+  {
+    "id": "863ce48e-3ccb-4e32-93b6-86730a5cec68",
+    "type": "FILE_SERVER",
+    "name": "File Server",
+    "description": "File Servers store and serve files. They are backed by distributed file systems like HDFS.",
+    "URL": "https://interviewready.io/learn/system-design-course/tinder_system_design/image_storage_files_vs._database_blob",
+    "meta_data": {
+      "backgroundColor": "#E177E3",
+      "borderColor": "#9e539f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/FileServer.png",
+    "category": ""
+  },
+  {
+    "id": "80f7eaa9-d4fe-436b-b221-ff1cf927b88d",
+    "type": "GAMING_CLIENT",
+    "name": "Gaming Client",
+    "description": "App downloaded on client device.",
+    "URL": "https://interviewready.io/learn/system-design-course/chess-design-building-a-highly-scalable-turn-based-gaming-website/requirements_of_a_chess_website",
+    "meta_data": {
+      "backgroundColor": "#DC4141",
+      "borderColor": "#9a2e2e"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/GamingClient.png",
+    "category": ""
+  },
+  {
+    "id": "13d50205-3219-45eb-9850-f196b814a3db",
+    "type": "DATA_LAKE",
+    "name": "Data Lake",
+    "description": "A centralized repository of data that stores structured and unstructured data at scale.",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/converting_data_sources_to_a_lake",
+    "meta_data": {
+      "backgroundColor": "#E0A24B",
+      "borderColor": "#9d7135"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/DataLake.png",
+    "category": ""
+  },
+  {
+    "id": "0354d8f0-1ba3-4aab-b705-5c4287ff8cf6",
+    "type": "MATCHING_SERVICE",
+    "name": "Matching Service",
+    "description": "Matches incoming requests from one party to existing requests from another party in real time.",
+    "URL": "https://interviewready.io/learn/system-design-course/chess-design-building-a-highly-scalable-turn-based-gaming-website/requirements_of_a_chess_website",
+    "meta_data": {
+      "backgroundColor": "#048577",
+      "borderColor": "#035d53"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/MatchingService.png",
+    "category": ""
+  },
+  {
+    "id": "e9477866-3e49-420e-bc58-bb834f513152",
+    "type": "CHAT_SERVICE",
+    "name": "Chat Service",
+    "description": "A service that manages sending chat messages, read receipts, group messaging, and blocking user messages.",
+    "URL": "https://interviewready.io/learn/system-design-course/whats_app_system_design/system_requirements",
+    "meta_data": {
+      "backgroundColor": "#9001D8",
+      "borderColor": "#650197"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ChatService.png",
+    "category": ""
+  },
+  {
+    "id": "f3c941d5-9031-4356-a436-559b05ae1e13",
+    "type": "DOCUMENT_SERVICE",
+    "name": "Document Service",
+    "description": "A service to create, read, and edit documents.",
+    "URL": "https://interviewready.io/learn/system-design-course/google-docs-collaborative-editor-design/Document-Schema",
+    "meta_data": {
+      "backgroundColor": "#0189AC",
+      "borderColor": "#016078"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/DocumentService.png",
+    "category": ""
+  },
+  {
+    "id": "d05ba63f-240c-4b76-9f0b-c3ed7e3612b7",
+    "type": "MAP_SERVICE",
+    "name": "Map Service",
+    "description": "Performs higher order map operations like finding nearby points, condensing points to hubs, splitting into regions, etc...",
+    "URL": "https://interviewready.io/learn/system-design-course/design-a-location-based-service-like-google-maps/finding-the-shortest-path-a-star-search",
+    "meta_data": {
+      "backgroundColor": "#DE6262",
+      "borderColor": "#9b4545"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/MapService.png",
+    "category": ""
+  },
+  {
+    "id": "275e2ca9-1346-45de-a6e7-c880b9174d06",
+    "type": "NOTIFICATION_SERVICE",
+    "name": "Notification Service",
+    "description": "Notifies subscribers of events through polling, broadcast, point-to-point or multicast methods.",
+    "URL": "https://interviewready.io/learn/system-design-course/system-design-tradeoffs/pull-vs-push-architectures",
+    "meta_data": {
+      "backgroundColor": "#005F95",
+      "borderColor": "#004368"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/notification-service.png",
+    "category": ""
+  },
+  {
+    "id": "d7fe8bdf-644a-4fa2-9022-71fc828322ed",
+    "type": "DASHBOARD",
+    "name": "Dashboard",
+    "description": "Dashboard to view raw and aggregated metrics.",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/converting_data_sources_to_a_lake",
+    "meta_data": {
+      "backgroundColor": "#8DADCE",
+      "borderColor": "#637990"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/BrowserDashboard.png",
+    "category": ""
+  },
+  {
+    "id": "acb8c525-b27f-4584-9ed5-bf6fed267c02",
+    "type": "TRANSFORMER",
+    "name": "Video Transformer",
+    "description": "Ingests and transforms video data into different formats and resolutions.",
+    "URL": "https://interviewready.io/learn/system-design-course/hotstar-live-video-streaming-design/transferring_processed_videos_to_end_users",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Transformer.png",
+    "category": ""
+  },
+  {
+    "id": "8a290053-5382-481f-aba1-fe4d81e2d041",
+    "type": "SMS_SERVICE",
+    "name": "SMS Service",
+    "description": "Manages storing SMS templates, and sending SMSs for transactions and promotions.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/service_registration_and_proxies",
+    "meta_data": {
+      "backgroundColor": "#DCC123",
+      "borderColor": "#9a8719"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Phone.svg",
+    "category": ""
+  },
+  {
+    "id": "a15d0337-cee1-4b12-a495-6ac25c3dc7d2",
+    "type": "PAYMENTS_SERVICE",
+    "name": "Payments Service",
+    "description": "Maintains and updates balance, generates invoices and performs all other relevant financial operations for a system.",
+    "URL": "https://interviewready.io/learn/system-design-course/whatsapp-calling-app/concept_3_charging_users",
+    "meta_data": {
+      "backgroundColor": "#DA9F27",
+      "borderColor": "#996f1b"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/BillingService.png",
+    "category": ""
+  },
+  {
+    "id": "0f978841-be35-41e8-8ec1-0d35d4240d22",
+    "type": "CODE_EXECUTION_SERVER",
+    "name": "Code Execution Server",
+    "description": "Remote Code Exuctor to compile and test code submissions",
+    "URL": "https://interviewready.io/learn/system-design-course/online-coding-judge-design/online-coding-judge",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Style+2.svg",
+    "category": ""
+  },
+  {
+    "id": "36588add-4a42-4d64-aecf-cedffc801b95",
+    "type": "CRAWLER_SERVICE",
+    "name": "Web Crawler service",
+    "description": "This service functions as a web crawler, gathering text, images, and videos from across the web for use in enhanced search capabilities.",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/converting_data_sources_to_a_lake",
+    "meta_data": {
+      "backgroundColor": "#A56FDC",
+      "borderColor": "#734e9a"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/GroupWebCrawler.svg",
+    "category": ""
+  },
+  {
+    "id": "ea86086b-d435-4a72-b94e-42f372bcd24f",
+    "type": "MEDIA_SERVER",
+    "name": "Media Server",
+    "description": "A media server accepts and distributes video for large WebRTC conference calls.",
+    "URL": "https://interviewready.io/learn/system-design-course/networks-deep-dive/video_transmission_web_rtc_and_http-dash",
+    "meta_data": {
+      "backgroundColor": "#B97AF8",
+      "borderColor": "#8255ae"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Cloud.svg",
+    "category": ""
+  },
+  {
+    "id": "d5dff2c8-dea0-4330-86e1-6b9f84333669",
+    "type": "BOOKING_SERVICE",
+    "name": "Booking Service",
+    "description": "A service that books a resource for a requesting object like a user.",
+    "URL": "https://interviewready.io/learn/system-design-course/zoom_meets/july-2023-highly-scalable-concurrent-booking-systems",
+    "meta_data": {
+      "backgroundColor": "#65C001",
+      "borderColor": "#478601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/BookingService.svg",
+    "category": ""
+  },
+  {
+    "id": "fb85d17e-170d-4974-8920-1b8c35329f81",
+    "type": "NEWS_FEED",
+    "name": "News Feed",
+    "description": "Generates and supplies newsfeeds for different users.",
+    "URL": "https://interviewready.io/learn/system-design-course/instagram_design/user_feed_service",
+    "meta_data": {
+      "backgroundColor": "#DB6060",
+      "borderColor": "#994343"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/NewsFeed.svg",
+    "category": ""
+  },
+  {
+    "id": "4c344c6b-755b-4bc8-b35d-0bf8f00a46ae",
+    "type": "EXTERNAL_SERVER",
+    "name": "External Server",
+    "description": "An external server that connects with the system.",
+    "URL": "https://interviewready.io/learn/system-design-course/basics/horizontal_vs_vertical_scaling",
+    "meta_data": {
+      "backgroundColor": "#63B934",
+      "borderColor": "#458224"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/ExternalService.svg",
+    "category": ""
+  },
+  {
+    "id": "2222eec5-ad04-4561-a45b-6e39840670e3",
+    "type": "GAME_SERVER",
+    "name": "Game Server",
+    "description": "Manages game logic execution, real-time game state management, and communication.",
+    "URL": "https://interviewready.io/learn/system-design-course/chess-design-building-a-highly-scalable-turn-based-gaming-website/handling_connections_at_scale",
+    "meta_data": {
+      "backgroundColor": "#9F4FE3",
+      "borderColor": "#6f379f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/GameServer.svg",
+    "category": ""
+  },
+  {
+    "id": "4be4154e-3858-4abb-9ecf-804576af5c2d",
+    "type": "ELASTIC_SEARCH",
+    "name": "Elastic search",
+    "description": "Elasticsearch is a distributed search engine known for its robust search capabilities, scalability, and efficient data handling.",
+    "URL": "https://interviewready.io/learn/system-design-course/google-docs-collaborative-editor-design/Storing-Documents",
+    "meta_data": {
+      "backgroundColor": "#E8B719",
+      "borderColor": "#a28012"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/SearchEngine.svg",
+    "category": ""
+  },
+  {
+    "id": "759a5fde-9049-4fe7-8f08-6e3de1793b4f",
+    "type": "GROUP_SERVICE",
+    "name": "Group Service",
+    "description": "Allows creation, updating and deletion of groups, which are user to group mappings, in a system.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-emailing-service-like-gmail/contacts_groups",
+    "meta_data": {
+      "backgroundColor": "#DA9F27",
+      "borderColor": "#996f1b"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/GroupService.svg",
+    "category": ""
+  },
+  {
+    "id": "93fdccac-17ed-414f-b5d4-5f36e183b9dc",
+    "type": "AUDIO_PROCESSING_ENGINE",
+    "name": "Audio Processing Engine",
+    "description": "This service analyzes and processes audio input to create fingerprints.",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-audio-search-engine-like-shazam/design_an_algorithm",
+    "meta_data": {
+      "backgroundColor": "#048577",
+      "borderColor": "#035d53"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Gengon.svg",
+    "category": ""
+  },
+  {
+    "id": "d319fa20-2827-4ac2-b6eb-c8a13beaeded",
+    "type": "IMAGE_SEARCH_SERVICE",
+    "name": "Image Search Service",
+    "description": "This service finds similar images based on an input image",
+    "URL": "https://interviewready.io/learn/system-design-course/tinder_system_design/image_storage_files_vs._database_blob",
+    "meta_data": {
+      "backgroundColor": "#A56FDC",
+      "borderColor": "#734e9a"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/SearchEngine.svg",
+    "category": ""
+  },
+  {
+    "id": "beadd9f5-f334-4f6d-b21e-cf434b8b90da",
+    "type": "VIDEO_TRANSPORTER",
+    "name": "Video Transporter",
+    "description": "Converts transformed video chunks into a single stream and forwards it to subscribers.",
+    "URL": "https://interviewready.io/learn/system-design-course/hotstar-live-video-streaming-design/transferring_processed_videos_to_end_users",
+    "meta_data": {
+      "backgroundColor": "#63B934",
+      "borderColor": "#458224"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/VideoTransporter.png",
+    "category": ""
+  },
+  {
+    "id": "8cf2b40f-5b4a-4a59-8103-539439b9ce51",
+    "type": "TASK_SCHEDULER",
+    "name": "Task Scheduler",
+    "description": "Schedules and manages task execution at a defined rate.",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/final_architecture_diagram",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/TaskScheduler.svg",
+    "category": ""
+  },
+  {
+    "id": "b348d5ee-4f57-40e8-848e-8b09d0061525",
+    "type": "RATE_LIMITER",
+    "name": "Rate Limiter",
+    "description": "Checks and limits the rate at which requests are accepted into a system.",
+    "URL": "https://interviewready.io/learn/system-design-course/distributed-rate-limiting/the_oracle_and_the_timer_wheel",
+    "meta_data": {
+      "backgroundColor": "#DE6262",
+      "borderColor": "#9b4545"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/PyramidRateLimiter.svg",
+    "category": ""
+  },
+  {
+    "id": "e48d93ef-c971-41c9-a429-a57c9bf20dfa",
+    "type": "AGGREGATOR_SERVICE",
+    "name": "Aggregator Service",
+    "description": " It is responsible for gathering, normalizing, and integrating data from various sources",
+    "URL": "https://interviewready.io/learn/system-design-course/design-a-cab-aggregator-app-like-uber/static-pricing-of-rides",
+    "meta_data": {
+      "backgroundColor": "#DCC123",
+      "borderColor": "#9a8719"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/BrowserAggregatorService.svg",
+    "category": ""
+  },
+  {
+    "id": "e0f4ed78-4a5a-4bd5-9e8a-19b6296eab48",
+    "type": "SOCIAL_NETWORK_MANAGER",
+    "name": "Social Network Manager",
+    "description": "Manages connections, events and history of the social network built by users.",
+    "URL": "https://interviewready.io/learn/system-design-course/instagram_design/following_users",
+    "meta_data": {
+      "backgroundColor": "#9F4FE3",
+      "borderColor": "#6f379f"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Round+cube.svg",
+    "category": ""
+  },
+  {
+    "id": "dff8d51c-f6fd-4ba7-9c75-661aceed1553",
+    "type": "RECOMMENDATION_ENGINE",
+    "name": "Recommendation Engine",
+    "description": "This AI/ML component recommends personalized text, images, and data to users",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/ranking_restaurants_in_real_time_and_batch",
+    "meta_data": {
+      "backgroundColor": "#8DADCE",
+      "borderColor": "#637990"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/recommendation_engine_logo.svg",
+    "category": ""
+  },
+  {
+    "id": "92b05ae3-d620-422c-a0fa-b609bb516d50",
+    "type": "RANKING_SERVICE",
+    "name": "Ranking Service",
+    "description": "It sorts and prioritizes search results or data entries based on relevance, quality, and user preferences",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/ranking_restaurants_in_real_time_and_batch",
+    "meta_data": {
+      "backgroundColor": "#0189AC",
+      "borderColor": "#016078"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Round cuberanking_service.svg",
+    "category": ""
+  },
+  {
+    "id": "8f444a27-e524-427b-be7d-0830523863b9",
+    "type": "CONVERSATIONAL_MODEL_SERVICE",
+    "name": "Conversational Model Service",
+    "description": "A dedicated backend service utilizing advanced AI models to facilitate and manage real-time, interactive dialogue with users",
+    "URL": "https://en.wikipedia.org/wiki/Large_language_model",
+    "meta_data": {
+      "backgroundColor": "#005F95",
+      "borderColor": "#004368"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Phoneconversation.svg",
+    "category": ""
+  },
+  {
+    "id": "aac852b5-a870-48f0-acdd-8c714d697e8c",
+    "type": "IMAGE_GENERATION_SERVICE",
+    "name": "Image Generation Service",
+    "description": " specialized backend component designed for processing textual inputs and generating high-quality, relevant images using advanced AI algorithms",
+    "URL": "https://en.wikipedia.org/wiki/Text-to-image_model",
+    "meta_data": {
+      "backgroundColor": "#65C001",
+      "borderColor": "#478601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Pyramidimage_generator.svg",
+    "category": ""
+  },
+  {
+    "id": "f5c253a7-6083-4032-97d8-ec577ad274d0",
+    "type": "IMAGE_ANALYSIS_ENGINE",
+    "name": "Image Analysis Engine",
+    "description": "The Image Analysis Engine is a versatile system for analyzing and processing visual data, including facial recognition, object detection, and real-time image enhancements.",
+    "URL": "https://en.wikipedia.org/wiki/Feature_(computer_vision)",
+    "meta_data": {
+      "backgroundColor": "#8DADCE",
+      "borderColor": "#637990"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Gengonimage_analysis.svg",
+    "category": ""
+  },
+  {
+    "id": "2f64b981-fbec-4ae2-a3c6-3bbeb0780b8c",
+    "type": "BACKUP_STORAGE",
+    "name": "Backup Storage",
+    "description": "Backup Storage securely archives system data and allows for swift recovery in the event of data loss or system failure.",
+    "URL": "https://interviewready.io/learn/system-design-course/database-replication/primary-replica-architectures",
+    "meta_data": {
+      "backgroundColor": "#DE6262",
+      "borderColor": "#9b4545"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Cloudbackup.svg",
+    "category": ""
+  },
+  {
+    "id": "8d73ce9e-0224-48b0-a7f3-e95b7aca2f2c",
+    "type": "SESSION_SERVICE",
+    "name": "Session Service",
+    "description": "Manages connection related data for the system. Users may be connected using multiple devices, and sessions acts as a central store for services to query user-connection data.",
+    "URL": "https://interviewready.io/learn/system-design-course/whats_app_system_design/one_to_one_messaging",
+    "meta_data": {
+      "backgroundColor": "#E0A24B",
+      "borderColor": "#9d7135"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Browsersessions.svg",
+    "category": ""
+  },
+  {
+    "id": "60e3dd1d-6341-434b-b4f1-e8acdf6c0644",
+    "type": "FRAUD_DETECTION_SERVICE",
+    "name": "Fraud Detection Service",
+    "description": "Monitors transactional activities to identify and prevent fraudulent behavior in real-time.",
+    "URL": "https://interviewready.io/learn/system-design-course/observability-in-distributed-systems/introduction-to-observability",
+    "meta_data": {
+      "backgroundColor": "#DB6060",
+      "borderColor": "#994343"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Shieldfraud.svg",
+    "category": ""
+  },
+  {
+    "id": "3f90755c-3924-4a84-afdb-28e6de421482",
+    "type": "INVENTORY_SERVICE",
+    "name": "Inventory Manager",
+    "description": "An inventory manager prevents inventory stockout and overselling, by processing current and past orders. ",
+    "URL": "https://www.ibm.com/products/intelligent-promising/inventory-visibility",
+    "meta_data": {
+      "backgroundColor": "#63B934",
+      "borderColor": "#458224"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/inventory_manager.svg",
+    "category": ""
+  },
+  {
+    "id": "11a77ad9-0e23-46eb-a25c-a736fc1fbca9",
+    "type": "ORDER_SERVICE",
+    "name": "Order Manager",
+    "description": "Accepts and manages orders in a system.",
+    "URL": "https://www.ibm.com/topics/order-management",
+    "meta_data": {
+      "backgroundColor": "#9001D8",
+      "borderColor": "#650197"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/order_manager.svg",
+    "category": ""
+  },
+  {
+    "id": "abe9bdd4-1ead-48ea-a68a-e8ac5ed0c064",
+    "type": "PRODUCTS_SERVICE",
+    "name": "Products List",
+    "description": "Stores a list of products available in the system.",
+    "URL": "https://en.wikipedia.org/wiki/Product_information_management",
+    "meta_data": {
+      "backgroundColor": "#9001D8",
+      "borderColor": "#650197"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/products_list.svg",
+    "category": ""
+  },
+  {
+    "id": "022591ef-e240-4b01-9bb9-cfc8af6b0dec",
+    "type": "TRIE_BUILDER_SERVICE",
+    "name": "Trie Builder Service",
+    "description": "This component constructs and updates a trie data structure to enable fast and efficient autocomplete suggestions based on user input",
+    "URL": "https://en.wikipedia.org/wiki/Trie",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Round cubetrie_builder.svg",
+    "category": ""
+  },
+  {
+    "id": "8e5f52e5-a057-4082-8ecb-0210946687a1",
+    "type": "POSTS_SERVICE",
+    "name": "Posts Service",
+    "description": "Stores and supplies posts made by users through various APIs.",
+    "URL": "https://interviewready.io/learn/system-design-course/instagram_design/designing_the_data_schema",
+    "meta_data": {
+      "backgroundColor": "#048577",
+      "borderColor": "#035d53"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/PostsService.png",
+    "category": ""
+  },
+  {
+    "id": "ab2b6c01-c598-4bb5-907c-cc9103fb5e72",
+    "type": "LOCKING_SERVICE",
+    "name": "Locking Service",
+    "description": "Acquires and Manages Distributed Locks for requesting services.",
+    "URL": "https://interviewready.io/learn/system-design-course/distributed-consensus-with-paxos/the-problem-of-distributed-consensus",
+    "meta_data": {
+      "backgroundColor": "#0189AC",
+      "borderColor": "#016078"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/LockingService.svg",
+    "category": ""
+  },
+  {
+    "id": "266e36f6-d5ed-4f86-9f89-c815ed8f3623",
+    "type": "TOKEN_GENERATION_SERVICE",
+    "name": "Token Generation Service",
+    "description": "This service generates unique tokens ",
+    "URL": "https://interviewready.io/learn/system-design-course/design-an-audio-search-engine-like-shazam/audio_search_engine_quiz_1",
+    "meta_data": {
+      "backgroundColor": "#B97AF8",
+      "borderColor": "#8255ae"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/TextSearchDatabase.svg",
+    "category": ""
+  },
+  {
+    "id": "7d2614da-a859-4d17-833f-db0640bb1064",
+    "type": "DISCUSSION_SERVICE",
+    "name": "Discussion Service",
+    "description": "Stores discussions as threads of comments and replies, upto the required level, as a linked list or a graph.",
+    "URL": "https://interviewready.io/learn/system-design-course/instagram_design/designing_the_data_schema",
+    "meta_data": {
+      "backgroundColor": "#54A801",
+      "borderColor": "#3b7601"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/DiscussionService.svg",
+    "category": ""
+  },
+  {
+    "id": "d6d72e80-607c-4e24-a602-d71cb378c949",
+    "type": "PREDICTION_ENGINE",
+    "name": "Prediction Engine",
+    "description": "The Prediction Engine leverages historical data and machine learning algorithms to forecast user behavior and order trends",
+    "URL": "https://interviewready.io/learn/system-design-course/8-map-reduce-and-stream-processing/real_time_analytics",
+    "meta_data": {
+      "backgroundColor": "#005F95",
+      "borderColor": "#004368"
+    },
+    "icon": "https://cdn.interviewready.io/assets/system-design-components/Triangleprediction.svg",
+    "category": ""
+  }
+]
