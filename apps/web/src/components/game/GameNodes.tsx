@@ -13,7 +13,6 @@ import { ActorIcon, iconForComponent } from './component-icons';
 import {
   categoryForComponent,
   getCategoryStyle,
-  getPortLabels,
   normalizeComponentCategory,
   type ComponentSemanticCategory,
   type GraphNodeVisualState,
@@ -30,15 +29,18 @@ export interface ComponentCanvasData extends Record<string, unknown> {
   isHighlighted?: boolean;
   isDimmed?: boolean;
   isSimulationActive?: boolean;
+  isGlowMode?: boolean;
 }
 
 export interface BlankSlotData extends Record<string, unknown> {
   slotId: string;
+  hint?: string;
   isSelected?: boolean;
   isHighlighted?: boolean;
   isDimmed?: boolean;
   visualState?: GraphNodeVisualState;
   onSelectSlot?: (slotId: string) => void;
+  isGlowMode?: boolean;
 }
 
 export interface FilledSlotData extends Record<string, unknown> {
@@ -51,6 +53,7 @@ export interface FilledSlotData extends Record<string, unknown> {
   isDimmed?: boolean;
   isSimulationActive?: boolean;
   visualState?: GraphNodeVisualState;
+  isGlowMode?: boolean;
 }
 
 export interface ActorCanvasData extends Record<string, unknown> {
@@ -59,6 +62,7 @@ export interface ActorCanvasData extends Record<string, unknown> {
   isHighlighted?: boolean;
   isDimmed?: boolean;
   isSimulationActive?: boolean;
+  isGlowMode?: boolean;
 }
 
 export type GameFlowNode =
@@ -73,6 +77,7 @@ interface GraphNodeShellProps {
   selected?: boolean;
   highlighted?: boolean;
   dimmed?: boolean;
+  glowMode?: boolean;
   variant?: 'compact' | 'expanded';
   interactive?: boolean;
   className?: string;
@@ -101,6 +106,7 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
   selected = false,
   highlighted = false,
   dimmed = false,
+  glowMode = false,
   variant = 'compact',
   interactive = false,
   className,
@@ -135,20 +141,21 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
       onMouseLeave={onMouseLeave}
       ref={ref}
       className={cn(
-        'relative rounded-lg border bg-[var(--slot-filled)] text-[var(--text-primary)]',
+        'relative rounded-xl border-2 bg-[var(--slot-filled)] text-[var(--text-primary)]',
         'group/node',
-        'transition-[border-color,box-shadow,opacity,background-color] duration-200',
+        'transition-[border-color,box-shadow,opacity,background-color,transform] duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--node-accent)]/35',
-        variant === 'expanded' ? 'min-w-48 px-4 py-3.5' : 'min-w-40 px-4 py-3',
+        variant === 'expanded' ? 'w-[156px] px-3 py-4' : 'w-[140px] px-3 py-3',
         interactive && 'cursor-pointer',
         dimmed && 'opacity-35',
+        glowMode && 'hover:scale-110',
         stateClasses[effectiveState],
         className,
       )}
       style={{
         '--node-accent': categoryStyle.accent,
         borderColor: effectiveState === 'idle' ? categoryStyle.border : undefined,
-        boxShadow: highlighted || selected
+        boxShadow: glowMode || highlighted || selected
           ? `0 14px 34px ${categoryStyle.glow}`
           : undefined,
         ...style,
@@ -159,52 +166,22 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
   );
 });
 
-function PortHandle({
-  type,
-  position,
-  label,
-  category: _category,
-}: {
-  type: 'source' | 'target';
-  position: Position.Left | Position.Right;
-  label: string;
-  category: ComponentSemanticCategory;
-}) {
-  const isLeft = position === Position.Left;
+const HANDLE_CLS = '!absolute !h-0 !w-0 !min-h-0 !min-w-0 !border-0 !bg-transparent !opacity-0 !p-0';
 
-  return (
-    <div
-      className={cn(
-        'pointer-events-none absolute top-1/2 z-20 flex -translate-y-1/2 items-center',
-        isLeft ? 'left-0 flex-row-reverse' : 'right-0',
-      )}
-    >
-      <Handle
-        type={type}
-        position={position}
-        className="!absolute !left-auto !right-auto !top-auto !h-0 !w-0 !translate-x-0 !translate-y-0 !border-0 !bg-transparent !opacity-0"
-        aria-label={label}
-      />
-      <span
-        className={cn(
-          'pointer-events-none absolute top-1/2 z-30 -translate-y-1/2 whitespace-nowrap rounded-full',
-          'border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] px-2 py-1 text-[10px] font-semibold',
-          'text-[var(--text-primary)] opacity-0 shadow-lg transition-opacity duration-150 group-hover/node:opacity-100',
-          isLeft ? 'right-2' : 'left-2',
-        )}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-export function NodeHandles({ category }: { category: ComponentSemanticCategory }) {
-  const labels = getPortLabels(category);
+// React Flow keeps source and target handles in separate collections,
+// so the same id can exist for both types simultaneously.
+// This lets each side be used as either sourceHandle or targetHandle.
+export function NodeHandles() {
   return (
     <>
-      <PortHandle type="target" position={Position.Left} label={labels.input} category={category} />
-      <PortHandle type="source" position={Position.Right} label={labels.output} category={category} />
+      <Handle id="left"   type="source" position={Position.Left}   isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="right"  type="source" position={Position.Right}  isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="top"    type="source" position={Position.Top}    isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="bottom" type="source" position={Position.Bottom} isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="left"   type="target" position={Position.Left}   isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="right"  type="target" position={Position.Right}  isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="top"    type="target" position={Position.Top}    isConnectable={false} className={HANDLE_CLS} />
+      <Handle id="bottom" type="target" position={Position.Bottom} isConnectable={false} className={HANDLE_CLS} />
     </>
   );
 }
@@ -224,32 +201,30 @@ export function ComponentNode({ data, selected }: NodeProps<Node<ComponentCanvas
       selected={selected}
       highlighted={data.isHighlighted}
       dimmed={data.isDimmed}
+      glowMode={data.isGlowMode}
       variant={expanded ? 'expanded' : 'compact'}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <NodeHandles category={category} />
-      <div className="flex items-center gap-2">
+      <NodeHandles />
+      <div className="flex flex-col items-center gap-2 py-1">
         <span
           className={cn(
-            'grid h-9 w-9 place-items-center rounded-md border',
+            'grid h-11 w-11 place-items-center rounded-xl border-2',
             categoryStyle.bgClass,
             categoryStyle.borderClass,
             categoryStyle.textClass,
           )}
         >
-          <Icon className="h-4 w-4" aria-hidden="true" />
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">{data.label}</div>
-          <div className="truncate text-[10px] uppercase tracking-wide text-[var(--text-secondary)]">
-            {data.componentSlug}
-          </div>
+        <div className="text-center">
+          <div className="text-sm font-semibold leading-tight">{data.label}</div>
         </div>
       </div>
 
       {expanded && data.description && (
-        <p className="mt-2 max-w-56 text-xs leading-relaxed text-[var(--text-secondary)]">
+        <p className="mt-2 text-center text-xs leading-relaxed text-[var(--text-secondary)]">
           {data.description}
         </p>
       )}
@@ -273,11 +248,12 @@ export function BlankSlotNode({ data, selected }: NodeProps<Node<BlankSlotData, 
       selected={isSelected}
       highlighted={data.isHighlighted}
       dimmed={data.isDimmed}
+      glowMode={data.isGlowMode}
       interactive
       onClick={() => data.onSelectSlot?.(data.slotId)}
       ref={setNodeRef}
       className={cn(
-        'grid min-h-24 place-items-center bg-[var(--slot-blank)]/8 text-[var(--slot-blank)]',
+        'group relative grid min-h-[120px] place-items-center bg-[var(--slot-blank)]/8 text-[var(--slot-blank)]',
         !prefersReduced && !isOver && 'animate-slot-pulse',
         (isSelected || isOver) && 'border-solid bg-[var(--slot-blank)]/15',
       )}
@@ -285,7 +261,12 @@ export function BlankSlotNode({ data, selected }: NodeProps<Node<BlankSlotData, 
         boxShadow: '0 0 16px rgba(249, 115, 22, 0.6)',
       } : undefined}
     >
-      <NodeHandles category="async" />
+      <NodeHandles />
+      {data.hint && (
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 hidden w-56 -translate-x-1/2 rounded-lg border border-[var(--accent-primary)] bg-[var(--bg-secondary)] p-2 text-xs text-[var(--text-primary)] shadow-lg group-hover:block">
+          {data.hint}
+        </div>
+      )}
       <div className="text-center">
         <div className="mx-auto mb-1 grid h-7 w-7 place-items-center rounded-full bg-[var(--slot-blank)]/15 opacity-40">
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -322,11 +303,12 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
       selected={isSelected}
       highlighted={data.isHighlighted || isOver}
       dimmed={data.isDimmed}
+      glowMode={data.isGlowMode}
       interactive
       onClick={() => data.onSelectSlot?.(data.slotId)}
       ref={setNodeRef}
     >
-      <NodeHandles category={category} />
+      <NodeHandles />
       <button
         type="button"
         onClick={(event) => {
@@ -344,23 +326,20 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
           initial={prefersReduced ? undefined : scaleIn.initial}
           animate={prefersReduced ? undefined : scaleIn.animate}
           transition={spring}
-          className="flex items-center gap-2"
+          className="flex flex-col items-center gap-2 py-1"
         >
           <span
             className={cn(
-              'grid h-9 w-9 place-items-center rounded-md border',
+              'grid h-11 w-11 place-items-center rounded-xl border-2',
               categoryStyle.bgClass,
               categoryStyle.borderClass,
               categoryStyle.textClass,
             )}
           >
-            <Icon className="h-4 w-4" aria-hidden="true" />
+            <Icon className="h-5 w-5" aria-hidden="true" />
           </span>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{data.component.label}</div>
-            <div className="truncate text-[10px] uppercase tracking-wide text-[var(--text-secondary)]">
-              {categoryStyle.label}
-            </div>
+          <div className="text-center">
+            <div className="text-sm font-semibold leading-tight">{data.component.label}</div>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -379,14 +358,15 @@ export function ActorNode({ data, selected }: NodeProps<Node<ActorCanvasData, 'a
       selected={selected}
       highlighted={data.isHighlighted}
       dimmed={data.isDimmed}
-      className="min-w-32 rounded-full bg-[var(--bg-primary)]"
+      glowMode={data.isGlowMode}
+      className="bg-[var(--bg-primary)]"
     >
-      <NodeHandles category="networking" />
-      <div className="flex items-center gap-2">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+      <NodeHandles />
+      <div className="flex flex-col items-center gap-2 py-1">
+        <span className="grid h-11 w-11 place-items-center rounded-xl border-2 border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
           <ActorIcon />
         </span>
-        <span className="text-sm font-semibold">{data.label}</span>
+        <span className="text-sm font-semibold leading-tight">{data.label}</span>
       </div>
     </GraphNodeShell>
   );

@@ -81,7 +81,7 @@ function BuilderComponentNode({
       dimmed={data.isPrevious}
       visualState={data.isAnswer ? 'missing-config' : 'idle'}
     >
-      <NodeHandles category={category} />
+      <NodeHandles />
 
       {/* ANSWER badge — floats above the node */}
       {data.isAnswer && (
@@ -165,7 +165,7 @@ function BuilderActorNode({
       dimmed={data.isPrevious}
       className="min-w-32 rounded-full bg-[var(--bg-primary)]"
     >
-      <NodeHandles category="networking" />
+      <NodeHandles />
 
       {!data.isPrevious && (
         <button

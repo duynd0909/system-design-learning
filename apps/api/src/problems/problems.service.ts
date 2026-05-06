@@ -291,11 +291,7 @@ export class ProblemsService {
       answer: toAnswer(r.answer),
     }));
 
-    const { nodes, edges } = buildAccumulatedGraph(
-      reqs,
-      order,
-      `${problem.id}-req${order}`,
-    );
+    const { nodes, edges } = buildAccumulatedGraph(reqs, order);
 
     return {
       requirement: {

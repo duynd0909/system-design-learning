@@ -51,9 +51,10 @@ export function RequirementsSidebar({
         <h1 className="font-display text-lg font-bold leading-snug text-[var(--text-primary)]">
           {problem.title}
         </h1>
-        <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-          {problem.description}
-        </p>
+        <div
+          className="mt-1.5 text-sm text-[var(--text-secondary)] [&_a]:text-[var(--accent-primary)] [&_em]:italic [&_p]:mb-0 [&_strong]:font-semibold [&_strong]:text-[var(--text-primary)]"
+          dangerouslySetInnerHTML={{ __html: problem.description }}
+        />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">

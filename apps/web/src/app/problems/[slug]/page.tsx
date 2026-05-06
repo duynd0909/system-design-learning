@@ -43,6 +43,7 @@ import {
   Share2,
   Sparkles,
   XCircle,
+  Zap,
 } from 'lucide-react';
 import type {
   ActorNodeData,
@@ -525,11 +526,13 @@ interface CanvasToolbarProps {
   minimapVisible: boolean;
   snapToGrid: boolean;
   simulationEnabled: boolean;
+  isGlowMode: boolean;
   onAutoLayout: () => void;
   onFitView: () => void;
   onToggleMinimap: () => void;
   onToggleSnap: () => void;
   onToggleSimulation: () => void;
+  onToggleGlowMode: () => void;
 }
 
 function CanvasToolbar({
@@ -537,11 +540,13 @@ function CanvasToolbar({
   minimapVisible,
   snapToGrid,
   simulationEnabled,
+  isGlowMode,
   onAutoLayout,
   onFitView,
   onToggleMinimap,
   onToggleSnap,
   onToggleSimulation,
+  onToggleGlowMode,
 }: CanvasToolbarProps) {
   return (
     <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/95 p-1 shadow-lg backdrop-blur">
@@ -584,6 +589,13 @@ function CanvasToolbar({
         ) : (
           <Play className="h-4 w-4" aria-hidden="true" />
         )}
+      </CanvasToolButton>
+      <CanvasToolButton
+        label={isGlowMode ? 'Glow mode on' : 'Glow mode off'}
+        active={isGlowMode}
+        onClick={onToggleGlowMode}
+      >
+        <Zap className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
     </div>
   );
@@ -684,6 +696,7 @@ export default function ProblemGamePage() {
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [slotFeedback, setSlotFeedback] = useState<Record<string, boolean>>({});
+  const [isGlowMode, setIsGlowMode] = useState(false);
 
   const {
     data: reqGraph,
@@ -848,7 +861,7 @@ export default function ProblemGamePage() {
     return reqGraph.nodes.map((node): GameFlowNode => {
       const position = layoutOverrides[node.id] ?? node.position;
       const isHighlighted = hoveredPath.nodeIds.has(node.id);
-      const isDimmed = hasHoveredPath && !isHighlighted;
+      const isDimmed = !isGlowMode && hasHoveredPath && !isHighlighted;
       const isSimulationActive = activeSimulationNodes.has(node.id);
 
       if (node.type === 'blank') {
@@ -870,6 +883,7 @@ export default function ProblemGamePage() {
               isHighlighted,
               isDimmed,
               isSimulationActive,
+              isGlowMode,
               visualState: feedbackState,
             },
           };
@@ -880,10 +894,12 @@ export default function ProblemGamePage() {
           position,
           data: {
             slotId: node.id,
+            hint: (node.data as { hint?: string }).hint,
             onSelectSlot: setSelectedSlotId,
             isSelected: selectedSlotId === node.id,
             isHighlighted,
             isDimmed,
+            isGlowMode,
           },
         };
       }
@@ -897,6 +913,7 @@ export default function ProblemGamePage() {
             isHighlighted,
             isDimmed,
             isSimulationActive,
+            isGlowMode,
           },
         };
       }
@@ -914,6 +931,7 @@ export default function ProblemGamePage() {
             isHighlighted,
             isDimmed,
             isSimulationActive,
+            isGlowMode,
           },
         };
       }
@@ -921,7 +939,7 @@ export default function ProblemGamePage() {
         id: node.id,
         type: 'actor',
         position,
-        data: { label: 'Actor', isHighlighted, isDimmed, isSimulationActive },
+        data: { label: 'Actor', isHighlighted, isDimmed, isSimulationActive, isGlowMode },
       };
     });
   }, [
@@ -931,6 +949,7 @@ export default function ProblemGamePage() {
     componentBySlug,
     hasHoveredPath,
     hoveredPath.nodeIds,
+    isGlowMode,
     layoutOverrides,
     reqGraph,
     selectedSlotId,
@@ -945,9 +964,24 @@ export default function ProblemGamePage() {
     setHoveredEdgeId('');
   }, []);
 
-  const flowEdges = useMemo<Edge<SystemEdgeData>[]>(
-    () =>
-      reqGraph?.edges.map((edge) => {
+  const flowEdges = useMemo<Edge<SystemEdgeData>[]>(() => {
+      const edges = reqGraph?.edges ?? [];
+
+      // Only apply perpendicular offset for edges that share the same
+      // source, target AND handle combination (truly identical paths).
+      const pairCount = new Map<string, number>();
+      const pairCursor = new Map<string, number>();
+      for (const edge of edges) {
+        const key = `${edge.source}::${edge.target}::${edge.sourceHandle ?? ''}::${edge.targetHandle ?? ''}`;
+        pairCount.set(key, (pairCount.get(key) ?? 0) + 1);
+      }
+
+      return edges.map((edge) => {
+        const key = `${edge.source}::${edge.target}::${edge.sourceHandle ?? ''}::${edge.targetHandle ?? ''}`;
+        const parallelTotal = pairCount.get(key) ?? 1;
+        const parallelIndex = pairCursor.get(key) ?? 0;
+        pairCursor.set(key, parallelIndex + 1);
+
         const kind = inferEdgeKind(edge, {
           sourceSlug: nodeSlugById.get(edge.source),
           targetSlug: nodeSlugById.get(edge.target),
@@ -955,7 +989,7 @@ export default function ProblemGamePage() {
         const isActive =
           simulationEnabled && activeSimulationEdgeId === edge.id;
         const isHighlighted = hoveredPath.edgeIds.has(edge.id);
-        const isDimmed = hasHoveredPath && !isHighlighted;
+        const isDimmed = !isGlowMode && hasHoveredPath && !isHighlighted;
         const status: SystemEdgeStatus = isActive ? 'active' : 'normal';
         const color = edgeStatusStroke(kind, status);
 
@@ -963,27 +997,39 @@ export default function ProblemGamePage() {
           id: edge.id,
           source: edge.source,
           target: edge.target,
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle,
           label: edge.label,
           type: 'label',
           animated: edge.animated || isActive,
-          markerEnd: { type: MarkerType.ArrowClosed, color },
+          markerEnd: edge.markerEnd || !edge.markerStart
+            ? { type: MarkerType.ArrowClosed, color, width: edge.markerEnd?.width ?? 18, height: edge.markerEnd?.height ?? 18 }
+            : undefined,
+          markerStart: edge.markerStart
+            ? { type: MarkerType.ArrowClosed, color, width: edge.markerStart.width ?? 18, height: edge.markerStart.height ?? 18 }
+            : undefined,
           data: {
             kind,
             status,
             isActive,
             isHighlighted,
             isDimmed,
+            isGlowMode,
+            parallelIndex,
+            parallelTotal,
             onHover: handleEdgeHover,
             onHoverEnd: handleEdgeHoverEnd,
           },
         };
-      }) ?? [],
+      });
+    },
     [
       activeSimulationEdgeId,
       handleEdgeHover,
       handleEdgeHoverEnd,
       hasHoveredPath,
       hoveredPath.edgeIds,
+      isGlowMode,
       nodeSlugById,
       reqGraph?.edges,
       simulationEnabled,
@@ -1424,6 +1470,7 @@ export default function ProblemGamePage() {
                   minimapVisible={isMinimapVisible}
                   snapToGrid={snapToGrid}
                   simulationEnabled={simulationEnabled}
+                  isGlowMode={isGlowMode}
                   onAutoLayout={handleAutoLayout}
                   onFitView={handleFitView}
                   onToggleMinimap={() =>
@@ -1433,6 +1480,7 @@ export default function ProblemGamePage() {
                   onToggleSimulation={() =>
                     setSimulationEnabled((current) => !current)
                   }
+                  onToggleGlowMode={() => setIsGlowMode((current) => !current)}
                 />
 
                 <ReactFlowProvider>
