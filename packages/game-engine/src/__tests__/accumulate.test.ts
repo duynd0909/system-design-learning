@@ -40,7 +40,7 @@ describe('buildAccumulatedGraph', () => {
   ];
 
   it('reveals previous requirements and blanks only current answer nodes', () => {
-    const result = buildAccumulatedGraph(requirements, 2, 'fixed');
+    const result = buildAccumulatedGraph(requirements, 2);
 
     expect(result.nodes.map((n) => [n.id, n.type])).toEqual([
       ['user', 'actor'],

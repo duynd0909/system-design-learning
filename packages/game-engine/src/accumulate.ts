@@ -1,5 +1,4 @@
 import type { GraphNode, GraphEdge, MaskedNode } from '@stackdify/shared-types';
-import { seededShuffle } from './shuffle';
 
 interface RequirementData {
   order: number;
@@ -19,7 +18,6 @@ interface RequirementData {
 export function buildAccumulatedGraph(
   requirements: RequirementData[],
   targetOrder: number,
-  seed?: string,
 ): { nodes: MaskedNode[]; edges: GraphEdge[] } {
   const sorted = [...requirements].sort((a, b) => a.order - b.order);
   const target = sorted.find((r) => r.order === targetOrder);
@@ -51,19 +49,16 @@ export function buildAccumulatedGraph(
       // Current requirement: blank exactly the nodes listed in its answer
       const blankIds = new Set(Object.keys(req.answer));
 
-      // Apply seeded shuffle to blank selection for reproducibility
-      const componentNodes = req.nodes.filter((n) => n.type === 'component');
-      const effectiveSeed = seed ?? `req-${req.order}-${req.nodes.map((n) => n.id).join('')}`;
-      // Only shuffle if we need to pick a subset; here the answer already defines the blanks
-      void seededShuffle(componentNodes, effectiveSeed); // keeps shuffle deterministic for tests
-
       for (const node of req.nodes) {
         if (blankIds.has(node.id)) {
           accumulatedNodes.push({
             id: node.id,
             type: 'blank' as const,
             position: node.position,
-            data: { isBlank: true as const },
+            data: {
+              isBlank: true as const,
+              hint: (node.data as { hint?: string }).hint,
+            },
           });
         } else {
           accumulatedNodes.push({

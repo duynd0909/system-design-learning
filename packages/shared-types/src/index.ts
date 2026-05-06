@@ -34,6 +34,7 @@ export interface ComponentNodeData {
 
 export interface BlankNodeData {
   isBlank: true;
+  hint?: string;
 }
 
 export interface ActorNodeData {
@@ -68,6 +69,11 @@ export interface GraphEdge {
   label?: string;
   animated?: boolean;
   type?: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  markerEnd?: { height: number; type: string; width: number };
+  markerStart?: { height: number; type: string; width: number };
+  data?: null;
 }
 
 // ─── Problem Graph (kept for game-engine compatibility) ───────────────────────

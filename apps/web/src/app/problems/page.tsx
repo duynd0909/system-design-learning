@@ -50,7 +50,7 @@ function RequirementProgress({
               'h-1 flex-1 rounded-full transition-colors duration-300',
               i < completed
                 ? 'bg-[var(--slot-correct)]'
-                : 'bg-[var(--text-primary)]/15',
+                : 'bg-[var(--text-primary)]/15'
             )}
           />
         ))}
@@ -95,7 +95,7 @@ function ProblemCard({
 
         <CardTitle className="mb-2">{problem.title}</CardTitle>
         <CardDescription className="line-clamp-2 flex-1">
-          {problem.description}
+          <div dangerouslySetInnerHTML={{ __html: problem.description }}></div>
         </CardDescription>
 
         {isAuthenticated && problem.requirementCount > 0 && (
@@ -224,7 +224,7 @@ function ProblemsPageContent() {
     | 'false'
     | '';
   const difficultyFilter = DIFFICULTIES.some(
-    ({ value }) => value === selectedDifficulty,
+    ({ value }) => value === selectedDifficulty
   )
     ? (selectedDifficulty as Difficulty)
     : '';
@@ -263,7 +263,7 @@ function ProblemsPageContent() {
         .flatMap((page) => page.data ?? [])
         .filter((problem): problem is ProblemSummary => Boolean(problem?.id)) ??
       [],
-    [problemPages],
+    [problemPages]
   );
   const totalProblems = problemPages?.pages[0]?.total ?? 0;
 
@@ -274,14 +274,14 @@ function ProblemsPageContent() {
         threshold: 0.35,
         includeScore: true,
       }),
-    [problems],
+    [problems]
   );
   const filteredProblems = useMemo(
     () =>
       searchQuery.trim()
         ? fuse.search(searchQuery).map((r) => r.item)
         : problems,
-    [fuse, problems, searchQuery],
+    [fuse, problems, searchQuery]
   );
 
   const categories = useMemo(() => {
@@ -289,7 +289,7 @@ function ProblemsPageContent() {
       new Set([
         ...(categoryData ?? []),
         ...(selectedCategory ? [selectedCategory] : []),
-      ]),
+      ])
     ).sort();
     return ['All', ...cats];
   }, [categoryData, selectedCategory]);
@@ -304,7 +304,7 @@ function ProblemsPageContent() {
       }
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams]
   );
 
   useEffect(() => {
@@ -315,7 +315,7 @@ function ProblemsPageContent() {
       (entries) => {
         if (entries[0]?.isIntersecting) void fetchNextPage();
       },
-      { rootMargin: '320px 0px' },
+      { rootMargin: '320px 0px' }
     );
 
     observer.observe(node);
@@ -362,7 +362,7 @@ function ProblemsPageContent() {
                   'rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
                   difficultyFilter === value || (!difficultyFilter && !value)
                     ? 'bg-[#00ffa3] text-black shadow-[0_4px_16px_rgba(0,255,163,0.2)] font-bold'
-                    : 'bg-black/5 text-[var(--text-secondary)] hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-[#00ffa3]',
+                    : 'bg-black/5 text-[var(--text-secondary)] hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 dark:hover:text-[#00ffa3]'
                 )}
                 aria-pressed={
                   difficultyFilter === value || (!difficultyFilter && !value)
@@ -380,7 +380,7 @@ function ProblemsPageContent() {
               onChange={(e) =>
                 setFilter(
                   'category',
-                  e.target.value === 'All' ? '' : e.target.value,
+                  e.target.value === 'All' ? '' : e.target.value
                 )
               }
               aria-label="Filter by category"
@@ -449,7 +449,7 @@ function ProblemsPageContent() {
                   'rounded-md p-1.5 transition-colors duration-150',
                   viewMode === 'card'
                     ? 'bg-[#00ffa3] text-black shadow-sm font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]',
+                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]'
                 )}
               >
                 <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
@@ -463,7 +463,7 @@ function ProblemsPageContent() {
                   'rounded-md p-1.5 transition-colors duration-150',
                   viewMode === 'list'
                     ? 'bg-[#00ffa3] text-black shadow-sm font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]',
+                    : 'text-[var(--text-secondary)] hover:text-[#00b37a] dark:hover:text-[#00ffa3]'
                 )}
               >
                 <List className="h-3.5 w-3.5" aria-hidden="true" />
