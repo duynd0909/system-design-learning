@@ -18,6 +18,7 @@ RUN npm ci
 COPY packages/shared-types ./packages/shared-types
 COPY packages/game-engine  ./packages/game-engine
 COPY apps/api              ./apps/api
+COPY docs                  ./docs
 
 # Build shared packages in dependency order, then the API
 RUN npm run build --workspace=@stackdify/shared-types && \
@@ -51,6 +52,9 @@ COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/api/tsconfig.json ./apps/api/tsconfig.json
 COPY --from=builder /app/apps/api/tsconfig.seed.json ./apps/api/tsconfig.seed.json
+
+# Seed data files (read by prisma/seed.ts during pre-deploy)
+COPY --from=builder /app/docs ./docs
 
 EXPOSE 3001
 
