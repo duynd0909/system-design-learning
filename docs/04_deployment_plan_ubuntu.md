@@ -12,10 +12,12 @@
 2. [Phase 0 — Network & DNS (expose home PC to internet)](#2-phase-0--network--dns)
 3. [Phase 1 — Server Hardening](#3-phase-1--server-hardening)
 4. [Phase 2 — Docker & Docker Compose](#4-phase-2--docker--docker-compose)
-5. [Phase 3 — Nginx + SSL](#5-phase-3--nginx--ssl)
+5. [Phase 3 — Nginx](#5-phase-3--nginx)
 6. [Phase 4 — First Deployment](#6-phase-4--first-deployment)
 7. [Phase 5 — CI/CD via GitHub Actions](#7-phase-5--cicd-via-github-actions)
 8. [Phase 6 — Monitoring & Backups](#8-phase-6--monitoring--backups)
+   - [8.1 Basic health monitoring (cron fallback)](#81-basic-health-monitoring-fallback-cron-script)
+   - [8.5 UI Monitoring Stack — Uptime Kuma + Netdata](#85-ui-monitoring-stack)
 9. [Environment Variables Reference](#9-environment-variables-reference)
 10. [Cheat Sheet — Day-to-Day Commands](#10-cheat-sheet--day-to-day-commands)
 
@@ -146,7 +148,7 @@ cloudflared tunnel create stackdify
 cloudflared tunnel route dns stackdify  stackdify.space
 cloudflared tunnel route dns stackdify  api.stackdify.space
 
-# Create config
+# Create config in your home dir first (service install copies it to /etc/cloudflared/)
 mkdir -p ~/.cloudflared
 cat > ~/.cloudflared/config.yml <<EOF
 tunnel: <tunnel-id>
@@ -156,15 +158,23 @@ ingress:
   - hostname: stackdify.space
     service: http://localhost:80
   - hostname: api.stackdify.space
-    service: http://localhost:3001
+    service: http://localhost:80
   - service: http_status:404
 EOF
 
-# Run as system service
+# Install as system service — copies config to /etc/cloudflared/config.yml
+# After this, ALWAYS edit /etc/cloudflared/config.yml (not ~/.cloudflared/config.yml)
+# because the systemd service reads from /etc/cloudflared/
 sudo cloudflared service install
 sudo systemctl enable cloudflared
 sudo systemctl start cloudflared
 ```
+
+> **Config file locations:**
+> - `~/.cloudflared/config.yml` — used only when running `cloudflared` manually as your user
+> - `/etc/cloudflared/config.yml` — used by the **systemd service** (what actually runs on boot)
+>
+> After `sudo cloudflare service install`, always edit `/etc/cloudflared/config.yml` and run `sudo systemctl restart cloudflared` to apply changes.
 
 If using Cloudflare Tunnel you can skip Certbot (Cloudflare handles TLS at the edge) and skip opening ports 80/443 in the router.
 
@@ -367,13 +377,13 @@ networks:
 
 ### 4.3 Create environment files on the server
 
+Place all env files in the same directory as `docker-compose.prod.yml` (e.g. `/home/dave/stackdify/`). The compose file uses relative paths (`env_file: .env.api`) so they must sit alongside it.
+
 ```bash
-mkdir -p /srv/stackdify
-chmod 750 /srv/stackdify
-chown deploy:deploy /srv/stackdify
+cd /home/dave/stackdify   # wherever docker-compose.prod.yml lives
 ```
 
-`/srv/stackdify/.env.api`:
+`.env.api`:
 ```bash
 NODE_ENV=production
 PORT=3001
@@ -398,7 +408,7 @@ SENTRY_DSN=<optional>
 SENTRY_TRACES_SAMPLE_RATE=0.05
 ```
 
-`/srv/stackdify/.env.web`:
+`.env.web`:
 ```bash
 NODE_ENV=production
 NEXTAUTH_URL=https://stackdify.space
@@ -411,7 +421,7 @@ GOOGLE_CLIENT_ID=<prod-value>
 GOOGLE_CLIENT_SECRET=<prod-value>
 ```
 
-`/srv/stackdify/.env` (used by docker-compose for volume vars):
+`.env` (used by docker-compose for `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, image vars):
 ```bash
 POSTGRES_PASSWORD=<strong-random-password>
 REDIS_PASSWORD=<strong-random-password>
@@ -420,31 +430,121 @@ IMAGE_TAG=latest
 ```
 
 ```bash
-chmod 600 /srv/stackdify/.env*   # readable only by owner
+chmod 600 .env*   # readable only by owner
 ```
 
 ---
 
-## 5. Phase 3 — Nginx + SSL
+## 5. Phase 3 — Nginx
 
-### 5.1 Install Nginx and Certbot
+### 5.1 Install Nginx
 
 ```bash
 apt install -y nginx
+```
+
+### 5.2 Choose your TLS path
+
+| Setup | TLS handled by | Nginx config |
+|---|---|---|
+| **Cloudflare Tunnel** ✅ (current) | Cloudflare edge | HTTP-only (§5.3) |
+| Port-forwarding + Certbot | Let's Encrypt on server | HTTPS (§5.4) |
+
+---
+
+### 5.3 Nginx config — Cloudflare Tunnel (HTTP-only) ✅ ACTIVE
+
+Cloudflare Tunnel terminates TLS at the edge and proxies plain HTTP to Nginx on port 80. No certificates are needed on the server.
+
+`/etc/nginx/sites-available/stackdify`:
+
+```nginx
+# ─── Rate limiting zones ──────────────────────────────────────────────────────
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=30r/s;
+limit_req_zone $binary_remote_addr zone=web_limit:10m rate=60r/s;
+
+# ─── Frontend — stackdify.space ───────────────────────────────────────────────
+server {
+    listen 80;
+    server_name stackdify.space www.stackdify.space;
+
+    # Gzip
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1000;
+
+    limit_req zone=web_limit burst=80 nodelay;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade          $http_upgrade;
+        proxy_set_header   Connection       "upgrade";
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto https;  # tunnel was HTTPS externally
+        proxy_read_timeout 60s;
+        proxy_connect_timeout 10s;
+    }
+
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+}
+
+# ─── Backend API — api.stackdify.space ────────────────────────────────────────
+server {
+    listen 80;
+    server_name api.stackdify.space;
+
+    limit_req zone=api_limit burst=50 nodelay;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+        proxy_connect_timeout 10s;
+        client_max_body_size 5m;
+    }
+}
+```
+
+```bash
+ln -s /etc/nginx/sites-available/stackdify /etc/nginx/sites-enabled/stackdify
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+```
+
+> **Why no HTTPS on Nginx?** The Cloudflare Tunnel daemon (`cloudflared`) runs on the server and creates an outbound encrypted connection to Cloudflare's edge. Public HTTPS traffic is terminated by Cloudflare; the tunnel carries plain HTTP internally. Adding SSL to Nginx would break this flow and cause cert-not-found errors.
+
+> **Why `X-Forwarded-Proto https`?** Even though Nginx speaks HTTP, the original client request was HTTPS. Setting this header tells NestJS and Next.js that the protocol was secure so they generate correct redirect URLs and HSTS behaviour.
+
+---
+
+### 5.4 Nginx config — Certbot / Let's Encrypt (port-forwarding alternative)
+
+> Skip this section if you are using Cloudflare Tunnel.
+
+#### 5.4.1 Install Certbot
+
+```bash
 snap install --classic certbot
 ln -sf /snap/bin/certbot /usr/bin/certbot
 ```
 
-### 5.2 Initial Nginx config (HTTP only, for Certbot challenge)
-
-`/etc/nginx/sites-available/stackdify`:
+#### 5.4.2 Temporary HTTP config (for ACME challenge)
 
 ```nginx
 server {
     listen 80;
     server_name stackdify.space www.stackdify.space api.stackdify.space;
 
-    # Let's Encrypt ACME challenge
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
@@ -461,7 +561,7 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 ```
 
-### 5.3 Obtain SSL certificates
+#### 5.4.3 Obtain certificates
 
 ```bash
 certbot certonly --webroot \
@@ -474,18 +574,11 @@ certbot certonly --webroot \
   --non-interactive
 ```
 
-> If using Cloudflare Tunnel, skip Certbot entirely — Cloudflare provides the TLS cert.
-
-### 5.4 Full Nginx config with HTTPS
+#### 5.4.4 Full HTTPS config
 
 Replace `/etc/nginx/sites-available/stackdify`:
 
 ```nginx
-# ─── Security headers snippet ────────────────────────────────────────────────
-map $sent_http_content_type $csp_header {
-    default "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stackdify.space; frame-ancestors 'none';";
-}
-
 # ─── Rate limiting zones ──────────────────────────────────────────────────────
 limit_req_zone $binary_remote_addr zone=api_limit:10m rate=30r/s;
 limit_req_zone $binary_remote_addr zone=web_limit:10m rate=60r/s;
@@ -505,7 +598,8 @@ server {
 
 # ─── Frontend — stackdify.space ───────────────────────────────────────────────
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name stackdify.space www.stackdify.space;
 
     ssl_certificate     /etc/letsencrypt/live/stackdify.space/fullchain.pem;
@@ -515,15 +609,12 @@ server {
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
 
-    # Security headers
     add_header X-Frame-Options           "DENY"              always;
     add_header X-Content-Type-Options    "nosniff"           always;
     add_header Referrer-Policy           "strict-origin"     always;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-    add_header Content-Security-Policy   $csp_header         always;
     add_header Permissions-Policy        "camera=(), microphone=(), geolocation=()" always;
 
-    # Gzip
     gzip on;
     gzip_types text/plain text/css application/javascript application/json image/svg+xml;
     gzip_min_length 1000;
@@ -543,17 +634,16 @@ server {
         proxy_connect_timeout 10s;
     }
 
-    # Cache Next.js static assets
     location /_next/static/ {
         proxy_pass http://127.0.0.1:3000;
-        proxy_cache_valid 200 1y;
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
 }
 
 # ─── Backend API — api.stackdify.space ────────────────────────────────────────
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name api.stackdify.space;
 
     ssl_certificate     /etc/letsencrypt/live/stackdify.space/fullchain.pem;
@@ -568,20 +658,7 @@ server {
     add_header Referrer-Policy           "strict-origin" always;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
 
-    # Stricter rate limit for API
     limit_req zone=api_limit burst=50 nodelay;
-
-    # Block direct access to sensitive paths
-    location ~ ^/api/v1/admin {
-        # Optional: restrict to specific IPs
-        # allow 1.2.3.4;
-        # deny all;
-        proxy_pass http://127.0.0.1:3001;
-        proxy_set_header Host             $host;
-        proxy_set_header X-Real-IP        $remote_addr;
-        proxy_set_header X-Forwarded-For  $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-    }
 
     location / {
         proxy_pass         http://127.0.0.1:3001;
@@ -592,8 +669,6 @@ server {
         proxy_set_header   X-Forwarded-Proto https;
         proxy_read_timeout 60s;
         proxy_connect_timeout 10s;
-
-        # Limit upload body size (prevent large payload attacks)
         client_max_body_size 5m;
     }
 }
@@ -603,13 +678,15 @@ server {
 nginx -t && systemctl reload nginx
 ```
 
-### 5.5 Auto-renew SSL
+> **Note:** `listen 443 ssl; http2 on;` is the correct syntax for Nginx ≥ 1.25.1. The older `listen 443 ssl http2;` form is deprecated and produces warnings.
+
+#### 5.4.5 Auto-renew SSL
 
 Certbot installs a systemd timer automatically. Verify:
 
 ```bash
 systemctl status certbot.timer
-certbot renew --dry-run    # test renewal
+certbot renew --dry-run
 ```
 
 Add reload hook so Nginx picks up renewed certs:
@@ -871,13 +948,11 @@ jobs:
 
 ## 8. Phase 6 — Monitoring & Backups
 
-### 8.1 Basic health monitoring
+### 8.1 Basic health monitoring (fallback cron script)
+
+A lightweight cron-based health check runs independently of the UI monitoring stack. Keep this even after setting up Uptime Kuma — it acts as a second layer that doesn't depend on Docker.
 
 ```bash
-# Install simple uptime monitoring
-apt install -y monitoring-plugins-basic
-
-# Cron job to alert on service down (sends email via sendmail or a webhook)
 cat > /usr/local/bin/stackdify-healthcheck.sh <<'EOF'
 #!/bin/bash
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/api/v1/health)
@@ -890,6 +965,130 @@ chmod +x /usr/local/bin/stackdify-healthcheck.sh
 
 # Run every 5 minutes
 echo "*/5 * * * * deploy /usr/local/bin/stackdify-healthcheck.sh" | crontab -
+```
+
+---
+
+### 8.5 UI Monitoring Stack
+
+Two complementary tools cover different layers:
+
+| Tool | What it monitors | UI port | Access via |
+|---|---|---|---|
+| **Uptime Kuma** | HTTP endpoints, TCP ports — is the app up? | 3003 | Cloudflare Tunnel |
+| **Netdata** | CPU, RAM, disk, network, Docker containers | 19999 | SSH tunnel (local only) |
+
+#### 8.5.1 Uptime Kuma — endpoint uptime dashboard
+
+Uptime Kuma is a self-hosted Statuspage/UptimeRobot alternative with a polished web UI. It polls your HTTP endpoints and sends alerts via email, Telegram, Slack, etc.
+
+Add to `docker-compose.prod.yml` (or run as a separate compose project in `/home/dave/monitoring/`):
+
+```yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    volumes:
+      - uptime_kuma_data:/app/data
+    ports:
+      - '127.0.0.1:3003:3001'   # bind to loopback; expose via Cloudflare Tunnel
+
+volumes:
+  uptime_kuma_data:
+```
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+**Expose via Cloudflare Tunnel** — edit `/etc/cloudflared/config.yml` (the service config, not `~/.cloudflared/`):
+
+```bash
+sudo nano /etc/cloudflared/config.yml
+```
+
+```yaml
+ingress:
+  - hostname: status.stackdify.space
+    service: http://localhost:3003
+  - hostname: stackdify.space
+    service: http://localhost:80
+  - hostname: api.stackdify.space
+    service: http://localhost:80
+  - service: http_status:404
+```
+
+Register the DNS record and restart the service:
+
+```bash
+cloudflared tunnel route dns stackdify status.stackdify.space
+sudo systemctl restart cloudflared
+# Verify:
+curl -s -o /dev/null -w "%{http_code}" https://status.stackdify.space
+```
+
+**Monitors to create in the Uptime Kuma UI** (`https://status.stackdify.space`):
+
+| Name | Type | URL / Target | Interval |
+|---|---|---|---|
+| API Health | HTTP(s) | `http://localhost:3001/api/v1/health` | 60s |
+| Web App | HTTP(s) | `https://stackdify.space` | 60s |
+| API Public | HTTP(s) | `https://api.stackdify.space/api/v1/health` | 60s |
+| Postgres | TCP Port | `localhost:5432` | 120s |
+| Redis | TCP Port | `localhost:6379` | 120s |
+
+> Set up a notification channel (Settings → Notifications) for email or Telegram alerts before adding monitors.
+
+#### 8.5.2 Netdata — real-time server & container metrics
+
+Netdata installs as a system service and provides a live dashboard with CPU, memory, disk I/O, network throughput, and per-container Docker stats — no config required.
+
+```bash
+curl https://get.netdata.cloud/kickstart.sh > /tmp/netdata-kickstart.sh
+sh /tmp/netdata-kickstart.sh --stable-channel --dont-wait
+```
+
+Netdata binds to `localhost:19999` by default (not exposed publicly — intentional).
+
+**Access the dashboard via SSH tunnel from your local machine:**
+
+```bash
+ssh -L 19999:localhost:19999 -p 2222 deploy@stackdify.space
+# Then open http://localhost:19999 in your browser
+```
+
+**Key dashboards to watch:**
+
+| Dashboard | Path | What to look for |
+|---|---|---|
+| System Overview | `/` | CPU spikes during deploys / game submissions |
+| Disk I/O | `#menu_disk` | Postgres write pressure |
+| Docker containers | `#menu_docker` | Per-container CPU & RAM |
+| Network | `#menu_net` | Ingress traffic from Cloudflare Tunnel |
+
+**Configure alert thresholds** in `/etc/netdata/health.d/`:
+
+```bash
+# Lower the default disk-full alert from 85% to 80%
+cat > /etc/netdata/health.d/stackdify.conf <<'EOF'
+alarm: disk_space_usage
+   on: disk.space
+ calc: $used * 100 / ($avail + $used)
+every: 1m
+ warn: $this > 80
+ crit: $this > 90
+ info: disk space utilisation
+   to: sysadmin
+EOF
+
+systemctl restart netdata
+```
+
+**Netdata Cloud (optional, free tier):** Connect the agent to Netdata Cloud for persistent history and mobile alerts without exposing port 19999:
+
+```bash
+netdata-claim.sh -token=<your-claim-token> -rooms=<room-id> -url=https://app.netdata.cloud
 ```
 
 ### 8.2 PostgreSQL backups

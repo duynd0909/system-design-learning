@@ -73,3 +73,33 @@ jobs:
           build-args: NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            # Pull latest images
+            docker compose -f docker-compose.prod.yml pull
+
+            # Run DB migrations (zero-downtime: run before swap)
+            docker compose -f docker-compose.prod.yml run --rm api \
+              sh -c "npx prisma migrate deploy"
+
+            # Rolling restart (no downtime for stateless services)
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            # Health check
+            sleep 10
+            curl -f http://localhost:3001/api/v1/health || exit 1
+
+            # Clean up old images
+            docker image prune -f
