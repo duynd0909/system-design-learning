@@ -47,7 +47,8 @@ jobs:
         with:
           images: ${{ env.IMAGE_PREFIX }}/stackdify-api,${{ env.IMAGE_PREFIX }}/stackdify-web
           tags: |
-            type=sha,prefix=sha- 
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build & push API image
         uses: docker/build-push-action@v5
