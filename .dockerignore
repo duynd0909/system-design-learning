@@ -34,9 +34,11 @@ node_modules
 .idea
 
 # Documentation (not needed at runtime)
-docs
 *.md
 *.docx
+
+# Re-include docs/ — contains seed data JSON files needed by the API
+!docs/
 
 # Infrastructure code
 infra
