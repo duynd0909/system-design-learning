@@ -25,7 +25,9 @@ export interface PortLabels {
 export interface EdgeStyleConfig {
   label: string;
   stroke: string;
+  darkStroke: string;
   activeStroke: string;
+  darkActiveStroke: string;
   dasharray?: string;
 }
 
@@ -193,24 +195,32 @@ export const EDGE_KIND_STYLES: Record<SystemEdgeKind, EdgeStyleConfig> = {
   request: {
     label: 'Request',
     stroke: '#64748b',
+    darkStroke: '#94a3b8',
     activeStroke: '#4f46e5',
+    darkActiveStroke: '#818cf8',
   },
   streaming: {
     label: 'Stream',
     stroke: '#3b82f6',
+    darkStroke: '#60a5fa',
     activeStroke: '#2563eb',
+    darkActiveStroke: '#60a5fa',
     dasharray: '9 7',
   },
   async: {
     label: 'Queue',
     stroke: '#f97316',
+    darkStroke: '#fb923c',
     activeStroke: '#ea580c',
+    darkActiveStroke: '#fb923c',
     dasharray: '2 7',
   },
   cache: {
     label: 'Cache',
     stroke: '#10b981',
+    darkStroke: '#34d399',
     activeStroke: '#059669',
+    darkActiveStroke: '#34d399',
     dasharray: '7 5',
   },
 };
@@ -220,6 +230,13 @@ const EDGE_STATUS_STROKES: Record<SystemEdgeStatus, string> = {
   warning: '#f59e0b',
   error: '#ef4444',
   active: '#4f46e5',
+};
+
+const EDGE_STATUS_STROKES_DARK: Record<SystemEdgeStatus, string> = {
+  normal: '#94a3b8',
+  warning: '#fcd34d',
+  error: '#f87171',
+  active: '#818cf8',
 };
 
 export function normalizeComponentCategory(category?: string, slug?: string): ComponentSemanticCategory {
@@ -256,10 +273,10 @@ export function getPortLabels(category: ComponentSemanticCategory): PortLabels {
   return PORT_LABELS_BY_CATEGORY[category];
 }
 
-export function edgeStatusStroke(kind: SystemEdgeKind, status: SystemEdgeStatus): string {
-  if (status === 'normal') return EDGE_KIND_STYLES[kind].stroke;
-  if (status === 'active') return EDGE_KIND_STYLES[kind].activeStroke;
-  return EDGE_STATUS_STROKES[status];
+export function edgeStatusStroke(kind: SystemEdgeKind, status: SystemEdgeStatus, dark = false): string {
+  if (status === 'normal') return dark ? EDGE_KIND_STYLES[kind].darkStroke : EDGE_KIND_STYLES[kind].stroke;
+  if (status === 'active') return dark ? EDGE_KIND_STYLES[kind].darkActiveStroke : EDGE_KIND_STYLES[kind].activeStroke;
+  return dark ? EDGE_STATUS_STROKES_DARK[status] : EDGE_STATUS_STROKES[status];
 }
 
 export function inferEdgeKind(

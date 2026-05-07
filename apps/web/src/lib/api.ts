@@ -6,6 +6,7 @@ import type {
   ProblemDetailResponse,
   RequirementGraphResponse,
   SolutionResponse,
+  Submission,
   SubmissionRequest,
   SubmissionResponse,
   SubmissionHistoryItem,
@@ -187,6 +188,14 @@ export function useMySubmissions(token: string, page = 1, limit = 50) {
     queryKey: ['submissions', 'me', page, limit],
     queryFn: () => apiFetch(`/submissions/me?page=${page}&limit=${limit}`, undefined, token),
     enabled: !!token,
+  });
+}
+
+export function useSubmissionById(id: string | null, token: string | null) {
+  return useQuery<Submission>({
+    queryKey: ['submissions', id],
+    queryFn: () => apiFetch<Submission>(`/submissions/${id}`, undefined, token!),
+    enabled: !!id && !!token,
   });
 }
 

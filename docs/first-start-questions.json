@@ -1,8 +1,8 @@
 [
   {
     "id": "8e9fc737-fff9-45e2-a835-418475ee52c0",
-    "title": "URL Shortener system design",
-    "description": "<p>URL shortener is&nbsp;<strong><em>a website that reduces the length of your URL</em></strong>, in order to make the address something that's easier to remember and track. It obscures the target address and can be used to redirect to an unexpected site.</p>",
+    "title": "Design a Link Shortening Service Like Bitly",
+    "description": "<p>A link shortening service transforms long web addresses into compact, shareable URLs. The system maps short codes to their original destinations and handles billions of redirects with minimal latency.</p>",
     "solution": "",
     "design": {
       "id": "2527fac4-164c-4272-9c8d-bcadec225fa8",
@@ -448,8 +448,8 @@
   },
   {
     "id": "2e015b5b-5a4a-4204-a69f-4349ebb8a5c7",
-    "title": "Online File Converter like Zamzar",
-    "description": "<p>An online file converter accepts files from users and converts them to the desired format. A popular example would be JPG to PDF conversion.</p>",
+    "title": "Design an Online File Conversion Platform Like Zamzar",
+    "description": "<p>An online file conversion platform receives uploaded files from users and transforms them into a target format on demand. Common use cases include document, image, and media format conversions.</p>",
     "solution": "",
     "design": {
       "id": "8e2372bc-f9d1-4abc-9ca0-7d13aedcbfea",
@@ -1330,8 +1330,8 @@
   },
   {
     "id": "683f09f8-f317-4fb9-87c1-e0e346b68311",
-    "title": "CricBuzz ScoreBoard System Design",
-    "description": "<p>Cricbuzz is&nbsp;a cricket news website that lets users see live scores of cricket matches including text commentary, player stats and team rankings.</p>",
+    "title": "Design a Live Sports Scoreboard Like CricBuzz",
+    "description": "<p>A live sports scoreboard streams real-time match updates to millions of fans simultaneously. It delivers ball-by-ball commentary, player statistics, and team standings with sub-second latency.</p>",
     "solution": "",
     "design": {
       "id": "0d52843d-f27a-400c-bb15-62b3af9ece53",
@@ -1769,8 +1769,8 @@
   },
   {
     "id": "8c3fcac4-6232-4ac8-8989-8bc38952b5ee",
-    "title": "CodeForces Online Judge System Design",
-    "description": "<p>CodeForces is a competitive programming website that hosts coding challenges by executing user code submissions remotely and running them against test-cases.</p>",
+    "title": "Design a Competitive Programming Judge Like Codeforces",
+    "description": "<p>A competitive programming judge safely executes user-submitted code in isolated sandboxes and evaluates the output against hidden test cases to produce a verdict.</p>",
     "solution": "",
     "design": {
       "id": "3742269f-1e02-465d-9123-d44c97e0a610",
@@ -2229,8 +2229,8 @@
   },
   {
     "id": "7b9a310b-37a3-4b73-87bd-af1cddd6cfab",
-    "title": "Adobe PDF Files Manager",
-    "description": "<p>Adobe PDF Reader is an application that lets users view, create, and manage PDFs.</p>",
+    "title": "Design a PDF Document Management System Like Adobe Acrobat",
+    "description": "<p>A PDF document management system allows users to upload, store, render, and share PDF files at scale, with support for versioning and fast retrieval.</p>",
     "solution": "",
     "design": {
       "id": "56b48b1a-5d09-4ef9-9eb2-d89d284bd7eb",
@@ -2745,8 +2745,8 @@
   },
   {
     "id": "a4d0fee5-04c4-4969-bf17-7c608c3b0122",
-    "title": "AWS CloudWatch Metrics and Logging",
-    "description": "<p>Amazon CloudWatch is&nbsp;a web service that provides real-time monitoring to Amazon's EC2 customers on their resource utilization such as CPU, disk, network and replica lag for RDS Database replicas.</p>",
+    "title": "Design a Cloud Metrics and Alerting System Like AWS CloudWatch",
+    "description": "<p>A cloud monitoring system ingests high-throughput telemetry — CPU usage, network I/O, disk reads — from distributed infrastructure and surfaces anomalies through dashboards and automated alerts.</p>",
     "solution": "",
     "design": {
       "id": "72fefcb7-8309-430e-ada0-77f40e8c5606",
@@ -3379,8 +3379,8 @@
   },
   {
     "id": "17f67c40-49ad-4bd3-806e-f1db45f2bd4e",
-    "title": "Google Drive File Storage",
-    "description": "<p>Google Drive is a file storage service that allows users to store files online and access them anywhere using the cloud</p>",
+    "title": "Design a Cloud File Storage Service Like Google Drive",
+    "description": "<p>A cloud file storage service lets users upload, organize, and access their files from any device. It must handle concurrent edits, versioning, and secure sharing across billions of files.</p>",
     "solution": "",
     "design": {
       "id": "8c69fde8-ecc0-44de-b0fd-a7c2724485ac",
@@ -3902,8 +3902,8 @@
   },
   {
     "id": "aa2de678-54f8-4930-bdff-445f27924d62",
-    "title": "Pastebin Text Storage",
-    "description": "<p>Pastebin is a type of online content-hosting service where users can store plain text, and share the link with other users.</p>",
+    "title": "Design a Text Snippet Sharing Service Like Pastebin",
+    "description": "<p>A text snippet sharing service lets users paste raw text and receive a unique link to share with others. Pastes can be set to expire after a configurable duration.</p>",
     "solution": "",
     "design": {
       "id": "3d94ff60-394b-40af-a41d-d4d6439db9d2",
@@ -4269,8 +4269,8 @@
   },
   {
     "id": "5be732bc-778a-4de6-bc30-c495d116812d",
-    "title": "Udemy Course Manager",
-    "description": "<p>Udemy provides an online learning and teaching platform through courses and certification programs.</p>",
+    "title": "Design an Online Learning Platform Like Udemy",
+    "description": "<p>An online learning platform hosts video courses and educational content, enabling instructors to publish material and learners to stream lessons on demand from anywhere in the world.</p>",
     "solution": "",
     "design": {
       "id": "2bcb153f-cc4b-4dc9-98e5-d2ab973213f7",
@@ -4772,8 +4772,8 @@
   },
   {
     "id": "814b85f1-5bc4-47a8-bafa-6534904ef4da",
-    "title": "AirBnb Aggregator and Property Search",
-    "description": "<p>AirBnb is a short and long-term homestay enabler. The company acts as a broker and charges a commission from each booking.</p>",
+    "title": "Design a Short-Term Rental Marketplace Like Airbnb",
+    "description": "<p>A short-term rental marketplace connects property hosts with travelers seeking accommodation. The platform aggregates listings, handles real-time availability searches, and processes bookings.</p>",
     "solution": "",
     "design": {
       "id": "761a95bc-02b7-4b9b-b49d-fb6d8f6f6958",
@@ -6346,8 +6346,8 @@
   },
   {
     "id": "d9a47814-da87-490f-bad2-2d800f3e74c3",
-    "title": "Design the LinkedIn Connection Search",
-    "description": "<p>LinkedIn is a business and employment-focused social media platform. LinkedIn connections can see each other's updates on their NewsFeed, and send messages to each other.</p>",
+    "title": "Design a Professional Network Search Like LinkedIn",
+    "description": "<p>A professional network search engine traverses a social graph of millions of users to surface relevant connection suggestions and profile results, factoring in shared connections and mutual interests.</p>",
     "solution": "",
     "design": {
       "id": "1b840895-b823-4fb3-a05f-91581ab26671",
@@ -6795,8 +6795,8 @@
   },
   {
     "id": "89dc1bd0-e531-4df7-9f6a-6ab616d35496",
-    "title": "GitHub Code Search",
-    "description": "<p>GitHub is an online software development platform. It's used for storing, tracking, and collaborating on software projects. The code search tool lets developers do a substring search on repositories.</p>",
+    "title": "Design a Repository Code Search Engine Like GitHub",
+    "description": "<p>A repository code search engine indexes source files across millions of repositories and enables developers to perform fast substring and pattern-based searches across an entire codebase.</p>",
     "solution": "",
     "design": {
       "id": "4b97c9fb-b3c9-4fd1-98c2-143166d6bc11",
