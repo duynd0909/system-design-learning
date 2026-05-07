@@ -95,7 +95,7 @@ function ProblemCard({
 
         <CardTitle className="mb-2">{problem.title}</CardTitle>
         <CardDescription className="line-clamp-2 flex-1">
-          <div dangerouslySetInnerHTML={{ __html: problem.description }}></div>
+          <span dangerouslySetInnerHTML={{ __html: problem.description }}></span>
         </CardDescription>
 
         {isAuthenticated && problem.requirementCount > 0 && (
@@ -146,7 +146,7 @@ function ProblemListRow({
             )}
           </div>
           <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">
-            {problem.description}
+            <span dangerouslySetInnerHTML={{ __html: problem.description }}></span>
           </p>
         </div>
 

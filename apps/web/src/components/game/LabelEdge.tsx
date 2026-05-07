@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from 'react';
 import { useReducedMotion } from 'motion/react';
+import { useTheme } from 'next-themes';
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -43,6 +44,8 @@ export function LabelEdge({
   animated,
 }: EdgeProps) {
   const prefersReduced = useReducedMotion();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const edgeData = data as SystemEdgeData | undefined;
   const kind = edgeData?.kind ?? 'request';
   const isActive = edgeData?.isActive ?? false;
@@ -54,6 +57,7 @@ export function LabelEdge({
   const status: SystemEdgeStatus = isActive ? 'active' : edgeData?.status ?? 'normal';
   const kindStyle = EDGE_KIND_STYLES[kind];
   const stroke = edgeStatusStroke(kind, status);
+  const labelStroke = edgeStatusStroke(kind, status, isDark);
   const shouldAnimate = !prefersReduced && (animated || isActive || kind === 'streaming');
 
   // Separate parallel edges by applying a perpendicular offset
@@ -108,8 +112,8 @@ export function LabelEdge({
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
-              borderColor: isActive || isHighlighted ? stroke : 'color-mix(in srgb, var(--text-primary) 12%, transparent)',
-              color: stroke,
+              borderColor: isActive || isHighlighted ? labelStroke : 'color-mix(in srgb, var(--text-primary) 12%, transparent)',
+              color: labelStroke,
               opacity: isDimmed ? 0.35 : 1,
             }}
             onMouseEnter={() => edgeData?.onHover?.(id)}

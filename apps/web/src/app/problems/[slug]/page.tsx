@@ -77,6 +77,7 @@ import {
 import { LabelEdge, type SystemEdgeData } from '@/components/game/LabelEdge';
 import { ResultOverlay } from '@/components/game/ResultOverlay';
 import { RequirementsSidebar } from '@/components/game/RequirementsSidebar';
+import { SubmissionGraphModal } from '@/components/game/SubmissionGraphModal';
 import { iconForComponent } from '@/components/game/component-icons';
 import {
   categoryForComponent,
@@ -697,6 +698,10 @@ export default function ProblemGamePage() {
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [slotFeedback, setSlotFeedback] = useState<Record<string, boolean>>({});
   const [isGlowMode, setIsGlowMode] = useState(false);
+  const [viewingSubmission, setViewingSubmission] = useState<{
+    id: string;
+    order: number;
+  } | null>(null);
 
   const {
     data: reqGraph,
@@ -1422,8 +1427,10 @@ export default function ProblemGamePage() {
                   currentOrder={currentOrder}
                   completedOrders={completedOrders}
                   isLoading={isGraphLoading}
+                  token={token}
                   onSelectRequirement={handleSelectRequirement}
                   onComponentClick={handleComponentClick}
+                  onViewSubmission={(id, order) => setViewingSubmission({ id, order })}
                 />
               </div>
 
@@ -1595,6 +1602,14 @@ export default function ProblemGamePage() {
         open={leaveModal.open}
         onConfirm={handleLeaveConfirm}
         onCancel={handleLeaveCancel}
+      />
+
+      <SubmissionGraphModal
+        submissionId={viewingSubmission?.id ?? null}
+        slug={slug}
+        token={token}
+        componentTypes={problemDetail?.componentTypes ?? []}
+        onClose={() => setViewingSubmission(null)}
       />
     </div>
   );
