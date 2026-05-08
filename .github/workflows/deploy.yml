@@ -94,8 +94,8 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
 
-          # Trust the host
-          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          # Trust the host (tolerate failure — we use StrictHostKeyChecking=no anyway)
+          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy via SSH
         run: |
