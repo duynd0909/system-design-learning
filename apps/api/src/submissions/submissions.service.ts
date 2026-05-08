@@ -106,7 +106,7 @@ export class SubmissionsService {
       }),
     );
 
-    const [submission, updatedUser] = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const [submission, _updatedUser] = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const sub = await tx.submission.create({
         data: {
           userId,
@@ -134,15 +134,8 @@ export class SubmissionsService {
       return [sub, updated] as const;
     });
 
-    // Sync leaderboard cache asynchronously (non-blocking)
-    void this.leaderboard.syncUserScore(userId, updatedUser.xp, {
-      userId,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl ?? undefined,
-      level: updatedUser.level,
-      passedCount: 0, // approximate; full cache refresh on next getGlobal() miss
-    });
+    // Invalidate leaderboard cache so next read rebuilds with fresh solved counts
+    void this.leaderboard.invalidateCache();
 
     return {
       id: submission.id,

@@ -105,7 +105,7 @@ export function RequirementsSidebar({
   const totalCount = requirements.length;
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-  const { data: submissionsPage, isLoading: isSubmissionsLoading } = useMySubmissions(
+  const { data: submissionsPage, isLoading: isSubmissionsLoading, isError: isSubmissionsError } = useMySubmissions(
     token ?? '',
     1,
     100,
@@ -381,6 +381,10 @@ export function RequirementsSidebar({
                 <Skeleton key={i} className="h-12 w-full rounded-lg" />
               ))}
             </div>
+          ) : isSubmissionsError ? (
+            <p className="px-1 pt-2 text-sm text-[var(--slot-incorrect)]">
+              Could not load submissions.
+            </p>
           ) : problemSubmissions.length === 0 ? (
             <p className="px-1 pt-2 text-sm text-[var(--text-secondary)]">
               No submissions yet for this problem.
