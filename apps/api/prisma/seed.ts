@@ -13,9 +13,9 @@ const pool = new Pool({
 });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
-// ─── Source data (loaded from docs/) ─────────────────────────────────────────
+// ─── Source data (loaded from prisma/) ─────────────────────────────────────────
 
-const DOCS_DIR = path.join(__dirname, '../../../docs');
+const SEED_DIR = __dirname;
 
 interface SourceComponent {
   type: string;
@@ -65,11 +65,11 @@ interface SourceProblem {
 }
 
 const componentsJson = JSON.parse(
-  fs.readFileSync(path.join(DOCS_DIR, 'components.json'), 'utf-8'),
+  fs.readFileSync(path.join(SEED_DIR, 'components.json'), 'utf-8'),
 ) as SourceComponent[];
 
 const questionsJson = JSON.parse(
-  fs.readFileSync(path.join(DOCS_DIR, 'first-start-questions.json'), 'utf-8'),
+  fs.readFileSync(path.join(SEED_DIR, 'first-start-questions.json'), 'utf-8'),
 ) as SourceProblem[];
 
 // ─── Component type mapping ───────────────────────────────────────────────────
