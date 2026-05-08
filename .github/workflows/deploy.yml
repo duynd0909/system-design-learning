@@ -91,19 +91,14 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # Create askpass script so ssh can provide the passphrase non-interactively
-          cat > ~/.ssh/askpass.sh << 'ASKPASS'
-          #!/bin/sh
-          echo "$SSH_PASS"
-          ASKPASS
-          chmod +x ~/.ssh/askpass.sh
+          # Strip passphrase so ssh doesn't need askpass
+          cp ~/.ssh/deploy_key ~/.ssh/deploy_key.locked
+          ssh-keygen -p -f ~/.ssh/deploy_key.locked -P "$SSH_PASS" -N "" -q
+          mv ~/.ssh/deploy_key.locked ~/.ssh/deploy_key
 
       - name: Deploy via SSH
-        env:
-          SSH_ASKPASS: ~/.ssh/askpass.sh
-          SSH_ASKPASS_REQUIRE: force
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY'
+          ssh -T -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY'
           cd ${{ secrets.DEPLOY_PATH }}
 
           # Pull latest images
