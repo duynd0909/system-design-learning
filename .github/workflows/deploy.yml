@@ -83,32 +83,39 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Start ssh-agent and add key (handles passphrase)
+          eval "$(ssh-agent -s)"
+          echo "${{ secrets.DEPLOY_SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+
+          # Trust the host
+          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: ${{ secrets.DEPLOY_PORT }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          passphrase: ${{ secrets.DEPLOY_SSH_PASSPHRASE }}
-          command_timeout: 5m
-          script_stop: true
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY'
+          cd ${{ secrets.DEPLOY_PATH }}
 
-            # Pull latest images
-            docker compose -f docker-compose.prod.yml pull
+          # Pull latest images
+          docker compose -f docker-compose.prod.yml pull
 
-            # Run DB migrations (zero-downtime: run before swap)
-            docker compose -f docker-compose.prod.yml run --rm api \
-              sh -c "npx prisma migrate deploy"
+          # Run DB migrations (zero-downtime: run before swap)
+          docker compose -f docker-compose.prod.yml run --rm api \
+            sh -c "npx prisma migrate deploy"
 
-            # Rolling restart (no downtime for stateless services)
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          # Rolling restart (no downtime for stateless services)
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
-            # Health check
-            sleep 10
-            curl -f http://localhost:3001/api/v1/health || exit 1
+          # Health check
+          sleep 10
+          curl -f http://localhost:3001/api/v1/health || exit 1
 
-            # Clean up old images
-            docker image prune -f
+          # Clean up old images
+          docker image prune -f
+          DEPLOY
