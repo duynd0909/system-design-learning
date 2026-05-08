@@ -1168,6 +1168,7 @@ export default function ProblemGamePage() {
           queryKey: ['problems', token || null],
         }), // refresh problems list isSolved badge
         queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
+        queryClient.invalidateQueries({ queryKey: ['submissions', 'me'] }),
       ]);
     } catch (error) {
       setSubmitError(

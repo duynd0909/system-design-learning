@@ -67,7 +67,7 @@ export default function MinimalModernHero({
       />
 
       {/* Floating Icons layer */}
-      {!shouldReduceMotion && icons.length > 0 && (
+      {icons.length > 0 && (
         <div className="absolute inset-0 w-full h-full hidden md:block">
           {icons.map((iconData, index) => (
             <Icon
