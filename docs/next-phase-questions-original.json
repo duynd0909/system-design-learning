@@ -1,8 +1,9 @@
 [
+ 
   {
     "id": "e333b02d-2431-47e0-80cf-088826c9a648",
-    "title": "Design an Image Search Engine Like Google Images",
-    "description": "<p>An image search engine indexes billions of visual assets crawled from the web and returns ranked results for keyword and reverse-image queries with low latency.</p>",
+    "title": "Google Image Search Engine",
+    "description": "<p>Google Images is a search engine that allows users to search the World Wide Web for images.</p>",
     "solution": "",
     "design": {
       "id": "5db6448e-83b3-4896-90bf-bf0a20438184",
@@ -452,8 +453,8 @@
   },
   {
     "id": "5d3c4650-7e64-4607-8d93-614df78d0784",
-    "title": "Design an Audio Recognition Service Like Shazam",
-    "description": "<p>An audio recognition service captures short sound clips from a device microphone, generates an acoustic fingerprint, and identifies the matching track from a library of millions of songs in milliseconds.</p>",
+    "title": "Shazam Audio Search Engine",
+    "description": "<p>Shazam is an application that can identify music based on a short sample played using the microphone on the device. It uses a microphone to gather a brief audio sample and seeks a song match in its database of millions of songs.</p>",
     "solution": "",
     "design": {
       "id": "6d26158d-0ced-464e-ba87-3db8d831cb26",
@@ -881,8 +882,8 @@
   },
   {
     "id": "af26536b-202a-44e7-8815-0206319306c3",
-    "title": "Design a Web Crawler and Indexer Like Google Search",
-    "description": "<p>A web crawler and indexer continuously fetches, parses, and stores billions of web pages to build a ranked, searchable index that returns relevant results for user queries with sub-second latency.</p>",
+    "title": "Web Page Indexer like Google Index",
+    "description": "<p>Googlebot is the web crawler software used by Google that collects documents from the web to build a searchable index for the Google Search engine.</p>",
     "solution": "",
     "design": {
       "id": "32b6d3a4-690e-4cfd-a221-b27da95c09f3",
@@ -1509,8 +1510,8 @@
   },
   {
     "id": "fe74fd8a-2de2-41c8-94a5-d89d0019b648",
-    "title": "Design an Event Ticketing Platform Like BookMyShow",
-    "description": "<p>An event ticketing platform lets users browse shows, select seats on an interactive seating map, and complete purchases for movies and live events. The system must prevent double-booking under high concurrency during popular release windows.</p>",
+    "title": "BookMyShow Movie Booking",
+    "description": "<p>BookMyShow is an online ticketing aggregator app that lets users buy tickets to movies and events.</p>",
     "solution": "",
     "design": {
       "id": "95c07f68-cc8b-4f7c-9695-5931a80bd68f",
@@ -1934,8 +1935,8 @@
   },
   {
     "id": "b94b6c0c-36d8-466d-a83f-f04a5042f673",
-    "title": "Design a Meeting Scheduling Service Like Calendly",
-    "description": "<p>A meeting scheduling service lets hosts publish their availability and allows guests to self-book time slots without back-and-forth coordination. The system must synchronize with external calendars and resolve concurrent booking conflicts reliably.</p>",
+    "title": "Calendly Booking System",
+    "description": "<p>Calendly is a business communication platform used by teams to schedule, prepare and follow up on external meetings.</p>",
     "solution": "",
     "design": {
       "id": "e34a6020-3d57-4a1c-b5bf-26a14f5db248",
@@ -2363,8 +2364,8 @@
   },
   {
     "id": "593c7ad7-b2ca-4907-bdbf-9b4b2a461d46",
-    "title": "Design a High-Demand Train Ticket Booking System Like IRCTC Tatkal",
-    "description": "<p>A high-demand train ticket booking system handles millions of concurrent users competing for a limited seat inventory that opens at a fixed time. The system must enforce fair queuing, prevent overselling, and process payments reliably under extreme peak load.</p>",
+    "title": "IRCTC Tatkal Booking",
+    "description": "<p>Indian Railway Catering and Tourism Corporation (IRCTC) platform is a train and hotel booking system. The Tatkal Scheme is a ticketing program for booking journeys at short notice.</p>",
     "solution": "",
     "design": {
       "id": "37fb79c5-dc47-4e92-82a5-db705cf1b97c",
@@ -3171,8 +3172,8 @@
   },
   {
     "id": "d7ee4f3a-ea18-415f-840a-7dabfb718600",
-    "title": "Design a Calendar and Event Management Service Like Google Calendar",
-    "description": "<p>A calendar and event management service lets users create, share, and track scheduled events across time zones and devices. The system must support concurrent updates, real-time notifications, and seamless synchronization with external scheduling tools.</p>",
+    "title": "Google Calendar Booking",
+    "description": "<p>Google Calendar is a time-management and scheduling calendar service that allows users to create, share and track calendar events.</p>",
     "solution": "",
     "design": {
       "id": "791b328e-c062-47e2-b08d-cf4298cfc1d9",
@@ -4020,8 +4021,8 @@
   },
   {
     "id": "90fda00d-1dba-4f73-b81c-0f96df2d105d",
-    "title": "Design a Social Media Feed Like Instagram",
-    "description": "<p>A social media feed aggregates and ranks photos and videos from followed accounts and surfaces them in a personalized, low-latency stream. The system must handle high write fan-out, rank content in near real-time, and store billions of media assets at scale.</p>",
+    "title": "Instagram NewsFeed ",
+    "description": "<p>Instagram is&nbsp;a photo and video-sharing social networking service that lets users upload media like images and videos on the platform.</p>",
     "solution": "",
     "design": {
       "id": "6a55f026-f5d0-4acb-9511-1599ed9ae61e",
@@ -4706,8 +4707,8 @@
   },
   {
     "id": "c80fd8b6-603c-4e3d-8bc4-7dd4c7a332bf",
-    "title": "Design a Short Video Trending Feed Like TikTok",
-    "description": "<p>A short video trending feed identifies clips gaining rapid engagement and delivers them to users with sub-second load times. The system must ingest high upload volumes, compute trending signals in near real-time, and stream video content efficiently across global regions.</p>",
+    "title": "TikTok Trending Posts Feature",
+    "description": "<p>TikTok is a video hosting service used for creating, sharing and discovering short videos.</p>",
     "solution": "",
     "design": {
       "id": "637fb5bb-0d3a-44d9-aae0-c85f1e737d51",
@@ -5351,8 +5352,8 @@
   },
   {
     "id": "986b089c-85ef-45de-bf60-75b4d72e8d23",
-    "title": "Design a Social Network Feed Like Twitter",
-    "description": "<p>A social network feed curates and ranks posts from followed accounts based on user preferences and engagement signals. The system must fan-out new posts to millions of followers with minimal delay and handle write spikes during trending events.</p>",
+    "title": "Twitter NewsFeed",
+    "description": "<p>The twitter newsfeed is a series on posts shown to a user according to their preferences and behaviors.</p>",
     "solution": "",
     "design": {
       "id": "8a42ec6e-ec6e-45aa-bd1e-830670586bfb",
@@ -5842,8 +5843,8 @@
   },
   {
     "id": "9afd4247-dd67-4dfd-9aa4-f7bd1b7c62cd",
-    "title": "Design a Real-Time Inventory Management System Like Zepto",
-    "description": "<p>A real-time inventory management system tracks stock levels across multiple fulfillment centers and allocates items to incoming orders with minimal latency. The system must prevent overselling, synchronize stock across locations, and trigger automated replenishment.</p>",
+    "title": "Zepto Inventory Management System",
+    "description": "<p>Zepto is&nbsp;an Indian e-commerce company focused on grocery and food delivery that lets users order items on short-notice.</p>",
     "solution": "",
     "design": {
       "id": "21779524-a1d7-48e6-915f-ed5ab63f32ce",
@@ -7034,8 +7035,8 @@
   },
   {
     "id": "169f4fa6-c021-431e-aeb1-c5e123c359db",
-    "title": "Design a Ride-Hailing Matching Service Like Uber",
-    "description": "<p>A ride-hailing matching service pairs nearby drivers with riders in real-time, applies dynamic surge pricing based on demand, and computes accurate ETAs from a live map. The system must process high-frequency GPS updates and minimize match latency at global scale.</p>",
+    "title": "Cab Aggregator like Uber",
+    "description": "<p>Uber is a cab aggregator app that prices rides in real-time, matches drivers to riders and calculates ETAs accurately.</p>",
     "solution": "",
     "design": {
       "id": "32a854e2-a222-4296-9d1f-61d88efafa83",
@@ -7599,8 +7600,8 @@
   },
   {
     "id": "081d7bb1-c215-4bad-ae9b-bf4b49d960c2",
-    "title": "Design a Mapping and Navigation Service Like Google Maps",
-    "description": "<p>A mapping and navigation service computes optimal routes between locations, incorporates live traffic conditions, and delivers turn-by-turn directions with accurate ETAs. The system must process continuous location telemetry, update the road graph in real-time, and serve millions of concurrent navigation sessions.</p>",
+    "title": "Maps Service like Google Maps",
+    "description": "<p>A maps service can find the best route between the two locations, handle traffic updates to adjust routes, and perform ETA calculations efficiently.</p>",
     "solution": "",
     "design": {
       "id": "f18e1e11-58a0-46a4-859f-d17344df575a",
@@ -8030,8 +8031,8 @@
   },
   {
     "id": "fd4bf5a1-1828-4413-b506-749665abc8ad",
-    "title": "Design a Food Delivery Tracking System Like Zomato",
-    "description": "<p>A food delivery tracking system coordinates orders between customers, restaurants, and delivery agents while broadcasting real-time location updates from pickup to drop-off. The system must assign delivery partners efficiently and handle order spikes during peak meal hours.</p>",
+    "title": "Zomato Delivery Tracking System",
+    "description": "<p>Zomato is a restaurant aggregator and food delivery company that lets users order food on short notice.</p>",
     "solution": "",
     "design": {
       "id": "25ea4b96-ba92-4d3a-80f8-a6f0dc8e378a",
@@ -8595,8 +8596,8 @@
   },
   {
     "id": "ccbb5ca6-e5da-4b00-9839-084cbcc33aef",
-    "title": "Design a Transactional Email Delivery Service Like Amazon SES",
-    "description": "<p>A transactional email delivery service dispatches high volumes of individually addressed emails on behalf of applications, handling routing, retries, and bounce management at scale. The system must protect sender reputation, enforce per-domain rate limits, and provide real-time delivery status tracking.</p>",
+    "title": "Amazon Simple Email Service",
+    "description": "<p>Amazon SES (<strong><em>Simple Email Service</em></strong>) is a cloud-based email service for sending both transactional and mass emails.</p>",
     "solution": "",
     "design": {
       "id": "8ff4e52e-a26b-4d6c-800d-1ee3b0b88ecf",
@@ -9484,8 +9485,8 @@
   },
   {
     "id": "11a8b7e5-e26e-4ddf-a3ca-55be15e6202c",
-    "title": "Design an Email Service Like Gmail",
-    "description": "<p>An email service allows users to compose, send, receive, and organize messages with support for threads, labels, and full-text search. The system must route messages reliably across the internet, store billions of emails with fast retrieval, and deliver new mail with minimal latency.</p>",
+    "title": "Email Service System Design",
+    "description": "<p>Gmail is an email service that allows users to send, receive and tag emails.</p>",
     "solution": "",
     "design": {
       "id": "fd54bce8-7218-41f6-9b55-43ba8fff940c",
@@ -10878,8 +10879,8 @@
   },
   {
     "id": "36b4c22f-af41-4679-a1f5-1e0cc22b7833",
-    "title": "Design a Bulk Email Campaign Engine Like Mailchimp",
-    "description": "<p>A bulk email campaign engine schedules and dispatches millions of marketing emails to segmented subscriber lists, tracking open rates, clicks, and unsubscribes in real-time. The system must manage per-domain send quotas, protect sender reputation, and handle subscriber updates at scale.</p>",
+    "title": "Mailing Engine of MailChimp",
+    "description": "<p>Mailchimp is&nbsp;a marketing automation and email marketing platform used by businesses to run email campaigns.</p>",
     "solution": "",
     "design": {
       "id": "bd3cfc14-7d55-463c-b935-e15b14eb9683",
@@ -11418,8 +11419,8 @@
   },
   {
     "id": "4bf6a6c5-5fe3-4fe4-bb27-9899f841474b",
-    "title": "Design a VoIP Calling Service Like WhatsApp",
-    "description": "<p>A VoIP calling service establishes real-time audio connections between users across the globe using peer-to-peer or server-relayed media streams. The system must minimize call setup latency, handle NAT traversal, and maintain call quality under variable network conditions.</p>",
+    "title": "Calling App like WhatsApp",
+    "description": "<p>A calling app like WhatsApp calling allows users to connect over audio calls around the world.</p>",
     "solution": "",
     "design": {
       "id": "bfbeb507-d210-4afc-92fc-b887593a6962",
@@ -11945,8 +11946,8 @@
   },
   {
     "id": "4f48a75b-cb52-4820-8a85-6ab4c974bb7e",
-    "title": "Design a Video Conferencing Service Like Google Meet",
-    "description": "<p>A video conferencing service supports multi-participant audio and video calls with screen sharing, live captions, and session recording. The system must mix and route media streams efficiently, adapt to varying bandwidth conditions, and scale to thousands of concurrent meetings.</p>",
+    "title": "Conference System for Google Meet",
+    "description": "<p>Google Meet is a video conferencing platform used for meetings, webinars, meeting recordings, and live chat.</p>",
     "solution": "",
     "design": {
       "id": "4876d8ca-cec9-4472-b8c1-ada02ed67101",
@@ -12485,8 +12486,8 @@
   },
   {
     "id": "4d69def5-6d18-436d-ab32-a313cab59cd1",
-    "title": "Design a Scalable Video Conferencing Platform Like Zoom",
-    "description": "<p>A scalable video conferencing platform connects hundreds of participants in real-time audio and video sessions with support for breakout rooms, webinars, and cloud recordings. The system must distribute media processing across edge nodes and sustain quality during global traffic spikes.</p>",
+    "title": "Zoom Video Conferencing Service",
+    "description": "<p>Zoom is a video conferencing platform used for meetings, webinars, meeting recordings, and live chat.</p>",
     "solution": "",
     "design": {
       "id": "7ccbbc21-1c36-49e2-87a4-f1aaadffbc3c",
@@ -13271,8 +13272,8 @@
   },
   {
     "id": "ae008faa-9fd4-4369-b6c6-f440fb2ad274",
-    "title": "Design a Video Content Delivery Network Like Netflix",
-    "description": "<p>A video content delivery network distributes on-demand movies and series by caching encoded media at edge locations close to viewers worldwide. The system must produce adaptive bitrate streams, route playback to the optimal edge server, and sustain low-latency delivery at billions of stream-hours per month.</p>",
+    "title": "Netflix Content Distribution Network",
+    "description": "<p>Netflix is an on-demand video streaming service, that lets users to view movies and TV series globally.</p>",
     "solution": "",
     "design": {
       "id": "9c4f9277-bb26-4701-9886-028ba14e6f4a",
@@ -14453,8 +14454,8 @@
   },
   {
     "id": "d674daa7-d391-433e-b300-deb024cccc0e",
-    "title": "Design a Video Sharing and Streaming Platform Like YouTube",
-    "description": "<p>A video sharing and streaming platform ingests user-uploaded footage, transcodes it into multiple resolutions, and delivers it to billions of concurrent viewers via adaptive streaming and CDN distribution. The system must handle massive upload throughput and store petabytes of video reliably.</p>",
+    "title": "YouTube Video Serving System",
+    "description": "<p>YouTube is an online video-sharing and social media platform, used by billions of viewers everyday.</p>",
     "solution": "",
     "design": {
       "id": "ac073a4e-6053-451a-a103-79c53d8b3ee0",
@@ -15034,8 +15035,8 @@
   },
   {
     "id": "bd9bf8f2-3498-412d-8387-7e76319cffe6",
-    "title": "Design a Live Video Streaming Service Like Hotstar",
-    "description": "<p>A live video streaming service ingests raw broadcast feeds, transcodes them into device-appropriate formats in real-time, and delivers them to tens of millions of concurrent viewers. The system must minimize end-to-end latency and handle sudden audience surges without degrading playback quality.</p>",
+    "title": "Live Event Streamer like Hotstar",
+    "description": "<p>Live Streaming applications ingest raw video footage, transform the video for different devices and transport the result to end users.</p>",
     "solution": "",
     "design": {
       "id": "1b20da9b-fa17-4701-b8de-7edeaddd799a",
@@ -16150,8 +16151,8 @@
   },
   {
     "id": "2bcf9846-75a1-4f77-9e20-c660c6a7c99c",
-    "title": "Design a Digital Payment Wallet Like PayTM",
-    "description": "<p>A digital payment wallet lets users load funds and execute secure transactions across merchants and peer-to-peer transfers. The system must guarantee transaction consistency, prevent double-spending, and process high volumes of concurrent payments with fault tolerance.</p>",
+    "title": " Payment Wallet like PayTM",
+    "description": "<p>PayTM wallet is an online wallet that allows users to add money and complete transactions.</p>",
     "solution": "",
     "design": {
       "id": "0ace499f-cbaa-40f0-be57-7172d44a1f91",
@@ -16789,8 +16790,8 @@
   },
   {
     "id": "bda46148-7bfa-4cba-b221-20c7dc3c62b9",
-    "title": "Design a Stock Trading and Brokerage Platform Like Zerodha",
-    "description": "<p>A stock trading and brokerage platform lets retail investors place buy and sell orders, track live market prices, and manage portfolios across equities, commodities, and mutual funds. The system must process orders with high precision, maintain accurate ledger balances, and handle market-open traffic spikes reliably.</p>",
+    "title": "Zerodha StockBroker App",
+    "description": "<p>Zerodha is stock broker and financial services company. It offers its customers commodity trading, mutual funds and bonds. The company has over 7.5 million customers.</p>",
     "solution": "",
     "design": {
       "id": "d4e57860-aa6f-449b-aa56-55da6e88d503",
@@ -18024,8 +18025,8 @@
   },
   {
     "id": "f40e011f-fc9c-43bd-aeca-e9c584d43afa",
-    "title": "Design a Mobile Payment Service Like Google Pay",
-    "description": "<p>A mobile payment service enables contactless, in-app, and online purchases by linking user accounts to payment instruments and routing transactions through banking networks. The system must authorize payments in milliseconds, prevent fraud, and maintain high availability across global markets.</p>",
+    "title": "GPay Online Payment System",
+    "description": "<p>Google Pay is a mobile payment service that powers in-app, online, and in-person contactless purchases on mobile devices.</p>",
     "solution": "",
     "design": {
       "id": "518ba75b-89a7-468c-b72b-f52981e55718",
@@ -18606,8 +18607,8 @@
   },
   {
     "id": "72b05eb2-3cb2-485e-9ced-0de4d81d78ae",
-    "title": "Design a Payment Gateway Like Razorpay",
-    "description": "<p>A payment gateway bridges merchants and banking networks by processing simultaneous global transactions and delivering real-time payment status notifications. The system must route payments across multiple acquirers, handle retries on failure, and apply fraud detection at high throughput.</p>",
+    "title": "Payment Gateway like RazorPay",
+    "description": "<p>A payment gateway allows payments from across the globe to be processed simultaneously, and notifies users of payment events.</p>",
     "solution": "",
     "design": {
       "id": "62439ec5-178f-4043-8574-8c306fbf015b",
@@ -19778,8 +19779,8 @@
   },
   {
     "id": "33fadd29-8187-44d4-a1f4-768cdebbd8da",
-    "title": "Design a Food Order Management System Like Zomato",
-    "description": "<p>A food order management system tracks the full lifecycle of customer orders from placement through payment confirmation and delivery completion. The system must synchronize order state across customers, restaurants, and delivery partners while processing payment events and status updates in real-time.</p>",
+    "title": "Zomato Order Management system",
+    "description": "<p>Zomato is an Indian restaurant aggregator and food delivery company. The order management system of Zomato tracks statuses, payments and completion of orders. </p>",
     "solution": "",
     "design": {
       "id": "44447a1f-dc9c-4abd-a978-a3528e4e95c5",
@@ -20477,8 +20478,8 @@
   },
   {
     "id": "cbca38d0-c27e-4467-aeca-c0e9657c1284",
-    "title": "Design an Online Design Editor Like Canva",
-    "description": "<p>An online design editor lets users create and customize graphics, presentations, and marketing assets using templates and drag-and-drop tools directly in the browser. The system must persist design state reliably, support real-time collaboration, and export finished assets in multiple formats.</p>",
+    "title": "Canva Editing and Tools System",
+    "description": "<p>Canva is an online template editor app for creating social media graphics and presentations.</p>",
     "solution": "",
     "design": {
       "id": "45e2a378-8097-4e34-a519-a32cf85d7a39",
@@ -20977,8 +20978,8 @@
   },
   {
     "id": "65f9c8f5-8557-47a0-aace-f46d7d5cc00a",
-    "title": "Design a Collaborative Whiteboard Like Excalidraw",
-    "description": "<p>A collaborative whiteboard lets multiple users simultaneously sketch diagrams, annotate, and arrange shapes on an infinite canvas with changes reflected in real-time. The system must synchronize concurrent edits with low latency, resolve conflicts deterministically, and persist canvas state reliably.</p>",
+    "title": "Excalidraw Online WhiteBoard",
+    "description": "<p>Excalidraw is&nbsp;a whiteboard tool that lets users draw and collaborate on diagrams.</p>",
     "solution": "",
     "design": {
       "id": "9b4b4a6d-f472-4190-8fb3-8b90dd143b1f",
@@ -21427,8 +21428,8 @@
   },
   {
     "id": "dad13db1-7b4d-4cd4-bc8d-3a2291920fde",
-    "title": "Design a Real-Time Collaborative Document Editor Like Google Docs",
-    "description": "<p>A real-time collaborative document editor allows multiple users to write and format a shared document simultaneously, with every change propagated to all collaborators instantly. The system must merge concurrent edits without conflicts and maintain a full version history.</p>",
+    "title": "Google Docs Collaborative Editing",
+    "description": "<p>Google Docs allows concurrent updates in a single document by multiple users and the versioning of documents.</p>",
     "solution": "",
     "design": {
       "id": "b1accbea-9590-422d-8fe0-afc9a64c7b24",
@@ -21966,8 +21967,8 @@
   },
   {
     "id": "f07d4552-42a8-41c8-9e6f-f509799bdfcb",
-    "title": "Design an Online Chess Platform Like Lichess",
-    "description": "<p>An online chess platform connects players worldwide for real-time matches, enforces move legality, manages game state, and tracks ratings across millions of completed games. The system must synchronize moves with minimal latency and support concurrent tournaments at scale.</p>",
+    "title": "Chess Website like LiChess",
+    "description": "<p>Chess websites allow users from around the world to create and play chess games.</p>",
     "solution": "",
     "design": {
       "id": "a866f899-07a1-458a-89a6-30a5cb255983",
@@ -24050,8 +24051,8 @@
   },
   {
     "id": "de1f6990-1e00-4c4b-84d9-81d0e645eeca",
-    "title": "Design a Multiplayer Online Game Service Like Counter-Strike",
-    "description": "<p>A multiplayer online game service provisions dedicated game servers, maintains synchronized player state, and delivers game events to all participants in each match. The system must minimize tick latency, manage server lifecycle efficiently, and scale session capacity on demand.</p>",
+    "title": "Counter-Strike multiplayer game service",
+    "description": "<p>Counter-Strike is a multiplayer video game that lets users play, chat, and manage game-servers in real-time.</p>",
     "solution": "",
     "design": {
       "id": "061e8d2c-ae3c-4b3e-bd19-4d35a2f19883",
@@ -24834,8 +24835,8 @@
   },
   {
     "id": "f75bf145-cabe-408d-99c3-a9995abeeb5d",
-    "title": "Design a Real-Time Multiplayer Lobby System Like Among Us",
-    "description": "<p>A real-time multiplayer lobby system lets players across platforms join shared game sessions, communicate in-game, and receive synchronized state updates with minimal delay. The system must handle lobby creation, matchmaking, and real-time event broadcasting across globally distributed players.</p>",
+    "title": "Group gaming system for Among Us",
+    "description": "<p>Among us is a multi-platform collaborative game. Users from around the globe join a server to play a social deduction game.</p>",
     "solution": "",
     "design": {
       "id": "4d76d14d-6911-4f2e-a9e6-4f1d48683fed",
@@ -25443,8 +25444,8 @@
   },
   {
     "id": "017335fe-64b4-4355-97bf-97d1f9befa6a",
-    "title": "Design a Fantasy Sports Platform Like Dream11",
-    "description": "<p>A fantasy sports platform lets users draft virtual teams of real athletes and compete in contests scored by live match statistics. The system must ingest real-time sports data feeds, calculate scores instantly after each game event, and process millions of team entries during contest deadlines.</p>",
+    "title": "Fantasy League System like Dream11",
+    "description": "<p>Dream11 is a fantasy league where participants assemble imaginary or virtual teams composed of proxies of real cricket players. These teams compete based on the statistical performance of those players in actual games.</p>",
     "solution": "",
     "design": {
       "id": "b2101f60-56f6-4d3f-880d-0f64b6f7b52b",
@@ -26296,8 +26297,8 @@
   },
   {
     "id": "585bdcd1-c078-4f17-8d38-ded37fcd1e4c",
-    "title": "Design a Live Q&A and Polling Service Like Slido",
-    "description": "<p>A live Q&A and polling service lets event audiences submit questions, vote on topics, and respond to polls in real-time during presentations and webinars. The system must aggregate votes instantly, surface trending questions, and support thousands of concurrent participants per event.</p>",
+    "title": "Questions and Polling Services for Slido",
+    "description": "<p>Slido is an event management and feedback platform with Q&amp;A and polling features.</p>",
     "solution": "",
     "design": {
       "id": "112f6030-a182-4126-8ade-e66d72905d8f",
@@ -26780,8 +26781,8 @@
   },
   {
     "id": "b11228ad-cb8c-428b-ac32-6947340a2ff9",
-    "title": "Design a Social Discussion Forum Like Reddit",
-    "description": "<p>A social discussion forum lets users create posts, share media, and engage through threaded comments and votes organized into topic-based communities. The system must rank content across millions of communities, handle viral traffic spikes, and propagate vote counts with eventual consistency.</p>",
+    "title": "Reddit Discussions",
+    "description": "<p>Reddit is a social forum where users create posts, share images and videos, and react to posts using comments and likes.</p>",
     "solution": "",
     "design": {
       "id": "d0834dc2-4d6b-479f-86e4-304fa9dcb3e2",
@@ -27314,8 +27315,8 @@
   },
   {
     "id": "caef4ff7-b574-4d86-95c6-27423c401164",
-    "title": "Design a Technical Q&A Platform Like Stack Overflow",
-    "description": "<p>A technical Q&A platform allows developers to post questions, submit answers, and vote on the most helpful responses, surfacing expert contributors through a reputation system. The system must index content for fast full-text search and scale to heavy read traffic.</p>",
+    "title": "StackOverflow Discussions System",
+    "description": "<p>Stack Overflow is a question-and-answer website for computer programmers. It features questions and answers on certain computer programming topics.</p>",
     "solution": "",
     "design": {
       "id": "3c391682-ff1f-49f3-b9af-1004536e85c4",
@@ -28010,8 +28011,8 @@
   },
   {
     "id": "01799bd4-8fba-4b5d-a25d-d49daf042a2c",
-    "title": "Design a Decentralized Travel Document Vault Like DigiYatra",
-    "description": "<p>A decentralized travel document vault lets air passengers securely store identity documents and boarding passes on their mobile devices for frictionless checkpoint verification. The system must authenticate documents without a central lookup, protect user privacy, and support offline verification.</p>",
+    "title": "DigiYatra Ticket Vault",
+    "description": "<p>DigiYatra is a decentralized mobile-based ID storage platform where air travelers can save their IDs and travel documents.</p>",
     "solution": "",
     "design": {
       "id": "f7f36db0-8aaa-46fd-b718-7021cd8eae32",
@@ -28768,8 +28769,8 @@
   },
   {
     "id": "1d83b302-6353-4829-9514-7c828e2d126c",
-    "title": "Design a File Authorization and Access Control System Like Google Drive",
-    "description": "<p>A file authorization and access control system governs read, write, and share permissions across billions of user-owned cloud files. The system must enforce fine-grained access policies in real-time, propagate permission changes instantly, and maintain an audit trail across all users and file versions.</p>",
+    "title": "Google Drive Authorization System",
+    "description": "<p>Google Drive is a file storage and synchronization service that allows users to store files in the cloud, synchronize files across devices, and share files.</p>",
     "solution": "",
     "design": {
       "id": "910fba70-5a3e-4d95-8641-2f3baa2f20cd",
@@ -29289,8 +29290,8 @@
   },
   {
     "id": "edf823f9-8de0-4281-8328-e067c9433b2d",
-    "title": "Design a Real-Time Payment Fraud Detection System Like Razorpay",
-    "description": "<p>A real-time payment fraud detection system scores every incoming transaction against behavioral signals, device fingerprints, and historical patterns to block fraudulent activity before settlement. The system must return a risk verdict within milliseconds and minimize false positives on legitimate transactions.</p>",
+    "title": "RazorPay Fraud Detection System",
+    "description": "<p>Razorpay is&nbsp;<strong><em>a payment platform </em></strong>that combines multiple banking systems designed to help midsize and large businesses manage finances through payment gateways and vendor payouts.</p>",
     "solution": "",
     "design": {
       "id": "a974fb36-72bf-4de9-89bb-6c332ecc5ac7",
@@ -29932,8 +29933,8 @@
   },
   {
     "id": "e6fae8be-8ac5-42f1-b1f1-812a64a14950",
-    "title": "Design a Subscription Billing Management System Like Netflix",
-    "description": "<p>A subscription billing management system tracks active plan states, processes recurring payments, and manages upgrades, downgrades, and cancellations for millions of users. The system must handle payment failures with retry logic, enforce entitlement checks on every access, and produce accurate billing records.</p>",
+    "title": "Netflix Subscription Management system",
+    "description": "<p>The Netflix subscription management system tracks and updates the subscription statuses of paid users at Netflix.</p>",
     "solution": "",
     "design": {
       "id": "f91f700c-01b3-4095-aeb1-fcb48d7d3c71",
@@ -30828,8 +30829,8 @@
   },
   {
     "id": "56bef3e4-3c31-4294-9f9a-85aa7e32684e",
-    "title": "Design a Community Messaging Platform Like Discord",
-    "description": "<p>A community messaging platform organizes users into servers with topic-based text channels and supports voice rooms, direct messages, and file sharing. The system must deliver messages with low latency, maintain presence state across thousands of concurrent users per server, and scale to millions of active communities.</p>",
+    "title": "Discord Channels and Message Services",
+    "description": "<p>Discord is an instant messaging platform that allows voice calls, text messaging, and file sharing.</p>",
     "solution": "",
     "design": {
       "id": "44aa98f8-96ff-4c2c-a598-eab65371e284",
@@ -31372,8 +31373,8 @@
   },
   {
     "id": "1266e449-e3a5-4135-bfeb-05be82eac795",
-    "title": "Design an Office Messaging and Collaboration Platform Like Slack",
-    "description": "<p>An office messaging and collaboration platform enables teams to communicate through channels, direct messages, and threaded replies with support for file sharing and third-party integrations. The system must deliver messages reliably, preserve conversation history, and support thousands of workspaces with millions of concurrent users.</p>",
+    "title": "Slack Office Messenger",
+    "description": "<p>Slack is a team communication platform that has text messaging, file sharing, voice calling, and group chat capabilities.</p>",
     "solution": "",
     "design": {
       "id": "432c592a-e205-44e6-8b23-6f666626fb84",
@@ -31981,8 +31982,8 @@
   },
   {
     "id": "544611fd-982c-4f31-b5f4-dfe836c70365",
-    "title": "Design a Disappearing Message Service Like Snapchat",
-    "description": "<p>A disappearing message service delivers photos and texts that are automatically deleted from both sender and recipient devices after a brief viewing window. The system must enforce deletion guarantees, prevent unauthorized persistence of content, and deliver media with low latency.</p>",
+    "title": "SnapChat Disappearing Messages",
+    "description": "<p>Snapchat is an instant messaging app. Messages are expected to be visible for a short period of time, before being deleted from both client devices.</p>",
     "solution": "",
     "design": {
       "id": "cd69decd-65a3-4bd4-8397-6189078459cb",
@@ -32621,8 +32622,8 @@
   },
   {
     "id": "c71ecbb4-536a-4f33-bf61-b2aa4450f122",
-    "title": "Design a Large-Scale Channel Messaging System Like Telegram",
-    "description": "<p>A large-scale channel messaging system lets creators broadcast messages to millions of subscribers simultaneously, with full conversation history synced across all user devices. The system must fan-out messages efficiently, synchronize read state across devices, and serve history on demand with low latency.</p>",
+    "title": "Telegram Channel Management System",
+    "description": "<p>Telegram is an instant messaging service where users chat and share images with their history synced across devices.</p>",
     "solution": "",
     "design": {
       "id": "12817854-d4cc-4b58-94a0-52636eddc33e",
@@ -33111,8 +33112,8 @@
   },
   {
     "id": "12e8fa28-e32b-4100-bd96-377d5db3f5bb",
-    "title": "Design an End-to-End Encrypted Group Chat Like WhatsApp",
-    "description": "<p>An end-to-end encrypted group chat service lets users exchange text, voice messages, and media in private and group threads, with messages decryptable only by participants. The system must manage encryption key distribution, deliver messages to offline users via push notifications, and sync history across multiple devices.</p>",
+    "title": "WhatsApp Group Chat",
+    "description": "<p>WhatsApp is an instant messaging and voice-over-IP service. It allows users to send text, voice messages, and video messages, make voice and video calls, and share images, documents, user locations, and other content. </p><p>Group chat in WhatsApp lets users make groups, manage groups and send chat messages to groups.</p>",
     "solution": "",
     "design": {
       "id": "69c6eed6-ae65-4866-ba44-95a0f55b6c71",
@@ -34579,8 +34580,8 @@
   },
   {
     "id": "fc7a0810-38de-48dd-a0c4-65e219502827",
-    "title": "Design a Content Recommendation Engine Like Medium",
-    "description": "<p>A content recommendation engine analyzes reading history, engagement signals, and topic affinities to surface relevant articles for each user. The system must compute personalized rankings in real-time, update recommendations as new content is published, and serve results with low latency at scale.</p>",
+    "title": "Medium Blog Recommendations System",
+    "description": "<p>Medium and a blogging and content sharing platform that serves users recommendations based on their preferences.</p>",
     "solution": "",
     "design": {
       "id": "dd85eb07-02a4-4039-bd68-f38fed2a238c",
@@ -35233,8 +35234,8 @@
   },
   {
     "id": "a5ea0765-c1b4-4669-88e3-fb06f730fe0d",
-    "title": "Design a Personalized Food Recommendation Engine Like Swiggy",
-    "description": "<p>A personalized food recommendation engine predicts what dishes a user is likely to order using signals like location, time of day, order history, and payment behavior. The system must generate and rank recommendations in real-time and serve millions of concurrent users efficiently.</p>",
+    "title": "Recommendation Engine for Food Delivery Apps",
+    "description": "<p>Food delivery apps predict user behaviors through past data sources like location, time, and payment history. They use this data to recommend food items to customers.</p>",
     "solution": "",
     "design": {
       "id": "a8187538-b90c-4ed6-a9ce-c610fa8b52bb",

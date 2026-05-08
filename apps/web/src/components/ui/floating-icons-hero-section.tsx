@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 
@@ -31,6 +31,7 @@ export const Icon = ({
   index: number;
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion() ?? false;
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -38,6 +39,8 @@ export const Icon = ({
   const springY = useSpring(y, { stiffness: 300, damping: 20 });
 
   React.useEffect(() => {
+    if (reducedMotion) return;
+
     const handleMouseMove = () => {
       if (ref.current) {
         const rect = ref.current.getBoundingClientRect();
@@ -63,16 +66,16 @@ export const Icon = ({
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [x, y, mouseX, mouseY]);
+  }, [x, y, mouseX, mouseY, reducedMotion]);
 
   return (
     <motion.div
       ref={ref}
       key={iconData.id}
-      style={{ x: springX, y: springY }}
-      initial={{ opacity: 0, scale: 0.5 }}
+      style={reducedMotion ? {} : { x: springX, y: springY }}
+      initial={reducedMotion ? false : { opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{
+      transition={reducedMotion ? { duration: 0 } : {
         delay: index * 0.08,
         duration: 0.6,
         ease: [0.22, 1, 0.36, 1],
@@ -81,12 +84,12 @@ export const Icon = ({
     >
       <motion.div
         className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 p-3 rounded-3xl shadow-xl bg-card/80 dark:bg-[#141414]/90 backdrop-blur-md border border-border/10"
-        animate={{
+        animate={reducedMotion ? {} : {
           y: [0, -8, 0, 8, 0],
           x: [0, 6, 0, -6, 0],
           rotate: [0, 5, 0, -5, 0],
         }}
-        transition={{
+        transition={reducedMotion ? {} : {
           duration: 5 + (iconData.id % 5),
           repeat: Infinity,
           repeatType: 'mirror',
