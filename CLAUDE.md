@@ -13,10 +13,10 @@ The core loop: select a real-world system (Instagram, YouTube, TikTok…) → se
 **App name:** Stackdify — domain: stackdify.space
 
 **Docs to read first (in `/docs/`):**
-- `01_system_design.docx` — architecture, DB schema, API contracts, scoring algorithm
-- `02_uiux_design.docx` — full design system, animation specs, page-by-page layout
-- `03_sprint_plan.docx` — sprint breakdown, acceptance criteria per sprint
-- `04_deployment_plan.docx` — Railway (Phase 1, current) → AWS ECS (Phase 2, at scale), CI/CD, env vars, Dockerfiles
+- `01_system_design.md` — architecture, DB schema, API contracts, scoring algorithm
+- `02_uiux_design.md` — full design system, animation specs, page-by-page layout
+- `03_sprint_plan.md` — sprint breakdown, acceptance criteria per sprint
+- `04_deployment_plan.md` — Ubuntu server deployment, CI/CD, env vars, Dockerfiles, monitoring
 
 ---
 
@@ -422,26 +422,22 @@ Test coverage target: **> 90%** (Jest). Run: `npm test --filter=game-engine`.
 |--------|------|--------|--------|
 | 1 | Foundation & Auth | ✅ Complete | `sprint/1-foundation` |
 | 2 | Core Game Loop | ✅ Complete | `sprint/2-game-loop` |
-| 3 | Progressive Requirements | ✅ Complete | `main` |
-| 4 | Social & Discovery | 🟡 In Progress | `dev` |
-| 5 | Scale & Quality | ⬜ Not started | `sprint/5-scale` |
+| 3 | Progressive Requirements | ✅ Complete | merged to `main` |
+| 4 | Social & Discovery | ✅ Complete | merged to `main` |
+| 5 | Scale & Quality | ✅ Complete | merged to `main` |
+| 6 | Admin Studio & Governance | 🟡 In Progress | `dev` |
 
-**Current Sprint: 4 — Social & Discovery**
+**Current Sprint: 6 — Admin Studio & Governance**
 
-Sprint 4 scope (implemented 2026-05-01):
-- Redis sorted-set leaderboard cache (60s TTL); `syncUserScore()` called on every submission
-- Corrected XP mechanics: +10 attempt, +50 first pass, +25 streak bonus (streak ≥ 3)
-- Streak tracking: increment/reset `user.streak` + `lastActiveAt` in submission transaction
-- Share tokens: `POST /problems/:slug/share` → Redis token (7-day TTL); `GET /share/:token` → 302 redirect
-- Public user profile: `GET /users/profile/:username` (unauthenticated)
-- `?solved=true/false` filter on `GET /problems` (post-query filter using existing solvedIds)
-- Notifications mock: `POST /users/me/notifications` → 201
-- New shared types: `XpBreakdown`, `ShareTokenResponse`, `PublicUserProfile`; `User.streak`, `SubmissionResponse.xpBreakdown/streakAfter`
-- Frontend: `XpCounter` + `StreakBadge` components; animated XP + streak in ResultOverlay
-- Frontend: fuse.js fuzzy search + solved filter on problems page
-- Frontend: share button in GameHeader + ResultOverlay (copies `/share/:token` URL)
-- Frontend: `/profile/[username]` public profile page
-- Frontend: `SocialProofSection` on landing page (top 5 leaderboard)
+Sprint 6 scope:
+- `RequirementBuilder` v2: visual node/edge editor on React Flow canvas
+- `CONTENT_EDITOR` role with draft/review/publish workflow
+- Problem version history
+- Admin publish/unpublish toggle with confirmation modal
+- Full visual answer-key assignment in RequirementBuilder
+- Problem preview mode (play as user)
+
+See `docs/03_sprint_plan.md` for full scope and acceptance criteria.
 
 ---
 
