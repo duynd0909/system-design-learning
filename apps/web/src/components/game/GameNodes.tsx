@@ -1,11 +1,11 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from 'react';
-import { forwardRef, useState } from 'react';
+import { forwardRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useDroppable } from '@dnd-kit/core';
-import { X } from 'lucide-react';
+import { Check, Plus, X } from 'lucide-react';
 import type { ComponentType } from '@stackdify/shared-types';
 import { cn } from '@/lib/utils';
 import { scaleIn, spring } from '@/lib/animations';
@@ -30,6 +30,7 @@ export interface ComponentCanvasData extends Record<string, unknown> {
   isDimmed?: boolean;
   isSimulationActive?: boolean;
   isGlowMode?: boolean;
+  connectionCount?: number;
 }
 
 export interface BlankSlotData extends Record<string, unknown> {
@@ -41,6 +42,8 @@ export interface BlankSlotData extends Record<string, unknown> {
   visualState?: GraphNodeVisualState;
   onSelectSlot?: (slotId: string) => void;
   isGlowMode?: boolean;
+  slotIndex?: number;
+  slotTotal?: number;
 }
 
 export interface FilledSlotData extends Record<string, unknown> {
@@ -54,6 +57,9 @@ export interface FilledSlotData extends Record<string, unknown> {
   isSimulationActive?: boolean;
   visualState?: GraphNodeVisualState;
   isGlowMode?: boolean;
+  connectionCount?: number;
+  slotIndex?: number;
+  slotTotal?: number;
 }
 
 export interface ActorCanvasData extends Record<string, unknown> {
@@ -63,6 +69,7 @@ export interface ActorCanvasData extends Record<string, unknown> {
   isDimmed?: boolean;
   isSimulationActive?: boolean;
   isGlowMode?: boolean;
+  connectionCount?: number;
 }
 
 export type GameFlowNode =
@@ -71,6 +78,47 @@ export type GameFlowNode =
   | Node<FilledSlotData, 'filledSlot'>
   | Node<ActorCanvasData, 'actor'>;
 
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function NodePortDots({ count }: { count: number }) {
+  const total = Math.min(count, 6);
+  if (total === 0) return null;
+  return (
+    <div className="flex items-center justify-center gap-[3px] px-3 pb-2">
+      {Array.from({ length: total }, (_, i) => (
+        <span
+          key={i}
+          className="h-[5px] w-[5px] rounded-full bg-[var(--accent-primary)] transition-colors duration-150"
+        />
+      ))}
+    </div>
+  );
+}
+
+function StatusBadge({ state }: { state: 'correct' | 'incorrect' }) {
+  const prefersReduced = useReducedMotion();
+  const isCorrect = state === 'correct';
+  return (
+    <span
+      className={cn(
+        'absolute -right-1.5 -top-1.5 z-10 grid h-[18px] w-[18px] place-items-center rounded-full shadow-sm',
+        !prefersReduced && 'animate-badge-pop',
+        isCorrect
+          ? 'bg-[var(--slot-correct)] text-white'
+          : 'bg-[var(--slot-incorrect)] text-white',
+      )}
+    >
+      {isCorrect ? (
+        <Check className="h-2.5 w-2.5" aria-hidden="true" />
+      ) : (
+        <X className="h-2.5 w-2.5" aria-hidden="true" />
+      )}
+    </span>
+  );
+}
+
+// ─── GraphNodeShell ──────────────────────────────────────────────────────────
+
 interface GraphNodeShellProps {
   category: ComponentSemanticCategory;
   visualState?: GraphNodeVisualState;
@@ -78,8 +126,12 @@ interface GraphNodeShellProps {
   highlighted?: boolean;
   dimmed?: boolean;
   glowMode?: boolean;
-  variant?: 'compact' | 'expanded';
   interactive?: boolean;
+  showStripe?: boolean;
+  stripeColor?: string;
+  showPorts?: boolean;
+  connectionCount?: number;
+  statusBadge?: 'correct' | 'incorrect' | null;
   className?: string;
   style?: CSSProperties;
   ariaLabel: string;
@@ -107,8 +159,12 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
   highlighted = false,
   dimmed = false,
   glowMode = false,
-  variant = 'compact',
   interactive = false,
+  showStripe = false,
+  stripeColor,
+  showPorts = false,
+  connectionCount = 0,
+  statusBadge = null,
   className,
   style,
   ariaLabel,
@@ -123,6 +179,7 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
     : highlighted
       ? 'processing'
       : visualState;
+  const prefersReduced = useReducedMotion();
 
   return (
     <div
@@ -141,36 +198,56 @@ export const GraphNodeShell = forwardRef<HTMLDivElement, GraphNodeShellProps>(fu
       onMouseLeave={onMouseLeave}
       ref={ref}
       className={cn(
-        'relative rounded-xl border-2 bg-[var(--slot-filled)] text-[var(--text-primary)]',
+        'relative w-[134px] overflow-hidden rounded-xl border-2 bg-[var(--slot-filled)] text-[var(--text-primary)]',
         'group/node',
         'transition-[border-color,box-shadow,opacity,background-color,transform] duration-200',
+        'hover:-translate-y-px hover:shadow-md',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--node-accent)]/35',
-        variant === 'expanded' ? 'w-[156px] px-3 py-4' : 'w-[140px] px-3 py-3',
         interactive && 'cursor-pointer',
         dimmed && 'opacity-35',
-        glowMode && 'hover:scale-110',
+        glowMode && !prefersReduced && 'animate-node-glow-pulse',
         stateClasses[effectiveState],
         className,
       )}
       style={{
         '--node-accent': categoryStyle.accent,
+        '--node-glow-color': categoryStyle.glow,
         borderColor: effectiveState === 'idle' ? categoryStyle.border : undefined,
-        boxShadow: glowMode || highlighted || selected
+        boxShadow: (glowMode || highlighted || selected) && !prefersReduced
           ? `0 14px 34px ${categoryStyle.glow}`
           : undefined,
         ...style,
       } as CSSProperties}
     >
+      {/* Category stripe */}
+      {showStripe && (
+        <div
+          className="absolute inset-x-0 top-0 h-[3px] rounded-t-xl"
+          style={{
+            backgroundColor: stripeColor ?? categoryStyle.accent,
+            opacity: 0.9,
+          }}
+        />
+      )}
+
+      {/* Content */}
       {children}
+
+      {/* Connection ports */}
+      {showPorts && (
+        <NodePortDots count={connectionCount} />
+      )}
+
+      {/* Status badge */}
+      {statusBadge && <StatusBadge state={statusBadge} />}
     </div>
   );
 });
 
+// ─── Handles ──────────────────────────────────────────────────────────────────
+
 const HANDLE_CLS = '!absolute !h-0 !w-0 !min-h-0 !min-w-0 !border-0 !bg-transparent !opacity-0 !p-0';
 
-// React Flow keeps source and target handles in separate collections,
-// so the same id can exist for both types simultaneously.
-// This lets each side be used as either sourceHandle or targetHandle.
 export function NodeHandles() {
   return (
     <>
@@ -186,12 +263,12 @@ export function NodeHandles() {
   );
 }
 
+// ─── Node Components ─────────────────────────────────────────────────────────
+
 export function ComponentNode({ data, selected }: NodeProps<Node<ComponentCanvasData, 'component'>>) {
-  const [hovered, setHovered] = useState(false);
   const Icon = iconForComponent(data.componentSlug);
   const category = normalizeComponentCategory(data.category, data.componentSlug);
   const categoryStyle = getCategoryStyle(category);
-  const expanded = hovered || selected;
 
   return (
     <GraphNodeShell
@@ -202,32 +279,29 @@ export function ComponentNode({ data, selected }: NodeProps<Node<ComponentCanvas
       highlighted={data.isHighlighted}
       dimmed={data.isDimmed}
       glowMode={data.isGlowMode}
-      variant={expanded ? 'expanded' : 'compact'}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      showStripe
+      showPorts
+      connectionCount={data.connectionCount ?? 0}
     >
       <NodeHandles />
-      <div className="flex flex-col items-center gap-2 py-1">
+      <div className="px-3 pb-2.5 pt-3 text-center">
         <span
           className={cn(
-            'grid h-11 w-11 place-items-center rounded-xl border-2',
+            'mx-auto mb-2 grid h-[38px] w-[38px] place-items-center rounded-lg',
             categoryStyle.bgClass,
-            categoryStyle.borderClass,
             categoryStyle.textClass,
           )}
         >
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
-        <div className="text-center">
-          <div className="text-sm font-semibold leading-tight">{data.label}</div>
+        <div className="text-[13px] font-bold leading-tight">{data.label}</div>
+        <div
+          className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-60"
+          style={{ color: categoryStyle.accent }}
+        >
+          {categoryStyle.label}
         </div>
       </div>
-
-      {expanded && data.description && (
-        <p className="mt-2 text-center text-xs leading-relaxed text-[var(--text-secondary)]">
-          {data.description}
-        </p>
-      )}
     </GraphNodeShell>
   );
 }
@@ -253,7 +327,7 @@ export function BlankSlotNode({ data, selected }: NodeProps<Node<BlankSlotData, 
       onClick={() => data.onSelectSlot?.(data.slotId)}
       ref={setNodeRef}
       className={cn(
-        'group relative grid min-h-[120px] place-items-center bg-[var(--slot-blank)]/8 text-[var(--slot-blank)]',
+        'group relative grid min-h-[110px] place-items-center bg-[var(--slot-blank)]/8 text-[var(--slot-blank)]',
         !prefersReduced && !isOver && 'animate-slot-pulse',
         (isSelected || isOver) && 'border-solid bg-[var(--slot-blank)]/15',
       )}
@@ -267,13 +341,16 @@ export function BlankSlotNode({ data, selected }: NodeProps<Node<BlankSlotData, 
           {data.hint}
         </div>
       )}
-      <div className="text-center">
-        <div className="mx-auto mb-1 grid h-7 w-7 place-items-center rounded-full bg-[var(--slot-blank)]/15 opacity-40">
-          <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" />
-          </svg>
+      <div className="px-3 pb-2.5 pt-3 text-center">
+        <div className="mx-auto mb-2 grid h-8 w-8 place-items-center rounded-full bg-[var(--slot-blank)]/20">
+          <Plus className="h-4 w-4" aria-hidden="true" />
         </div>
-        <div className="text-sm font-semibold">Drop here</div>
+        <div className="text-[13px] font-semibold text-[var(--slot-blank)]">Drop here</div>
+        {(data.slotTotal ?? 0) > 0 && (
+          <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--slot-blank)]">
+            Slot {data.slotIndex} of {data.slotTotal}
+          </div>
+        )}
         {isSelected && (
           <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Selected
@@ -294,6 +371,11 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
   const category = categoryForComponent(data.component);
   const categoryStyle = getCategoryStyle(category);
   const isSelected = selected || data.isSelected;
+  const badgeState = data.visualState === 'valid'
+    ? 'correct' as const
+    : data.visualState === 'error'
+      ? 'incorrect' as const
+      : null;
 
   return (
     <GraphNodeShell
@@ -307,6 +389,10 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
       interactive
       onClick={() => data.onSelectSlot?.(data.slotId)}
       ref={setNodeRef}
+      showStripe
+      showPorts
+      connectionCount={data.connectionCount ?? 0}
+      statusBadge={badgeState}
     >
       <NodeHandles />
       <button
@@ -315,7 +401,7 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
           event.stopPropagation();
           data.onClear(data.slotId);
         }}
-        className="nodrag nopan absolute -right-2 -top-2 grid h-6 w-6 cursor-pointer place-items-center rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] text-[var(--text-secondary)] shadow-sm transition-colors hover:text-[var(--slot-incorrect)]"
+        className="nodrag nopan absolute -right-2 -top-2 z-20 grid h-6 w-6 cursor-pointer place-items-center rounded-full border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] text-[var(--text-secondary)] shadow-sm transition-colors hover:text-[var(--slot-incorrect)]"
         aria-label={`Clear ${data.component.label}`}
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -326,20 +412,23 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
           initial={prefersReduced ? undefined : scaleIn.initial}
           animate={prefersReduced ? undefined : scaleIn.animate}
           transition={spring}
-          className="flex flex-col items-center gap-2 py-1"
+          className="px-3 pb-2.5 pt-3 text-center"
         >
           <span
             className={cn(
-              'grid h-11 w-11 place-items-center rounded-xl border-2',
+              'mx-auto mb-2 grid h-[38px] w-[38px] place-items-center rounded-lg',
               categoryStyle.bgClass,
-              categoryStyle.borderClass,
               categoryStyle.textClass,
             )}
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
           </span>
-          <div className="text-center">
-            <div className="text-sm font-semibold leading-tight">{data.component.label}</div>
+          <div className="text-[13px] font-bold leading-tight">{data.component.label}</div>
+          <div
+            className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-60"
+            style={{ color: categoryStyle.accent }}
+          >
+            {categoryStyle.label}
           </div>
         </motion.div>
       </AnimatePresence>
@@ -359,14 +448,19 @@ export function ActorNode({ data, selected }: NodeProps<Node<ActorCanvasData, 'a
       highlighted={data.isHighlighted}
       dimmed={data.isDimmed}
       glowMode={data.isGlowMode}
+      showStripe
+      stripeColor="var(--accent-primary)"
       className="bg-[var(--bg-primary)]"
     >
       <NodeHandles />
-      <div className="flex flex-col items-center gap-2 py-1">
-        <span className="grid h-11 w-11 place-items-center rounded-xl border-2 border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+      <div className="px-3 pb-2.5 pt-3 text-center">
+        <span className="mx-auto mb-2 grid h-[38px] w-[38px] place-items-center rounded-lg bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
           <ActorIcon />
         </span>
-        <span className="text-sm font-semibold leading-tight">{data.label}</span>
+        <div className="text-[13px] font-bold leading-tight">{data.label}</div>
+        <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-60 text-[var(--accent-primary)]">
+          Actor
+        </div>
       </div>
     </GraphNodeShell>
   );

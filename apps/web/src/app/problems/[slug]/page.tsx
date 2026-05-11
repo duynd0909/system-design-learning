@@ -29,19 +29,16 @@ import {
 import {
   ArrowRight,
   CheckCircle2,
-  ChevronLeft,
   Clock,
   LayoutGrid,
-  LocateFixed,
   Map as MapIcon,
   Maximize2,
   Network,
-  Pause,
-  Play,
   RotateCcw,
   Send,
   Share2,
   Sparkles,
+  X,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -55,7 +52,6 @@ import type {
   SubmissionResponse,
 } from '@stackdify/shared-types';
 import { Button } from '@/components/ui/Button';
-import { DifficultyBadge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useToast } from '@/components/ui/Toast';
@@ -131,7 +127,94 @@ function formatTime(seconds: number) {
   return `${m}:${s}`;
 }
 
-// ─── Game Header (LeetCode-style compact bar) ────────────────────────────────
+// ─── Navbar (global 52px bar) ─────────────────────────────────────────────────
+
+interface NavbarProps {
+  isAuthenticated: boolean;
+  onNavigate: (href: string) => void;
+}
+
+function Navbar({ isAuthenticated, onNavigate }: NavbarProps) {
+  const { user } = useAuth();
+
+  return (
+    <nav
+      aria-label="Global navigation"
+      className="flex h-[52px] shrink-0 items-center gap-0 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)]/85 px-5 backdrop-blur-md"
+    >
+      {/* Brand */}
+      <button
+        type="button"
+        aria-label="Go to Stackdify home"
+        onClick={() => onNavigate('/')}
+        className="mr-8 flex cursor-pointer items-center gap-3"
+      >
+        <div
+          className="h-9 w-9 shrink-0 transition-transform hover:scale-105"
+          style={{
+            background: '#00ffa3',
+            clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+          }}
+        />
+        <span className="font-display text-xl font-black tracking-tight text-[var(--text-primary)]">
+          Stackdify
+        </span>
+      </button>
+
+      {/* Nav links */}
+      <div className="flex flex-1 gap-1">
+        <button
+          type="button"
+          className="cursor-pointer rounded-lg bg-[var(--accent-primary)]/12 px-3.5 py-1.5 text-[13px] font-semibold text-[var(--accent-primary)]"
+        >
+          Problems
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate('/leaderboard')}
+          className="cursor-pointer rounded-lg px-3.5 py-1.5 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)]"
+        >
+          Leaderboard
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate('/dashboard')}
+          className="cursor-pointer rounded-lg px-3.5 py-1.5 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)]"
+        >
+          Dashboard
+        </button>
+      </div>
+
+      {/* Right: streak + avatar */}
+      <div className="flex items-center gap-3">
+        <ThemeToggle className="h-8 w-8 rounded-lg hover:bg-[var(--accent-primary)]/10" />
+        {isAuthenticated && user ? (
+          <>
+            <div className="flex items-center gap-1 rounded-full bg-[var(--accent-primary)]/12 px-2.5 py-1 text-xs font-bold text-[var(--accent-primary)]">
+              <Zap className="h-3.5 w-3.5" aria-hidden="true" />
+              {user.streak ?? 0}
+            </div>
+            <div
+              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-2 border-[var(--text-primary)]/15 bg-[var(--bg-secondary)] text-[13px] font-bold text-[var(--text-secondary)] transition-colors hover:border-[var(--accent-primary)]"
+              title="Profile"
+            >
+              {user.displayName?.charAt(0).toUpperCase() ?? 'U'}
+            </div>
+          </>
+        ) : (
+          <Link
+            href="/login"
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-[var(--accent-primary)] transition-colors hover:bg-[var(--accent-primary)]/10"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// ─── Game Header (46px context bar below navbar) ──────────────────────────────
 
 interface GameHeaderProps {
   problem: { title: string; difficulty: Difficulty } | null;
@@ -175,64 +258,38 @@ function GameHeader({
   const prefersReduced = useReducedMotion();
 
   return (
-    <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-3">
-      {/* Left: logo → back → problem title */}
-      <div className="flex min-w-0 items-center gap-2">
+    <header className="flex h-[46px] shrink-0 items-center gap-3 border-b border-[var(--text-primary)]/10 bg-[var(--bg-secondary)] px-4">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]/60">
         <button
           type="button"
-          aria-label="Go to Stackdify home"
           onClick={() => onNavigate('/')}
-          className="flex shrink-0 items-center gap-1.5 group"
+          className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
         >
-          <div
-            className="w-6 h-6 shrink-0 transition-transform group-hover:scale-105"
-            style={{
-              background: '#00ffa3',
-              clipPath:
-                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-            }}
-          />
-          <span className="hidden font-display text-sm font-bold text-[var(--text-primary)] sm:block">
-            Stackdify
-          </span>
+          StackDify
         </button>
-
-        <span
-          className="select-none text-[var(--text-primary)]/20"
-          aria-hidden="true"
-        >
-          /
-        </span>
-
+        <span className="text-[10px] opacity-50" aria-hidden="true">/</span>
         <button
           type="button"
           onClick={() => onNavigate('/problems')}
-          className="flex shrink-0 items-center gap-0.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
         >
-          <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
           Problems
         </button>
-
         {problem && (
           <>
-            <span
-              className="hidden select-none text-[var(--text-primary)]/20 sm:block"
-              aria-hidden="true"
-            >
-              /
-            </span>
-            <span className="hidden max-w-[180px] truncate text-sm font-semibold text-[var(--text-primary)] sm:block">
+            <span className="text-[10px] opacity-50" aria-hidden="true">/</span>
+            <span className="font-semibold text-[var(--text-primary)]">
               {problem.title}
             </span>
-            <DifficultyBadge difficulty={problem.difficulty} />
           </>
         )}
       </div>
 
-      {/* Center: requirement progress dots */}
+      {/* Progress dots */}
       {requirements.length > 0 && (
         <div
-          className="flex shrink-0 items-center gap-1.5"
+          className="ml-5 flex shrink-0 items-center gap-1.5"
           role="group"
           aria-label={`Requirement progress: ${currentOrder} of ${requirements.length}`}
         >
@@ -250,11 +307,11 @@ function GameHeader({
                       : `Requirement ${req.order} locked`
                 }
                 className={cn(
-                  'h-2 w-2 rounded-full transition-colors duration-300',
+                  'h-2 w-2 rounded-full transition-all duration-300',
                   isCompleted
                     ? 'bg-[var(--slot-correct)]'
                     : isActive
-                      ? 'bg-[var(--accent-primary)]'
+                      ? 'bg-[var(--accent-primary)] shadow-[0_0_0_3px_var(--accent-primary)]/15'
                       : 'bg-[var(--text-primary)]/20',
                 )}
               />
@@ -266,7 +323,9 @@ function GameHeader({
         </div>
       )}
 
-      {/* Right: timer + slots + submit */}
+      <div className="flex-1" />
+
+      {/* Right: stats + actions */}
       <div className="flex shrink-0 items-center gap-2">
         {!isAuthenticated && isReady && (
           <Link
@@ -277,31 +336,34 @@ function GameHeader({
           </Link>
         )}
 
+        {/* Timer stat pill */}
         <div
-          className="flex items-center gap-1 rounded-md bg-[var(--text-primary)]/5 px-2 py-1 font-mono text-xs text-[var(--text-secondary)]"
+          className="flex items-center gap-1.5 rounded-md bg-[var(--text-primary)]/5 px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]"
           aria-label={`Elapsed time: ${formatTime(elapsedSeconds)}`}
         >
-          <Clock className="h-3 w-3" aria-hidden="true" />
-          <span aria-live="off">{formatTime(elapsedSeconds)}</span>
+          <Clock className="h-3.5 w-3.5 text-[var(--accent-primary)]" aria-hidden="true" />
+          <span className="tabular-nums" aria-live="off">{formatTime(elapsedSeconds)}</span>
         </div>
 
-        <span className="hidden text-xs tabular-nums text-[var(--text-secondary)] sm:block">
-          {filledCount}/{slotCount}
-        </span>
+        {/* Slots stat pill */}
+        <div className="flex items-center gap-1.5 rounded-md bg-[var(--text-primary)]/5 px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
+          <LayoutGrid className="h-3.5 w-3.5 text-[var(--text-secondary)]/50" aria-hidden="true" />
+          <span className="tabular-nums">{filledCount}/{slotCount} slots</span>
+        </div>
 
+        {/* Share button */}
         {onShare && (
           <button
             type="button"
             onClick={() => void onShare()}
             disabled={isSharing}
             aria-label="Share this challenge"
-            className="hidden h-8 w-8 items-center justify-center rounded-lg bg-[var(--text-primary)]/5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--text-primary)]/10 hover:text-[var(--text-primary)] disabled:opacity-50 sm:flex"
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--text-primary)]/5 px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:border-[var(--text-primary)]/20 hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Share
           </button>
         )}
-
-        <ThemeToggle className="h-8 w-8 rounded-lg bg-[var(--text-primary)]/5 hover:bg-[var(--text-primary)]/10" />
 
         {submitError && (
           <p
@@ -312,6 +374,7 @@ function GameHeader({
           </p>
         )}
 
+        {/* Submit button */}
         <Button
           type="button"
           size="sm"
@@ -320,7 +383,7 @@ function GameHeader({
           disabled={!isReadyToSubmit || isSubmitting || isFetching}
           title={!isReadyToSubmit ? 'Fill all slots to submit' : undefined}
           className={cn(
-            'h-8 rounded-lg px-3 text-xs',
+            'h-8 rounded-lg px-3.5 text-xs',
             isReadyToSubmit && !prefersReduced && 'animate-submit-pulse',
           )}
         >
@@ -540,24 +603,24 @@ function CanvasToolbar({
   hasNodes,
   minimapVisible,
   snapToGrid,
-  simulationEnabled,
   isGlowMode,
+  showEdgeLabels,
   onAutoLayout,
   onFitView,
   onToggleMinimap,
   onToggleSnap,
-  onToggleSimulation,
   onToggleGlowMode,
-}: CanvasToolbarProps) {
+  onToggleEdgeLabels,
+}: CanvasToolbarProps & { showEdgeLabels: boolean; onToggleEdgeLabels: () => void }) {
   return (
-    <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/95 p-1 shadow-lg backdrop-blur">
-      <CanvasToolButton
+    <div className="absolute left-3 top-3 z-20 flex items-center gap-0.5 rounded-[10px] border border-[var(--text-primary)]/10 bg-[var(--bg-secondary)]/95 p-1 shadow-lg backdrop-blur">
+      {/* <CanvasToolButton
         label="Auto layout"
         disabled={!hasNodes}
         onClick={onAutoLayout}
       >
         <Sparkles className="h-4 w-4" aria-hidden="true" />
-      </CanvasToolButton>
+      </CanvasToolButton> */}
       <CanvasToolButton
         label="Fit to view"
         disabled={!hasNodes}
@@ -565,6 +628,7 @@ function CanvasToolbar({
       >
         <Maximize2 className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
+      <div className="mx-0.5 h-5 w-px bg-[var(--text-primary)]/15" aria-hidden="true" />
       <CanvasToolButton
         label="Toggle minimap"
         active={minimapVisible}
@@ -579,24 +643,21 @@ function CanvasToolbar({
       >
         <LayoutGrid className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
-      <CanvasToolButton
-        label={simulationEnabled ? 'Pause simulation' : 'Start simulation'}
-        active={simulationEnabled}
-        disabled={!hasNodes}
-        onClick={onToggleSimulation}
-      >
-        {simulationEnabled ? (
-          <Pause className="h-4 w-4" aria-hidden="true" />
-        ) : (
-          <Play className="h-4 w-4" aria-hidden="true" />
-        )}
-      </CanvasToolButton>
+      <div className="mx-0.5 h-5 w-px bg-[var(--text-primary)]/15" aria-hidden="true" />
       <CanvasToolButton
         label={isGlowMode ? 'Glow mode on' : 'Glow mode off'}
         active={isGlowMode}
         onClick={onToggleGlowMode}
       >
         <Zap className="h-4 w-4" aria-hidden="true" />
+      </CanvasToolButton>
+      <div className="mx-0.5 h-5 w-px bg-[var(--text-primary)]/15" aria-hidden="true" />
+      <CanvasToolButton
+        label={showEdgeLabels ? 'Hide edge labels' : 'Show edge labels'}
+        active={showEdgeLabels}
+        onClick={onToggleEdgeLabels}
+      >
+        <Network className="h-4 w-4" aria-hidden="true" />
       </CanvasToolButton>
     </div>
   );
@@ -698,10 +759,12 @@ export default function ProblemGamePage() {
   const [isMinimapVisible, setIsMinimapVisible] = useState(true);
   const [slotFeedback, setSlotFeedback] = useState<Record<string, boolean>>({});
   const [isGlowMode, setIsGlowMode] = useState(false);
+  const [showEdgeLabels, setShowEdgeLabels] = useState(true);
   const [viewingSubmission, setViewingSubmission] = useState<{
     id: string;
     order: number;
   } | null>(null);
+  const [detailNodeId, setDetailNodeId] = useState<string | null>(null);
 
   const {
     data: reqGraph,
@@ -861,6 +924,22 @@ export default function ProblemGamePage() {
     setSubmitError('');
   }, []);
 
+  const connectionCount = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const edge of reqGraph?.edges ?? []) {
+      counts.set(edge.source, (counts.get(edge.source) ?? 0) + 1);
+      counts.set(edge.target, (counts.get(edge.target) ?? 0) + 1);
+    }
+    return counts;
+  }, [reqGraph?.edges]);
+
+  const slotOrderMap = useMemo(() => {
+    const blanks = reqGraph?.nodes.filter((n) => n.type === 'blank') ?? [];
+    const map = new Map<string, { index: number; total: number }>();
+    blanks.forEach((node, i) => map.set(node.id, { index: i + 1, total: blanks.length }));
+    return map;
+  }, [reqGraph?.nodes]);
+
   const flowNodes = useMemo<GameFlowNode[]>(() => {
     if (!reqGraph) return [];
     return reqGraph.nodes.map((node): GameFlowNode => {
@@ -868,6 +947,8 @@ export default function ProblemGamePage() {
       const isHighlighted = hoveredPath.nodeIds.has(node.id);
       const isDimmed = !isGlowMode && hasHoveredPath && !isHighlighted;
       const isSimulationActive = activeSimulationNodes.has(node.id);
+      const nodeConns = connectionCount.get(node.id) ?? 0;
+      const slotOrder = slotOrderMap.get(node.id);
 
       if (node.type === 'blank') {
         const selected = componentBySlug.get(answers[node.id]);
@@ -890,6 +971,9 @@ export default function ProblemGamePage() {
               isSimulationActive,
               isGlowMode,
               visualState: feedbackState,
+              connectionCount: nodeConns,
+              slotIndex: slotOrder?.index ?? 0,
+              slotTotal: slotOrder?.total ?? 0,
             },
           };
         }
@@ -905,6 +989,8 @@ export default function ProblemGamePage() {
             isHighlighted,
             isDimmed,
             isGlowMode,
+            slotIndex: slotOrder?.index ?? 0,
+            slotTotal: slotOrder?.total ?? 0,
           },
         };
       }
@@ -919,6 +1005,7 @@ export default function ProblemGamePage() {
             isDimmed,
             isSimulationActive,
             isGlowMode,
+            connectionCount: nodeConns,
           },
         };
       }
@@ -937,6 +1024,7 @@ export default function ProblemGamePage() {
             isDimmed,
             isSimulationActive,
             isGlowMode,
+            connectionCount: nodeConns,
           },
         };
       }
@@ -944,7 +1032,7 @@ export default function ProblemGamePage() {
         id: node.id,
         type: 'actor',
         position,
-        data: { label: 'Actor', isHighlighted, isDimmed, isSimulationActive, isGlowMode },
+        data: { label: 'Actor', isHighlighted, isDimmed, isSimulationActive, isGlowMode, connectionCount: nodeConns },
       };
     });
   }, [
@@ -952,6 +1040,7 @@ export default function ProblemGamePage() {
     answers,
     clearSlot,
     componentBySlug,
+    connectionCount,
     hasHoveredPath,
     hoveredPath.nodeIds,
     isGlowMode,
@@ -959,6 +1048,7 @@ export default function ProblemGamePage() {
     reqGraph,
     selectedSlotId,
     slotFeedback,
+    slotOrderMap,
   ]);
 
   const handleEdgeHover = useCallback((edgeId: string) => {
@@ -1280,6 +1370,9 @@ export default function ProblemGamePage() {
       isResizingRef.current = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      requestAnimationFrame(() => {
+        flowInstanceRef.current?.fitView({ padding: 0.2, duration: 200 });
+      });
     };
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
@@ -1360,7 +1453,13 @@ export default function ProblemGamePage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--bg-primary)]">
-      {/* Compact game header — full width, replaces global Navbar */}
+      {/* Global navbar — brand, nav links, streak, avatar */}
+      <Navbar
+        isAuthenticated={isAuthenticated}
+        onNavigate={handleNavigateAway}
+      />
+
+      {/* Game context bar — breadcrumbs, progress, timer, submit */}
       <GameHeader
         problem={problemDetail?.problem ?? null}
         requirements={problemDetail?.requirements ?? []}
@@ -1417,7 +1516,7 @@ export default function ProblemGamePage() {
               {/* Left sidebar — resizable */}
               <div
                 ref={sidebarContainerRef}
-                style={{ width: 300 }}
+                style={{ width: 400 }}
                 className="shrink-0 overflow-hidden"
               >
                 <RequirementsSidebar
@@ -1456,21 +1555,16 @@ export default function ProblemGamePage() {
 
               {/* Right: canvas */}
               <section className="relative flex-1 bg-[var(--bg-game-canvas)]">
-                <div className="pointer-events-none absolute left-4 top-4 z-20 max-w-sm rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)]/92 px-3 py-2.5 shadow-lg backdrop-blur">
-                  <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
-                    <LocateFixed className="h-3 w-3" aria-hidden="true" />
-                    Requirement {currentOrder}
-                  </div>
-                  <div className="text-sm font-semibold leading-tight text-[var(--text-primary)]">
-                    {currentRequirement?.title ?? problemDetail.problem.title}
-                  </div>
-                  <div className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
-                    {slotIds.length === 0
-                      ? 'Explore the revealed architecture path.'
-                      : selectedSlotId
-                        ? `Slot selected. ${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`
-                        : `${remainingSlots} open ${remainingSlots === 1 ? 'slot' : 'slots'} left.`}
-                  </div>
+                {/* Hint bar — centered pill */}
+                <div
+                  className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/10 px-4 py-1.5 text-xs font-semibold text-[var(--accent-primary)] transition-opacity duration-200"
+                  aria-live="polite"
+                >
+                  {selectedSlotId
+                    ? 'Slot selected — pick a component from the sidebar'
+                    : slotIds.length === 0
+                      ? 'Explore the revealed architecture path'
+                      : `Click an empty slot to start filling · ${remainingSlots} open`}
                 </div>
 
                 <CanvasToolbar
@@ -1479,6 +1573,7 @@ export default function ProblemGamePage() {
                   snapToGrid={snapToGrid}
                   simulationEnabled={simulationEnabled}
                   isGlowMode={isGlowMode}
+                  showEdgeLabels={showEdgeLabels}
                   onAutoLayout={handleAutoLayout}
                   onFitView={handleFitView}
                   onToggleMinimap={() =>
@@ -1489,6 +1584,7 @@ export default function ProblemGamePage() {
                     setSimulationEnabled((current) => !current)
                   }
                   onToggleGlowMode={() => setIsGlowMode((current) => !current)}
+                  onToggleEdgeLabels={() => setShowEdgeLabels((current) => !current)}
                 />
 
                 <ReactFlowProvider>
@@ -1503,6 +1599,11 @@ export default function ProblemGamePage() {
                       snapGrid={[24, 24]}
                       onInit={(instance) => {
                         flowInstanceRef.current = instance;
+                      }}
+                      onNodeClick={(_event, node) => {
+                        if (node.type === 'component' || node.type === 'actor') {
+                          setDetailNodeId(node.id);
+                        }
                       }}
                       fitView
                       fitViewOptions={{ padding: 0.2 }}
@@ -1522,12 +1623,24 @@ export default function ProblemGamePage() {
                           zoomable
                           nodeColor={(node) => {
                             if (node.type === 'blankSlot')
-                              return 'var(--slot-blank)';
+                              return '#f97316';
                             if (node.type === 'filledSlot')
-                              return 'var(--slot-correct)';
-                            return 'var(--accent-primary)';
+                              return '#10b981';
+                            if (node.type === 'actor')
+                              return '#3b82f6';
+                            return '#4f46e5';
                           }}
                           maskColor="rgba(0,0,0,0.08)"
+                          style={{
+                            bottom: 16,
+                            left: 12,
+                            width: 160,
+                            height: 100,
+                            borderRadius: 8,
+                            border: '1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)',
+                            background: 'var(--bg-secondary)',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                          }}
                         />
                       )}
                     </ReactFlow>
@@ -1573,6 +1686,93 @@ export default function ProblemGamePage() {
                     />
                   ) : null}
                 </AnimatePresence>
+
+                {/* Floating submit button when all slots filled */}
+                <AnimatePresence>
+                  {isReadyToSubmit && !result && !submit.isPending && (
+                    <motion.div
+                      key="floating-submit"
+                      initial={prefersReduced ? undefined : { opacity: 0, y: 20 }}
+                      animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
+                      exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
+                      className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2"
+                    >
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        className="flex h-12 cursor-pointer items-center gap-2.5 rounded-xl bg-[var(--accent-primary)] px-8 text-base font-bold text-[var(--accent-neon-text)] shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
+                      >
+                        <Send className="h-5 w-5" aria-hidden="true" />
+                        Submit Answer
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Node detail panel */}
+                {detailNodeId && (() => {
+                    const node = flowNodes.find((n) => n.id === detailNodeId);
+                    if (!node) return null;
+                    const nodeData = node.data as Record<string, unknown>;
+                    const label = typeof nodeData.label === 'string' ? nodeData.label : '';
+                    const description = typeof nodeData.description === 'string' ? nodeData.description : '';
+                    const category = typeof nodeData.category === 'string' ? nodeData.category : '';
+                    const slug = typeof nodeData.componentSlug === 'string' ? nodeData.componentSlug : '';
+                    const component = slug ? componentBySlug.get(slug) : undefined;
+                    const catStyle = getCategoryStyle(categoryForComponent(component ?? { category, slug }));
+                    const nodeEdges = (reqGraph?.edges ?? []).filter((e) => e.source === detailNodeId || e.target === detailNodeId);
+                    return (
+                      <div
+                        key="detail-panel"
+                        className="absolute bottom-0 right-0 top-0 z-30 w-[340px] overflow-y-auto border-l border-[var(--text-primary)]/10 bg-[var(--bg-secondary)]/95 backdrop-blur-md"
+                      >
+                        <div className="p-5">
+                          <button
+                            type="button"
+                            onClick={() => setDetailNodeId(null)}
+                            className="absolute right-4 top-4 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--text-primary)]/10 hover:text-[var(--text-primary)]"
+                            aria-label="Close detail panel"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                          <span
+                            className="mb-3 inline-block rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                            style={{ backgroundColor: catStyle.soft, color: catStyle.accent }}
+                          >
+                            {catStyle.label}
+                          </span>
+                          <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">{label}</h3>
+                          <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">
+                            {description || component?.description || 'A component in the system architecture.'}
+                          </p>
+                          {nodeEdges.length > 0 && (
+                            <>
+                              <h4 className="mb-2 mt-5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Connections</h4>
+                              <div className="space-y-1.5">
+                                {nodeEdges.map((edge) => {
+                                  const isSource = edge.source === detailNodeId;
+                                  const otherId = isSource ? edge.target : edge.source;
+                                  const otherNode = flowNodes.find((n) => n.id === otherId);
+                                  const otherData = otherNode?.data as Record<string, unknown> | undefined;
+                                  const otherLabel = otherData && typeof otherData.label === 'string' ? otherData.label : otherId;
+                                  return (
+                                    <div key={edge.id} className="flex items-center gap-2 rounded-md bg-[var(--bg-primary)] px-2.5 py-1.5 text-xs">
+                                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: catStyle.accent }} />
+                                      <span className="font-semibold">{isSource ? '→' : '←'}</span>
+                                      <span className="font-medium text-[var(--text-primary)]">{otherLabel}</span>
+                                      {edge.label && (
+                                        <span className="ml-auto text-[10px] text-[var(--text-secondary)]">{edge.label}</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
               </section>
             </div>
 
