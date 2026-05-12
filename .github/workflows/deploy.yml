@@ -86,21 +86,41 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
+
             cd ${{ secrets.DEPLOY_PATH }}
+            export IMAGE_TAG=sha-${{ github.sha }}
+            echo "Deploying IMAGE_TAG=${IMAGE_TAG}"
 
-            # Pull latest images
-            docker compose -f docker-compose.prod.yml pull
+            # Pull the exact app images built by this workflow
+            docker compose -f docker-compose.prod.yml pull api web
 
-            # Run DB migrations (zero-downtime: run before swap)
+            # Run DB migrations using the newly built API image
             docker compose -f docker-compose.prod.yml run --rm api \
               sh -c "npx prisma migrate deploy"
 
-            # Rolling restart (no downtime for stateless services)
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            # Recreate the stateless app services with the new images
+            docker compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans api web
 
             # Health check
-            sleep 10
-            curl -f http://localhost:3001/api/v1/health || exit 1
+            health_ok=false
+            for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+              if curl -fsS http://localhost:3001/api/v1/health; then
+                health_ok=true
+                break
+              fi
+
+              echo "Health check attempt ${attempt}/12 failed; retrying in 5s..."
+              sleep 5
+            done
+
+            if [ "$health_ok" != "true" ]; then
+              echo "API health check failed after 12 attempts. Recent API logs:"
+              docker compose -f docker-compose.prod.yml logs --tail=100 api || true
+              exit 1
+            fi
+
+            echo "Health check passed"
 
             # Clean up old images
             docker image prune -f
