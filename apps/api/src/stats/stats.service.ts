@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 
@@ -14,13 +14,22 @@ export interface PublicStats {
 }
 
 @Injectable()
-export class StatsService {
+export class StatsService implements OnModuleInit {
   private readonly logger = new Logger(StatsService.name);
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(RedisService) private readonly redis: RedisService,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.redis.del(STATS_CACHE_KEY);
+      this.logger.log('Public stats cache cleared on startup');
+    } catch {
+      this.logger.warn('Failed to clear stats cache on startup');
+    }
+  }
 
   async getPublicStats(): Promise<PublicStats> {
     // Try cache first

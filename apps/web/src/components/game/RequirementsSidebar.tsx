@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
-import { Check, CheckCircle2, Clock, Eye, History, Lock, Loader2, Network, XCircle } from 'lucide-react';
+import { Check, CheckCircle2, Clock, Eye, History, Lock, Loader2, Network, Search, XCircle } from 'lucide-react';
 import type { ComponentType, Requirement, SubmissionHistoryItem } from '@stackdify/shared-types';
 import { Difficulty } from '@stackdify/shared-types';
 import { DifficultyBadge } from '@/components/ui/Badge';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { fadeIn } from '@/lib/animations';
 import { useMySubmissions } from '@/lib/api';
 import { ComponentPalette } from './ComponentPalette';
+import { categoryForComponent, getCategoryStyle } from './graph-config';
 
 interface RequirementsSidebarProps {
   problem: { slug: string; title: string; difficulty: Difficulty; description: string };
@@ -100,12 +101,19 @@ export function RequirementsSidebar({
   const prefersReduced = useReducedMotion();
   const [activeTab, setActiveTab] = useState<'description' | 'submissions'>('description');
   const [subTab, setSubTab] = useState<'requirements' | 'components'>('requirements');
+  const [quickSearch, setQuickSearch] = useState('');
+
+  const filteredQuickComponents = components.filter((c) => {
+    const q = quickSearch.trim().toLowerCase();
+    if (!q) return true;
+    return c.label.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q);
+  });
 
   const completedCount = completedOrders.size;
   const totalCount = requirements.length;
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-  const { data: submissionsPage, isLoading: isSubmissionsLoading } = useMySubmissions(
+  const { data: submissionsPage, isLoading: isSubmissionsLoading, isError: isSubmissionsError } = useMySubmissions(
     token ?? '',
     1,
     100,
@@ -127,7 +135,7 @@ export function RequirementsSidebar({
   return (
     <aside
       aria-label="Problem sidebar"
-      className="flex h-full w-full flex-col bg-[var(--bg-secondary)]"
+      className="flex h-full w-full flex-col border-r border-[var(--text-primary)]/10 bg-[var(--bg-secondary)]"
     >
       {/* ── Top-level tabs ─────────────────────────────────────────────── */}
       <div
@@ -141,7 +149,7 @@ export function RequirementsSidebar({
           aria-selected={activeTab === 'description'}
           onClick={() => setActiveTab('description')}
           className={cn(
-            'px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
+            'flex-1 cursor-pointer px-4 py-2.5 text-center text-xs font-semibold transition-colors border-b-2 -mb-px',
             activeTab === 'description'
               ? 'border-[var(--accent-primary)] text-[var(--text-primary)]'
               : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -155,7 +163,7 @@ export function RequirementsSidebar({
           aria-selected={activeTab === 'submissions'}
           onClick={() => setActiveTab('submissions')}
           className={cn(
-            'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
+            'flex-1 flex cursor-pointer items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 -mb-px',
             activeTab === 'submissions'
               ? 'border-[var(--accent-primary)] text-[var(--text-primary)]'
               : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
@@ -170,55 +178,50 @@ export function RequirementsSidebar({
       {activeTab === 'description' ? (
         <div className="flex min-h-0 flex-1 flex-col">
           {/* Problem header */}
-          <div className="shrink-0 border-b border-[var(--text-primary)]/10 p-4">
+          <div className="shrink-0 border-b border-[var(--text-primary)]/10 px-4 py-3">
             <div className="mb-1 flex items-center gap-2">
               <DifficultyBadge difficulty={problem.difficulty} />
+              <span className="text-[11px] text-[var(--text-secondary)]">System Design</span>
             </div>
-            <h1 className="font-display text-lg font-bold leading-snug text-[var(--text-primary)]">
+            <h1 className="font-display text-[19px] font-bold leading-snug text-[var(--text-primary)]">
               {problem.title}
             </h1>
             <div
-              className="mt-1.5 text-sm text-[var(--text-secondary)] [&_a]:text-[var(--accent-primary)] [&_em]:italic [&_p]:mb-0 [&_strong]:font-semibold [&_strong]:text-[var(--text-primary)]"
+              className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-secondary)] [&_a]:text-[var(--accent-primary)] [&_em]:italic [&_p]:mb-0 [&_strong]:font-semibold [&_strong]:text-[var(--text-primary)]"
               dangerouslySetInnerHTML={{ __html: problem.description }}
             />
           </div>
 
           {/* Requirements / Components sub-tabs */}
-          <div className="shrink-0 border-b border-[var(--text-primary)]/10 px-3 pt-2">
-            <div
-              role="tablist"
-              aria-label="Content section"
-              className="grid grid-cols-2 rounded-lg bg-[var(--text-primary)]/5 p-1"
+          <div className="shrink-0 flex gap-0.5 px-4 pt-3">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={subTab === 'requirements'}
+              onClick={() => setSubTab('requirements')}
+              className={cn(
+                'cursor-pointer rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                subTab === 'requirements'
+                  ? 'bg-[var(--accent-primary)]/12 text-[var(--accent-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+              )}
             >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={subTab === 'requirements'}
-                onClick={() => setSubTab('requirements')}
-                className={cn(
-                  'rounded-md px-2 py-1.5 text-xs font-semibold transition-colors',
-                  subTab === 'requirements'
-                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
-                )}
-              >
-                Requirements
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={subTab === 'components'}
-                onClick={() => setSubTab('components')}
-                className={cn(
-                  'rounded-md px-2 py-1.5 text-xs font-semibold transition-colors',
-                  subTab === 'components'
-                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
-                )}
-              >
-                Components
-              </button>
-            </div>
+              Requirements
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={subTab === 'components'}
+              onClick={() => setSubTab('components')}
+              className={cn(
+                'cursor-pointer rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                subTab === 'components'
+                  ? 'bg-[var(--accent-primary)]/12 text-[var(--accent-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+              )}
+            >
+              Components
+            </button>
           </div>
 
           {/* Sub-tab content */}
@@ -257,12 +260,12 @@ export function RequirementsSidebar({
                             animate={prefersReduced ? undefined : fadeIn.animate}
                             transition={{ delay: (req.order - 1) * 0.06 }}
                             className={cn(
-                              'group w-full rounded-lg px-3 py-2.5 text-left transition-colors duration-200',
+                              'group w-full rounded-lg px-2.5 py-2 text-left transition-colors duration-150',
                               isActive &&
-                                'border border-[#00ffa3]/30 bg-[#00ffa3]/6 shadow-sm dark:shadow-[0_0_16px_rgba(0,255,163,0.04)]',
-                              isCompleted && !isActive && 'cursor-pointer hover:bg-[var(--bg-primary)]/60',
+                                'bg-[var(--accent-primary)]/8',
+                              isCompleted && !isActive && 'cursor-pointer hover:bg-[var(--text-primary)]/5',
                               isLocked && 'cursor-default opacity-40',
-                              !isActive && !isCompleted && !isLocked && 'hover:bg-[var(--bg-primary)]/40',
+                              !isActive && !isCompleted && !isLocked && 'cursor-pointer hover:bg-[var(--text-primary)]/5',
                             )}
                             aria-current={isActive ? 'step' : undefined}
                             aria-label={
@@ -276,10 +279,11 @@ export function RequirementsSidebar({
                             <div className="flex items-start gap-2.5">
                               <span
                                 className={cn(
-                                  'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-xs font-bold',
-                                  isCompleted && 'bg-[#00ffa3] text-black',
-                                  isActive && !isCompleted && 'bg-[#00ffa3] text-black',
+                                  'mt-px grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-[10px] font-bold',
+                                  isCompleted && 'bg-[var(--slot-correct)] text-black',
+                                  isActive && !isCompleted && 'bg-[var(--accent-primary)] text-black',
                                   isLocked && 'bg-[var(--text-primary)]/15 text-[var(--text-secondary)]',
+                                  !isCompleted && !isActive && !isLocked && 'bg-[var(--bg-primary)] text-[var(--text-secondary)]',
                                 )}
                                 aria-hidden="true"
                               >
@@ -295,7 +299,7 @@ export function RequirementsSidebar({
                               <div className="min-w-0 flex-1">
                                 <div
                                   className={cn(
-                                    'text-base font-semibold leading-tight',
+                                    'text-[13px] font-semibold leading-tight',
                                     isActive
                                       ? 'text-[var(--text-primary)]'
                                       : 'text-[var(--text-primary)]/80',
@@ -303,7 +307,7 @@ export function RequirementsSidebar({
                                 >
                                   {req.title}
                                 </div>
-                                <div className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                                <div className="mt-0.5 text-[13px] leading-relaxed text-[var(--text-secondary)]">
                                   {req.description}
                                 </div>
                               </div>
@@ -344,16 +348,16 @@ export function RequirementsSidebar({
           </div>
 
           {/* Progress bar */}
-          <div className="shrink-0 border-t border-[var(--text-primary)]/10 p-4">
-            <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--text-secondary)]">
-              <span>Progress</span>
-              <span className="font-semibold tabular-nums">
-                {completedCount}/{totalCount}
+          <div className="shrink-0 border-t border-[var(--text-primary)]/10 px-4 py-3">
+            <div className="mb-2 flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
+              <span className="font-semibold uppercase tracking-wider">Progress</span>
+              <span className="tabular-nums">
+                {completedCount}/{totalCount} complete
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--text-primary)]/10">
+            <div className="h-1 overflow-hidden rounded-full bg-[var(--text-primary)]/10">
               <motion.div
-                className="h-full rounded-full bg-[var(--slot-correct)]"
+                className="h-full rounded-full bg-[var(--accent-primary)]"
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
                 transition={prefersReduced ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
@@ -381,6 +385,10 @@ export function RequirementsSidebar({
                 <Skeleton key={i} className="h-12 w-full rounded-lg" />
               ))}
             </div>
+          ) : isSubmissionsError ? (
+            <p className="px-1 pt-2 text-sm text-[var(--slot-incorrect)]">
+              Could not load submissions.
+            </p>
           ) : problemSubmissions.length === 0 ? (
             <p className="px-1 pt-2 text-sm text-[var(--text-secondary)]">
               No submissions yet for this problem.
@@ -409,6 +417,48 @@ export function RequirementsSidebar({
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Quick Components (hidden when Components sub-tab is active) ── */}
+      {!(activeTab === 'description' && subTab === 'components') && (
+      <div className="shrink-0 border-t border-[var(--text-primary)]/10 px-4 py-3">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+          Quick Components
+        </div>
+        <label className="relative mb-2 block">
+          <span className="sr-only">Search components</span>
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" aria-hidden="true" />
+          <input
+            value={quickSearch}
+            onChange={(e) => setQuickSearch(e.target.value)}
+            placeholder="Search..."
+            className="h-8 w-full rounded-lg border border-[var(--text-primary)]/10 bg-[var(--bg-primary)] pl-8 pr-3 text-xs text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-secondary)]/70 focus:border-[var(--accent-primary)]/50"
+          />
+        </label>
+        <div className="grid grid-cols-2 gap-1.5">
+          {filteredQuickComponents.slice(0, 8).map((comp) => {
+            const catStyle = getCategoryStyle(categoryForComponent(comp));
+            const isPlaced = placedSlugs.has(comp.slug);
+            return (
+              <button
+                key={comp.id}
+                type="button"
+                onClick={() => onComponentClick?.(comp.slug)}
+                disabled={isPlaced}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-2.5 py-1.5 text-left text-xs font-medium transition-colors',
+                  'hover:border-[var(--text-primary)]/15 hover:bg-[var(--bg-primary)]',
+                  'disabled:cursor-default disabled:opacity-40',
+                )}
+                title={comp.description}
+              >
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: catStyle.accent }} />
+                <span className="truncate">{comp.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       )}
     </aside>
   );

@@ -78,6 +78,24 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup SSH key
+        env:
+          SSH_PASS: ${{ secrets.DEPLOY_SSH_PASSPHRASE }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Strip passphrase so ssh doesn't need askpass
+          cp ~/.ssh/deploy_key ~/.ssh/deploy_key.locked
+          ssh-keygen -p -f ~/.ssh/deploy_key.locked -P "$SSH_PASS" -N "" -q
+          mv ~/.ssh/deploy_key.locked ~/.ssh/deploy_key
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -122,5 +140,6 @@ jobs:
 
             echo "Health check passed"
 
-            # Clean up old images
-            docker image prune -f
+          # Clean up old images
+          docker image prune -f
+          DEPLOY
