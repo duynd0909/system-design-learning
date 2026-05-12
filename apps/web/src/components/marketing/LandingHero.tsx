@@ -325,7 +325,7 @@ export function LandingHero() {
       badge="System Design Practice"
       title="Master System Design"
       subtitle="Stop reading. Start building."
-      description="Drag real components onto architecture graphs and get instant scored feedback. Practice Instagram, YouTube, TikTok and more — at your own pace."
+      description={`Drag real components onto architecture graphs and get instant scored feedback. ${problemCount ? `${problemCount} ` : ''}real-world challenges across file storage, search, real-time systems, and more — at your own pace.`}
       primaryButton={{
         label: 'Start Practicing →',
         onClick: () => router.push('/problems'),

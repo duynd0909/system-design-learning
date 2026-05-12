@@ -11,7 +11,7 @@ const features: BentoItem[] = [
     title: 'Real Architecture Challenges',
     meta: 'Production patterns',
     description:
-      'Practice with production-grade system designs — Instagram, YouTube, TikTok, and more.',
+      'Practice with production-grade system designs — from URL shorteners and file converters to real-time scoreboards and code execution engines.',
     status: 'Core',
     tags: ['Systems', 'Scale'],
     cta: 'Explore drills ->',
@@ -78,7 +78,7 @@ export default function LandingPage() {
               {
                 step: '01',
                 title: 'Pick a system',
-                desc: 'Choose from real-world architectures like Instagram, YouTube, or TikTok.',
+                desc: 'Choose from real-world challenges — URL shorteners, file storage, search engines, monitoring dashboards, and more.',
               },
               {
                 step: '02',
