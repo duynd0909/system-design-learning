@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] — 2026-05-21
+
+### Fixed
+- Fixed the problem-solve canvas filled-slot clear button so it renders above the node container instead of being clipped.
+
 ## [1.0.5] — 2026-05-21
 
 ### Added

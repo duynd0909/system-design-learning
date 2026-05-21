@@ -393,6 +393,7 @@ export function FilledSlotNode({ data, selected }: NodeProps<Node<FilledSlotData
       showPorts
       connectionCount={data.connectionCount ?? 0}
       statusBadge={badgeState}
+      className="overflow-visible"
     >
       <NodeHandles />
       <button
