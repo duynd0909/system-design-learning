@@ -104,9 +104,9 @@ jobs:
           # Pull latest images
           docker compose -f docker-compose.prod.yml pull
 
-          # Run DB migrations (zero-downtime: run before swap)
+          # Run DB migrations and idempotent seed before swap
           docker compose -f docker-compose.prod.yml run --rm api \
-            sh -c "npx prisma migrate deploy"
+            sh -c "npm run deploy:db"
 
           # Recreate containers with new images
           docker compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans

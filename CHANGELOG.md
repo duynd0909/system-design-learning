@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] — 2026-05-21
+
 ### Added
+- Seeded the next-phase system design question bank into the API seed path.
+- Added reasoned answer keys and validation so blank slots cannot seed with `unknown` answers.
+
 - Admin Studio & Governance (Sprint 6 — in progress)
   - RequirementBuilder v2 with visual node/edge editor
   - `CONTENT_EDITOR` role with draft/review/publish workflow
@@ -15,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Admin publish/unpublish toggle with confirmation modal
   - Full visual answer-key assignment in RequirementBuilder
   - Problem preview mode (play as user)
+
+### Fixed
+- Production deploys now run the idempotent database seed after migrations so new question data reaches the database on release.
 
 ## [0.5.0] — 2026-05-04
 
